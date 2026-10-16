@@ -5,7 +5,7 @@ const fs = require('fs');
 const { chromium } = require('playwright');
 
 const ROOT = path.resolve(__dirname, '..');
-const URL = 'file://' + path.join(ROOT, 'index.html');
+const URL = 'file://' + path.join(ROOT, process.env.SITE_FILE || 'index.html');
 const OUT = path.join(ROOT, 'screenshots');
 fs.mkdirSync(OUT, { recursive: true });
 

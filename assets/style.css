@@ -50,10 +50,10 @@ body {
 }
 a { color: var(--accent); }
 button, select, input { font: inherit; color: inherit; }
-.wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 
-.topbar { position: sticky; top: 0; z-index: 10; background: var(--surface); border-bottom: 1px solid var(--line); }
-.topbar-inner { max-width: 1180px; margin: 0 auto; padding: 8px 16px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); border-bottom: 1px solid var(--line); }
+.topbar-inner { max-width: 1180px; margin: 0 auto; padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
 .brand { font-size: 17px; margin: 0; flex: 1 1 auto; }
 .tabs { display: flex; gap: 4px; order: 3; width: 100%; overflow: hidden; }
 .tab { flex: 1 1 0; min-width: 0; padding: 8px 4px; border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; cursor: pointer; font-size: 14px; white-space: nowrap; }
@@ -64,6 +64,7 @@ button, select, input { font: inherit; color: inherit; }
   .tab { flex: 0 0 auto; padding: 7px 14px; }
 }
 
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
 main { padding-top: 16px; padding-bottom: 40px; }
 h2 { font-size: 19px; margin: 0 0 8px; }
 h3 { font-size: 16px; margin: 0 0 8px; }

@@ -610,8 +610,13 @@
     document.getElementById('themeBtn').textContent = '테마: ' + themeLabel;
     saveState();
   }
+  // 페이지를 감싼 환경(웹 게시 화면 등)이 처음 정해 둔 테마는 '자동'일 때 그대로 둔다
+  var hostTheme = document.documentElement.getAttribute('data-theme');
   function applyTheme() {
-    if (state.theme === 'auto') document.documentElement.removeAttribute('data-theme');
+    if (state.theme === 'auto') {
+      if (hostTheme) document.documentElement.setAttribute('data-theme', hostTheme);
+      else document.documentElement.removeAttribute('data-theme');
+    }
     else document.documentElement.setAttribute('data-theme', state.theme);
   }
   function setChecksUpTo(id, n) {
