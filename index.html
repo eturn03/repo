@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>DD4 전개 도우미</title>
-<meta name="description" content="마스터 듀얼 DD 덱(DD4) 패 → 루트 조회, 단계 체크리스트, 패트랩 대응, 최종 필드 조회">
+<meta name="description" content="마스터 듀얼 DD 덱(DD4) 패 → 루트 조회, 단계 체크리스트, 패트랩 대응(루트·단계별 3,121건), 최종 필드 조회">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -15,9 +15,13 @@
       <button class="tab" role="tab" data-tab="hand">패 선택</button>
       <button class="tab" role="tab" data-tab="route">루트 진행</button>
       <button class="tab" role="tab" data-tab="all">전체 루트</button>
+      <button class="tab" role="tab" data-tab="ht">패트랩 요약</button>
       <button class="tab" role="tab" data-tab="doc">문서·검사</button>
     </nav>
-    <button class="theme-btn" id="themeBtn" type="button" aria-label="화면 테마 바꾸기">테마: 자동</button>
+    <div class="theme-switch" role="group" aria-label="화면 테마">
+      <button type="button" data-theme-set="dark">다크</button>
+      <button type="button" data-theme-set="light">라이트</button>
+    </div>
   </div>
 </header>
 <main id="app" class="wrap">
@@ -25,6 +29,7 @@
 </main>
 <footer class="foot wrap" id="foot"></footer>
 <script src="data/dd-data.js"></script>
+<script src="data/handtraps/meta.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>

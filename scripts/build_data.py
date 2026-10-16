@@ -288,8 +288,10 @@ def make_step(ctx, rid, n, t):
     rest = re.sub(r"[()（）:,.+·→①②\[\]\"“”]", " ", rest)
     leftovers = [w for w in rest.split() if w not in STEP_VOCAB and not re.fullmatch(r"[\d+\-]+", w)]
     is_summon = False
+    # '(원문 생략, 보완: 다음 P소환에 …)' 같은 주석 속 낱말은 소환으로 세지 않는다
+    body_core = re.sub(r"\([^()]*(?:원문 생략|보완)[^()]*\)", "", body)
     if not opponent:
-        if re.search(r"일반소환|특소|링크|엑시즈|융합|싱크로|소생|P소환(?!권)", body):
+        if re.search(r"일반소환|특소|링크|엑시즈|융합|싱크로|소생|P소환(?!권)", body_core):
             is_summon = True
         else:
             ex_alias = [a for a, c in ctx.alias_to_card.items() if c in ctx.ex_cards]
@@ -713,20 +715,9 @@ def validate(ctx, routes_doc, g, data):
     extra5 = [i for i in fifth if i not in decl]
     if extra5:
         ctx.warn(f"단계 수를 세면 제우스가 5번째 소환인 루트가 문서 목록(A1·A3·A5·A6) 밖에도 있다: {','.join(extra5)}. "
-                 "앱의 니비루 대응은 문서 목록만 '기록 있음'으로 보여준다. (소환 수는 앱이 단계 문장으로 센 값이라 참고용. "
+                 "(패트랩 화면의 니비루는 dd-handtraps.json 기준이라 이 계산을 쓰지 않는다. 소환 수는 앱이 단계 문장으로 센 값이라 참고용. "
                  "'케플러·스케일 P소환'처럼 한 단계에 여러 장을 P소환하는 경우도 1회로 셌다. C2는 제우스 앞에 2장 P소환이 있어 장수로 세면 6번째가 된다.)")
-    # 9. 설정의 규칙이 문서 표와 맞는지
-    for rule in ctx.config["responseRules"]:
-        rows = [x for x in g["handTrap"]["rows"] if rule["action"] in x["action"] and rule["timing"] in x["timing"]]
-        ctx.check(f"대응 규칙 '{rule['action']} / {rule['timing']}'에 맞는 문서 표 행이 1개", len(rows) == 1, f"{len(rows)}개")
-        if rows:
-            for i in rule.get("appliesOn", []):
-                if i not in rows[0]["ids"]:
-                    ctx.check(f"규칙 appliesOn {i}가 문서 표 행에 있음", False, rows[0]["response"])
-    for b in ctx.config["handTrapButtons"]:
-        for k in b["rows"]:
-            ok = any(k in x["action"] for x in g["handTrap"]["rows"])
-            ctx.check(f"패트랩 버튼 '{b['label']}'의 문서 행 '{k}' 존재", ok)
+    # 9. 설정의 문서 인용·역조회가 문서와 맞는지
     for k, sel in ctx.config["quoteSelectors"].items():
         q = quote_from(ctx, sel)
         ctx.check(f"문서 인용 '{k}' 찾음", q, (q or {}).get("text", "못 찾음")[:60])
