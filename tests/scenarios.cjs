@@ -104,6 +104,16 @@ async function shot(page, sel, name) {
         const sw2 = (await page.textContent('#recs .solve')).replace(/\s+/g, ' ');
         check(`${tag} 스몰 월드(이니시 있음)도 경로 검사`, /스몰 월드 경로 \d+가지/.test(sw2) || /스몰 월드:/.test(sw2), (sw2.match(/스몰 월드 경로[^.]*/) || sw2.match(/스몰 월드: [^—]*/) || ['없음'])[0]);
         await shot(page, null, `hand-smallworld-${theme}-${vp.name}.png`);
+        // 이니시도 스몰 월드도 없는 패: 29개 루트 전부 시도
+        await page.click('button[data-act="hand-clear"]').catch(() => {});
+        for (const c of ['DD 그리폰', 'DD 스케일 서베이어', '하루 우라라']) await addCard(page, c);
+        await page.waitForSelector('#recs .solve .calc-src:is(:has-text("실시간 계산"), :has-text("그대로 둠"))', { timeout: 30000 });
+        const ns = (await page.textContent('#recs .solve')).replace(/\s+/g, ' ');
+        check(`${tag} 이니시 없는 패 → 29개 루트 전부 시도`, ns.includes('이니시 없음 — 29개 루트 전부 시도'), (ns.match(/패 그대로[^—]*— [^—]*—/) || [''])[0]);
+        await page.click('button[data-act="hand-clear"]').catch(() => {});
+        for (const c of ['하루 우라라', '무한포영']) await addCard(page, c);
+        await page.waitForSelector('#recs .solve .box:has-text("수순 없음")', { timeout: 30000 });
+        check(`${tag} 계산할 카드 없는 패 → 수순 없음`, true, '');
         await page.click('button[data-act="hand-clear"]').catch(() => {});
         for (const c of ['DD 마도현자 케플러', '하루 우라라', '무한포영', '마루챠미 후와로스', 'DD 스케일 서베이어']) await addCard(page, c);
       }

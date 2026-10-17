@@ -46,6 +46,22 @@ fx('handtraps').forEach((r, i) => {
   out.handtraps.push({ i, route: r.route, step: r.step, trap: r.trap, ok, expected: { score: r.expected_score, counter: r.counter_score }, got: { score: sc, counter: cs, mons: res && res.response ? res.response.final.monsters : null }, ms });
 });
 
+// 4) 동점 규칙을 고정한 Python(tests/fixtures/python-pinned.patch)의 결과와 비교: 점수·최종 몬스터·고른 수순까지
+const pinPath = path.join(__dirname, 'fixtures', 'python-pinned.json');
+if (fs.existsSync(pinPath)) {
+  const pin = JSON.parse(fs.readFileSync(pinPath, 'utf8'));
+  const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  out.pinned = { routes: [], hands: [], handtraps: [] };
+  out.routes.forEach((r) => { const p = pin.routes[r.id]; out.pinned.routes.push({ id: r.id, ok: close(r.got.score, p.score) && eq(r.got.mons, p.mons) && r.got.zones === p.zones }); });
+  out.hands.forEach((h, i) => {
+    const p = pin.hands[i], r = calc.solveHand(h.hand);
+    out.pinned.hands.push({ i, ok: close(h.got.score, p.score) && eq(h.got.mons, p.mons) && h.got.route === p.route, steps: eq(r.best.done.map((x) => x[2]), p.steps), py: p, got: h.got });
+  });
+  out.handtraps.forEach((h, i) => {
+    const p = pin.handtraps[i];
+    out.pinned.handtraps.push({ i, route: h.route, step: h.step, trap: h.trap, ok: close(h.got.score, p.score) && (p.counter === null || p.counter === undefined || close(h.got.counter, p.counter)) && eq(h.got.mons, p.mons), py: p, got: h.got });
+  });
+}
 fs.writeFileSync(path.join(__dirname, 'calc-fixtures-result.json'), JSON.stringify(out, null, 1));
 const sum = (k) => { const a = out[k]; const bad = a.filter((x) => !x.ok); return { n: a.length, bad: bad.length, list: bad }; };
 const maxMs = (k) => Math.max(...out[k].map((x) => x.ms || 0));
@@ -58,4 +74,9 @@ for (const k of ['routes', 'hands', 'handtraps']) {
 }
 const pr = out.hands.map((x) => x.perRoute);
 console.log(`hands(루트마다 새로): ${pr.filter((x) => x.ok).length}/${pr.length} 일치, 공유 방식과 수순까지 같음 ${pr.filter((x) => x.sameAsShared).length}/${pr.length} (평균 ${Math.round(pr.reduce((a, x) => a + x.ms, 0) / pr.length)} ms, 최대 ${Math.max(...pr.map((x) => x.ms))} ms)`);
+if (out.pinned) for (const k of ['routes', 'hands', 'handtraps']) {
+  const a = out.pinned[k], bad = a.filter((x) => !x.ok);
+  console.log(`고정판 Python ${k}: ${a.length - bad.length}/${a.length} 일치` + (k === 'hands' ? ` (고른 수순까지 같음 ${a.filter((x) => x.steps).length}/${a.length})` : ''));
+  bad.forEach((x) => console.log('  다름', JSON.stringify({ i: x.i ?? x.id, route: x.route, step: x.step, trap: x.trap, py: x.py, js: x.got })));
+}
 process.exit(0);

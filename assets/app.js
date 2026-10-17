@@ -574,7 +574,7 @@
   }
   function calcOpts(r) {
     var opts = [];
-    if (r.base) opts.push({ title: '패 그대로', res: r.base });
+    if (r.base) opts.push({ title: r.base.noStarter ? '패 그대로 (이니시 없음 — 29개 루트 전부 시도)' : '패 그대로', res: r.base });
     r.smallWorld.forEach(function (w) { if (w.result) opts.push({ title: swTitle(w), res: w.result }); });
     return stableSort(opts, function (o) { return -o.res.score; });
   }

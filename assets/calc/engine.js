@@ -39,6 +39,8 @@ function DD_CALC_FACTORY(routeList) {
       out.push(idx.map(function (j) { return arr[j]; }));
     }
   }
+  // 중복 제거는 처음 나온 순서를 지킨다. 대체 후보를 비용으로 정렬할 때 비용이 같으면 이 순서가 그대로 남는다
+  // (Python 은 sorted(set(...)) 라 같은 비용끼리 순서가 실행마다 바뀐다 → 고정판은 dict.fromkeys 로 같은 규칙)
   function uniq(list) { var s = [], seen = {}; for (var i = 0; i < list.length; i++) if (!seen[list[i]]) { seen[list[i]] = 1; s.push(list[i]); } return s; }
   function stableSortBy(list, keyfn) {
     return list.map(function (x, i) { return [keyfn(x), i, x]; }).sort(function (a, b) {
@@ -1056,7 +1058,9 @@ function DD_CALC_FACTORY(routeList) {
       if (!(rid in bestpos)) { bestpos[rid] = [dd, k]; order.push(rid); }
       else if (dd < bestpos[rid][0]) bestpos[rid] = [dd, k];
     });
-    return { st: st, bestpos: bestpos, ranked: stableSortBy(order, function (rid) { return bestpos[rid][0]; }), runs: {}, looks: {} };
+    // 거리가 같으면 (루트 id, 단계 번호) 순. 루트마다 단계는 가장 앞(같은 거리면 먼저 나온 단계)을 쓴다
+    var ranked = order.slice().sort(function (a, b) { return bestpos[a][0] - bestpos[b][0] || (a < b ? -1 : a > b ? 1 : 0) || bestpos[a][1] - bestpos[b][1]; });
+    return { st: st, bestpos: bestpos, ranked: ranked, runs: {}, looks: {} };
   }
   function bestContinuation(st, own, topk, extraFirst, ctx) {
     if (topk === undefined) topk = 29;
@@ -1399,7 +1403,12 @@ function DD_CALC_FACTORY(routeList) {
     var modeled = full.filter(function (n) { return MODEL[n]; }).sort();
     var res = { modeled: modeled, base: null, smallWorld: [], note: '' };
     var hasStarter = ROUTE_IDS.some(function (rid) { var need = cfrom(STARTERS[rid]), hc = cfrom(modeled); for (var c in need) if (g(hc, c) < need[c]) return false; return true; });
-    if (hasStarter) res.base = solveHandOut(modeled);
+    // 이니시가 없어도 29개 루트를 전부 시도한다(fillgaps.solve 와 같음). 몬스터가 하나도 안 남으면 수순 없음
+    if (modeled.length) {
+      res.base = solveHandOut(modeled);
+      if (res.base && !(res.base.score > 0)) res.base = null;
+      if (res.base) res.base.noStarter = !hasStarter;
+    }
     var seen = {};
     (sw || []).forEach(function (p) {
       if (full.indexOf(p.reveal) < 0 || full.indexOf('스몰월드') < 0) return;
@@ -1408,10 +1417,11 @@ function DD_CALC_FACTORY(routeList) {
       var ban = MODEL[p.bridge] ? [p.bridge] : [];
       var key = m2.join('+') + '|' + ban.join('');
       if (seen[key]) return;
-      seen[key] = { reveal: p.reveal, bridge: p.bridge, target: p.target, planlibScore: p.planlibScore, result: solveHandOut(m2, ban) };
+      var sr = solveHandOut(m2, ban);
+      seen[key] = { reveal: p.reveal, bridge: p.bridge, target: p.target, planlibScore: p.planlibScore, result: sr && sr.score > 0 ? sr : null };
       res.smallWorld.push(seen[key]);
     });
-    if (!res.base && !res.smallWorld.length) res.note = modeled.length ? '이니시(루트 시작 카드)가 패에 없고, 스몰 월드로 갈 수 있는 수순도 없어 계산하지 않았다' : '계산기에 들어가는 카드가 패에 없다';
+    if (!res.base && !res.smallWorld.some(function (w) { return w.result; })) res.note = modeled.length ? '수순 없음 — 29개 루트를 전부 시도했지만 몬스터가 남는 수순을 못 찾았다' : '수순 없음 — 계산기에 들어가는 카드(DD 몬스터·계약서)가 패에 없다';
     return res;
   }
 

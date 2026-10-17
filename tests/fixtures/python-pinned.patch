@@ -1,0 +1,50 @@
+--- a/engine.py	2026-10-17 09:32:41.000000000 +0000
++++ b/engine.py	2026-10-17 13:08:45.991069962 +0000
+@@ -452,7 +452,7 @@
+     m = re.match(r'^(\S+) 특소\(령왕 효과(?:: (.+?))?\)$', s) or re.match(r'^(\S+) 파괴 → (\S+) 특소\(령왕 효과\)$', s)
+     if m and '령왕 효과' in s:
+         x = m.group(1) if '특소(령왕' in s else m.group(2)
+-        cands = sorted(set(fieldn + [p['name'] for p in st.pz]), key=lambda n: cost([n]))
++        cands = sorted(dict.fromkeys(fieldn + [p['name'] for p in st.pz]), key=lambda n: cost([n]))
+         for y in cands:
+             out.append(f'{x} 특소(령왕 효과: {y} 파괴)')
+         return out
+@@ -520,7 +520,7 @@
+     m = re.match(r'^추가 P소환권\(제우스 효과: (\S+) 파괴\)$', s) or re.match(r'^(\S+) 파괴 → 추가 P소환권\(제우스 효과\)$', s)
+     if m:
+         cands = list(st.st) + [p['name'] for p in st.pz] + [q['name'] for q in st.field if q['name'] in DD_MON and q['name'] != '제우스']
+-        for c in sorted(set(cands), key=lambda n: cost([n])):
++        for c in sorted(dict.fromkeys(cands), key=lambda n: cost([n])):
+             out.append(f'추가 P소환권(제우스 효과: {c} 파괴)')
+         return out
+     m = re.match(r'^(텔|데스마키나) 엑시즈\((\S+?)(?: 위 겹침)?\)$', s) or re.match(r'^(데스마키나)\((\S+?)(?:①|②)? 위 겹침\)$', s)
+@@ -530,7 +530,7 @@
+             bases = [q['name'] for q in st.field if q['name'] in ('솔로몬', '시져')]
+         else:
+             bases = [q['name'] for q in st.field if q['name'] in C.DDD and q['name'] != '데스마키나']
+-        for b in sorted(set(bases), key=lambda n: cost([n])):
++        for b in sorted(dict.fromkeys(bases), key=lambda n: cost([n])):
+             out.append(f'{x} 엑시즈({b})')
+     return out
+ 
+@@ -710,7 +710,7 @@
+ 
+ def dist(a, b):
+     keys = set(a) | set(b)
+-    w = {'F': 1.0, 'P': 1.0, 'C': 1.0, 'H': 0.8, 'G': 0.4, 'E': 0.4, 'O': 0.6, 'N': 1.0}
++    w = {'F': 10, 'P': 10, 'C': 10, 'H': 8, 'G': 4, 'E': 4, 'O': 6, 'N': 10}  # 가중치 x10 정수(순서와 상관없이 같은 합)
+     return sum(abs(a[k] - b[k]) * w[k[0]] for k in keys)
+ 
+ 
+@@ -732,9 +732,9 @@
+         if k >= len(ROUTES[rid]['steps']):
+             continue
+         dd = dist(sg, g)
+-        if rid not in bestpos or dd < bestpos[rid][0]:
++        if rid not in bestpos or (dd, k) < bestpos[rid]:
+             bestpos[rid] = (dd, k)
+-    ranked = sorted(bestpos.items(), key=lambda kv: kv[1][0])[:topk]
++    ranked = sorted(bestpos.items(), key=lambda kv: (kv[1][0], kv[0]))[:topk]  # 거리가 같으면 (루트 id, 단계) 순
+     seen = set()
+     for rid, (dd, k) in ranked:
+         key = tuple(ROUTES[rid]['steps'][k:])
