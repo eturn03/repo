@@ -25,6 +25,7 @@
   --warn: #e0c27f; --warn-soft: #27231a; --warn-line: #a8844a;
   --bad: #e8a3a3; --bad-soft: #2a1d1f; --bad-line: #b85c5c;
   --opp-soft: #241d24;
+  --add: #9cc3f0; --add-soft: #1b2433; --add-line: #5b86b8;
   --mark: #3b3520; --mark-text: #f0dd9a;
   --radius: 10px;
   --dur: 120ms;
@@ -40,6 +41,7 @@
   --warn: #6b4d12; --warn-soft: #f3ecdc; --warn-line: #a8844a;
   --bad: #8a2f2f; --bad-soft: #f4e3e3; --bad-line: #a14848;
   --opp-soft: #efe6ee;
+  --add: #1f4f86; --add-soft: #e2eaf4; --add-line: #4d74a3;
   --mark: #f1e3a6; --mark-text: #3d3205;
   color-scheme: light;
 }
@@ -135,6 +137,8 @@ p { margin: 6px 0; }
 .tag.bad { background: var(--bad-soft); border-color: var(--bad-line); color: var(--bad); }
 .tag.ok { background: var(--ok-soft); border-color: var(--ok-line); color: var(--ok); }
 .chip .tag.neg { margin: 0 0 0 2px; padding: 0 6px; font-size: 12px; font-weight: 700; }
+.tag.addx { background: var(--add-soft); border-color: var(--add-line); color: var(--add); font-weight: 600; }
+.solve { border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin: 12px 0; background: var(--surface-2); }
 .tag.sub { background: var(--warn-soft); border-color: var(--warn-line); color: var(--warn); font-weight: 600; }
 
 a.rid { font-weight: 700; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.95em; }

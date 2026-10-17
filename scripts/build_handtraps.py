@@ -220,6 +220,13 @@ def main():
                 late.append(f"{x['route']} {x['step']}단계(제우스 {zs}단계)")
     check("if_extra_card_in_hand는 제우스가 처음 나오기 전 단계에만 있음(md 5장)", not late, "; ".join(sorted(set(late))[:10]))
 
+    # ---- md 안에서 서로 어긋나는 설명
+    s1 = secs.get("1", {}).get("markdown", "")
+    l6 = bullets(secs.get("6", {}).get("markdown", ""))
+    zone6 = next((b for b in l6 if "링크 마커" in b and "검사하지 않았다" in b), None)
+    if zone6 and "몬스터 존 배치" in s1:
+        issues.append(f"md 1장·7장은 몬스터 존 배치(링크 마커)도 검사한다고 하는데, 6장 한계에는 아직 '{zone6}'가 남아 있다. 사이트는 6장 문장을 그대로 보여준다.")
+
     # ---- 참고: 데이터 없는 단계
     no_data = {}
     for rid, r in routes.items():
@@ -262,6 +269,25 @@ def main():
         "info": info,
         "checks": checks,
     }
+    # 패 → 수순 대비용 수순 모음(dd-planlib.json). 계산기가 실패하거나 1초를 넘을 때 쓴다
+    pl_path = DATA / "dd-planlib.json"
+    if pl_path.exists():
+        planlib = json.loads(pl_path.read_text(encoding="utf-8"))
+        plans = planlib.get("plans", [])
+        bad_pl = [p["id"] for p in plans if not all(k in p for k in ("needs_in_hand", "deck_pulls", "steps", "final_score", "final_monsters"))]
+        check(f"dd-planlib.json 수순 {len(plans)}개 형식", not bad_pl, ", ".join(bad_pl[:5]))
+        (DATA / "planlib.js").write_text("// 자동 생성: scripts/build_handtraps.py (원본 data/dd-planlib.json, 내용 그대로)\nwindow.DD_PLANLIB=" +
+                                         json.dumps(planlib, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
+        meta["planlibCount"] = len(plans)
+    marks = Counter()
+    for x in records:
+        for pl in [x.get("plan")] + [(x.get("counter") or {}).get("plan")] + [e.get("plan") for e in x.get("if_extra_card_in_hand", [])] + [w.get("plan") for w in x.get("with_my_droll", [])]:
+            for st_ in (pl or {}).get("steps", []):
+                if "(대체)" in st_:
+                    marks["대체"] += 1
+                if "(추가)" in st_:
+                    marks["추가"] += 1
+    info.append(f"수순 단계 표시: (대체) {marks['대체']}개, (추가) {marks['추가']}개.")
     (OUT_DIR / "meta.js").write_text("// 자동 생성: scripts/build_handtraps.py\nwindow.DD_HT_META=" +
                                      json.dumps(meta, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
     lines = ["# 패트랩 데이터 검사", "", "## 검사", ""] + \

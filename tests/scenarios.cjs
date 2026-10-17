@@ -29,12 +29,22 @@ async function openRouteAt(page, id, n) {
   await page.waitForTimeout(300);
   await page.evaluate(([id, n]) => {
     const st = JSON.parse(localStorage.getItem('dd4-helper-v1') || '{}');
-    st.tab = 'route'; st.routeId = id; st.ht = null; st.checks = st.checks || {};
+    st.tab = 'route'; st.routeId = id; st.ht = null; st.htSrc = 'live'; st.checks = st.checks || {};
     st.checks[id] = Array.from({ length: n - 1 }, (_, i) => i + 1);
     localStorage.setItem('dd4-helper-v1', JSON.stringify(st));
   }, [id, n]);
   await page.reload();
   await page.waitForSelector('#trapPanel');
+}
+async function waitLive(page) {
+  await page.waitForSelector('#trapPanel .calc-src:has-text("실시간 계산")', { timeout: 30000 });
+}
+async function toJson(page) {
+  await page.click('#trapPanel button[data-act="ht-src"][data-v="json"]');
+  await page.waitForSelector('#trapPanel .calc-src:has-text("미리 만든 데이터")');
+}
+async function toLive(page) {
+  await page.click('#trapPanel button[data-act="ht-src"][data-v="live"]');
 }
 async function shot(page, sel, name) {
   if (!SHOT) return;
@@ -75,6 +85,11 @@ async function shot(page, sel, name) {
       const minF = await page.$$eval('button', (bs) => Math.min(...bs.filter((b) => b.offsetParent).map((b) => parseFloat(getComputedStyle(b).fontSize))));
       check(`${tag} 버튼 글자 16px 이상`, minF >= 16, `${minF}px`);
       await noHScroll(page, `${tag} 패 선택`);
+      // 이 패로 계산한 수순(Web Worker). 1초를 넘으면 미리 만든 수순이 먼저 나오고, 끝나면 바뀐다
+      await page.waitForSelector('#recs .solve ol.todo li', { timeout: 30000 });
+      await page.waitForSelector('#recs .solve .calc-src:has-text("실시간 계산")', { timeout: 30000 });
+      const solveTxt = await page.textContent('#recs .solve');
+      check(`${tag} 패로 계산한 수순(실시간)`, /점수 \d/.test(solveTxt) && solveTxt.includes('결과 필드'), solveTxt.replace(/\s+/g, ' ').slice(0, 90));
       await shot(page, null, `hand-${theme}-${vp.name}.png`);
 
       // (a) A1 7단계 + 하루 우라라
@@ -83,23 +98,29 @@ async function shot(page, sel, name) {
       const trapBtns = await page.$$eval('#trapPanel button[data-act="ht-trap"]', (bs) => bs.map((b) => b.textContent.trim()));
       check(`${tag} (a) 7단계 패트랩 버튼(데이터 있는 것만)`, trapBtns.length > 0 && !trapBtns.some((t) => t.includes('니비루')), trapBtns.join(', '));
       await page.click('button.trap-btn[data-key="ash"]');
+      await waitLive(page);
+      const aLive = await page.textContent('#trapPanel');
+      check(`${tag} (a) 실시간 계산: 할 일 목록`, (await page.$$('#trapPanel ol.todo li')).length > 5 && aLive.includes('패: 스케일·케플러'), aLive.match(/패: [^·]*·[^ ]*/) ? aLive.match(/패: [^·]*·[^ ]*/)[0] : '');
+      check(`${tag} (a) 순서: 상태→생긴 일→할 일→건너뛴→결과`, ['맞은 시점 상태', '맞아서 생긴 일', '할 일', '건너뛴 원래 단계', '결과 필드'].every((t, i, arr) => i === 0 || aLive.indexOf(t) > aLive.indexOf(arr[i - 1])));
+      check(`${tag} (a) 한계(하한, MD 실기 미확인) 표시`, aLive.includes('하한') && aLive.includes('MD 실기'));
+      await shot(page, '#trapPanel', `a-A1-7-ash-live-${theme}-${vp.name}.png`);
+      await toJson(page);
       await page.waitForSelector('#trapPanel ol.todo li');
       const a = await page.textContent('#trapPanel');
       const tabSel = await page.$eval('#trapPanel button[role="tab"][aria-selected="true"]', (b) => b.textContent.trim());
-      check(`${tag} (a) 할 일 목록 + "패에 스케일 있으면" 탭`, a.includes('패에 스케일 있으면') && (await page.$$('#trapPanel ol.todo li')).length > 5, `선택된 탭: ${tabSel}`);
-      check(`${tag} (a) 패에 스케일 → 그 탭이 기본`, tabSel.startsWith('✓') || tabSel.includes('스케일'), tabSel);
-      check(`${tag} (a) 순서: 상태→생긴 일→할 일→건너뛴→결과`, ['맞은 시점 상태', '맞아서 생긴 일', '할 일', '건너뛴 원래 단계', '결과 필드'].every((t, i, arr) => i === 0 || a.indexOf(t) > a.indexOf(arr[i - 1])));
+      check(`${tag} (a) 미리 만든 데이터: "패에 스케일 있으면" 탭이 기본`, a.includes('패에 스케일 있으면') && tabSel.includes('스케일'), `선택된 탭: ${tabSel}`);
       check(`${tag} (a) (대체) 표시`, a.includes('대체: 원래 루트와 소재·대상이 다름'));
-      check(`${tag} (a) 한계(하한, MD 실기 미확인) 표시`, a.includes('하한') && a.includes('MD 실기'));
       await page.click('#trapPanel ol.todo li input');
       const checked = await page.$eval('#trapPanel ol.todo li input', (i) => i.checked);
       check(`${tag} (a) 할 일 체크 가능`, checked);
       await noHScroll(page, `${tag} (a) 루트 진행`);
-      await shot(page, '#trapPanel', `a-A1-7-ash-${theme}-${vp.name}.png`);
+      await shot(page, '#trapPanel', `a-A1-7-ash-json-${theme}-${vp.name}.png`);
+      await toLive(page);
 
       // (b) A1 6단계 + 증식의 G
       await openRouteAt(page, 'A1', 6);
       await page.click('button.trap-btn[data-key="maxxc"]');
+      await waitLive(page);
       await page.waitForSelector('#trapPanel .compare');
       const b = await page.textContent('#trapPanel .compare');
       const opts = await page.$$('#trapPanel .compare .opt');
@@ -113,7 +134,8 @@ async function shot(page, sel, name) {
       // (c) A2 15단계 + 무한포영
       await openRouteAt(page, 'A2', 15);
       await page.click('button.trap-btn[data-key="imperm"]');
-      await page.waitForSelector('#trapPanel .box.ok');
+      await waitLive(page);
+      await page.waitForSelector('#trapPanel .box.ok:not(.calc-src)');
       const c = await page.textContent('#trapPanel');
       check(`${tag} (c) "문서 루트 F1·F2 참조"`, c.includes('문서 루트 F1·F2 참조'));
       await shot(page, '#trapPanel', `c-A2-15-imperm-${theme}-${vp.name}.png`);
@@ -121,24 +143,36 @@ async function shot(page, sel, name) {
       const h2 = await page.textContent('main h2');
       check(`${tag} (c) F1 열기`, h2.includes('F1'), h2.trim().slice(0, 40));
 
-      // 무효 배지(negated_monsters): A1 2단계 무한포영 → 결과 필드 케플러 옆 '무효'
+      // 무효 배지(negated_monsters): A1 2단계 무한포영 → 결과 필드 케플러 옆 '무효' (미리 만든 데이터의 기본 탭)
       await openRouteAt(page, 'A1', 2);
       await page.click('button.trap-btn[data-key="imperm"]');
-      await page.waitForSelector('#trapPanel .ht-sec');
-      await page.click('#trapPanel button[role="tab"][data-v="base"]'); // 패에 스케일이 있어 기본 탭이 아니므로
+      await waitLive(page);
+      await toJson(page);
+      await page.click('#trapPanel button[role="tab"][data-v="base"]');
       const negTxt = await page.$$eval('#trapPanel .ht-sec .chip', (cs) => cs.filter((c) => c.querySelector('.neg')).map((c) => c.textContent.trim()));
       check(`${tag} negated_monsters → '무효' 배지`, negTxt.some((t) => t.startsWith('케플러')), negTxt.join(', '));
+      await toLive(page);
+      // (추가) 배지: A3 5단계 유령토끼
+      await openRouteAt(page, 'A3', 5);
+      await page.click('button.trap-btn[data-key="ogre"]');
+      await waitLive(page);
+      await toJson(page);
+      const addTxt = await page.$$eval('#trapPanel .tag.addx', (t) => t.length);
+      check(`${tag} "(추가)" 단계에 별도 배지`, addTxt > 0, `${addTxt}개`);
+      if (vp.name === 'pc') await shot(page, '#trapPanel', `add-badge-A3-5-ogre-${theme}.png`);
+      await toLive(page);
       // documented가 자기 루트: D1 1단계 드롤
       await openRouteAt(page, 'D1', 1);
       await page.click('button.trap-btn[data-key="droll"]');
-      await page.waitForSelector('#trapPanel .box.ok');
-      const selfTxt = await page.textContent('#trapPanel .box.ok');
+      await waitLive(page);
+      const selfTxt = await page.textContent('#trapPanel .box.ok:not(.calc-src)');
       check(`${tag} 자기 루트 documented → '지금 보고 있는 루트'`, selfTxt.includes('지금 보고 있는 루트(D1)가 이 상황의 대응') && !(await page.$('#trapPanel .box.ok button[data-act="open-route"]')));
 
       // 니비루: 상단 버튼 하나, 현재 단계 기준
       await openRouteAt(page, 'A1', 15);
       check(`${tag} 니비루는 단계별 버튼에 없음`, (await page.$$('#trapPanel button[data-act="ht-trap"][data-key="nibiru"]')).length === 0);
       await page.click('button[data-act="ht-nibiru"]');
+      await waitLive(page);
       await page.waitForSelector('#trapPanel .ht-sec');
       const nib = await page.textContent('#trapPanel');
       check(`${tag} 니비루 15단계: 카운터 선택지`, nib.includes('15단계') && nib.includes('제우스 ②로 무효'));
@@ -146,6 +180,7 @@ async function shot(page, sel, name) {
       const nib2 = await page.textContent('#trapPanel');
       check(`${tag} 카운터 누르면 counter.plan`, nib2.includes('제우스 ②로 무효') && nib2.includes('후)'));
       await page.click('button[data-act="next-step"]');
+      await waitLive(page);
       await page.waitForSelector('#trapPanel .ht-sec');
       const nib3 = await page.textContent('#trapPanel');
       check(`${tag} 진행하면 니비루 기준 단계도 바뀜(16단계)`, nib3.includes('16단계 기준') || nib3.includes('진행 위치 16단계'));
@@ -182,6 +217,24 @@ async function shot(page, sel, name) {
   await bp.click('button.trap-btn[data-key="ash"]');
   await bp.waitForSelector('#trapPanel .ht-sec');
   check('localStorage 차단돼도 동작', berr.length === 0, berr.join(' | '));
+  // Web Worker를 못 쓰는 환경 → 미리 만든 데이터로 대신 표시
+  const wctx = await browser.newContext();
+  await wctx.addInitScript(() => { window.Worker = undefined; });
+  const wp = await wctx.newPage();
+  const werr = [];
+  wp.on('pageerror', (e) => werr.push(e.message));
+  await wp.goto(URL);
+  await wp.click('button.card-btn[data-name="DD 마도현자 케플러"]');
+  await wp.waitForSelector('#recs .solve .calc-src:has-text("미리 만든 수순")');
+  await wp.waitForSelector('#recs .solve ol.todo li', { timeout: 15000 });
+  const plTxt = await wp.textContent('#recs .solve');
+  check('Worker 없음 → 패 수순은 dd-planlib.json으로 대신', plTxt.includes('계산 실패') && plTxt.includes('A1'), plTxt.replace(/\s+/g, ' ').slice(0, 100));
+  await wp.click('#recs button[data-act="start-route"][data-id="A1"]');
+  await wp.click('button[data-act="next-step"]');
+  await wp.click('button.trap-btn[data-key="ash"]');
+  await wp.waitForSelector('#trapPanel .ht-sec');
+  const fbTxt = await wp.textContent('#trapPanel .calc-src');
+  check('Worker 없음 → 패트랩은 dd-handtraps.json으로 대신', fbTxt.includes('미리 만든 데이터') && werr.length === 0, fbTxt.trim().slice(0, 80) + (werr.length ? ' | ' + werr.join(' | ') : ''));
   await browser.close();
   const fails = results.filter((r) => !r.ok);
   console.log(`\n${results.length}개 중 실패 ${fails.length}개`);

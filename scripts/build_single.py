@@ -26,14 +26,18 @@ def main():
     html = html.replace('<link rel="stylesheet" href="assets/style.css">', "<style>\n" + css + "</style>")
     html = html.replace('<script src="data/dd-data.js"></script>', "<script>\n" + data + "</script>")
     html = html.replace('<script src="assets/app.js"></script>', "<script>\n" + app + "</script>")
+    eng = inline_js(ROOT / "assets" / "calc" / "engine.js")
+    html = html.replace('<script src="assets/calc/engine.js"></script>', "<script>\n" + eng + "</script>")
     meta = inline_js(ROOT / "data" / "handtraps" / "meta.js")
     html = html.replace('<script src="data/handtraps/meta.js"></script>', "<script>\n" + meta + "</script>")
-    assert "assets/" not in html and "data/dd-data.js\"" not in html and "meta.js\"" not in html, "치환 실패"
+    assert not re.search(r'<(script|link)[^>]+(src|href)="(assets|data)/', html), "치환 실패"
 
     args = sys.argv[1:]
     if args[:1] != ["--artifact"]:
         # 한 파일 버전: 루트별 패트랩 파일도 전부 넣는다(따로 불러올 파일이 없도록)
         routes = "".join(inline_js(f) for f in sorted((ROOT / "data" / "handtraps").glob("[A-G]*.js")))
+        if (ROOT / "data" / "planlib.js").exists():
+            routes += inline_js(ROOT / "data" / "planlib.js")
         html = html.replace("<script>\n" + app, "<script>\n" + routes + "</script>\n<script>\n" + app)
     if args[:1] == ["--artifact"]:
         head = re.search(r"<head>(.*?)</head>", html, re.S).group(1)

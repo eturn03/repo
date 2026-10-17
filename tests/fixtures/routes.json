@@ -1,0 +1,548 @@
+{
+ "A1": {
+  "hand": [
+   "케플러"
+  ],
+  "final_monsters": [
+   "제우스",
+   "사이프리트",
+   "대왕시져",
+   "데스마키나"
+  ],
+  "contracts": [
+   "령왕",
+   "상암"
+  ],
+  "pzones": [
+   "토마스",
+   "카운트"
+  ],
+  "score": 14,
+  "zone_configs_possible": 120
+ },
+ "A2": {
+  "hand": [
+   "케플러"
+  ],
+  "final_monsters": [
+   "제우스",
+   "사이프리트",
+   "대왕시져",
+   "데스마키나"
+  ],
+  "contracts": [
+   "령왕",
+   "상암"
+  ],
+  "pzones": [
+   "토마스",
+   "제로마키나"
+  ],
+  "score": 14,
+  "zone_configs_possible": 120
+ },
+ "A3": {
+  "hand": [
+   "지옥문"
+  ],
+  "final_monsters": [
+   "제우스",
+   "사이프리트",
+   "대왕시져",
+   "데스마키나"
+  ],
+  "contracts": [
+   "령왕",
+   "상암"
+  ],
+  "pzones": [
+   "토마스",
+   "카운트"
+  ],
+  "score": 14,
+  "zone_configs_possible": 120
+ },
+ "A4": {
+  "hand": [
+   "지옥문"
+  ],
+  "final_monsters": [
+   "제우스",
+   "사이프리트",
+   "대왕시져",
+   "데스마키나"
+  ],
+  "contracts": [
+   "령왕",
+   "상암"
+  ],
+  "pzones": [
+   "토마스",
+   "카운트"
+  ],
+  "score": 14,
+  "zone_configs_possible": 120
+ },
+ "A5": {
+  "hand": [
+   "제로마키나"
+  ],
+  "final_monsters": [
+   "제우스",
+   "사이프리트",
+   "대왕시져",
+   "데스마키나"
+  ],
+  "contracts": [
+   "지옥문",
+   "상암"
+  ],
+  "pzones": [
+   "토마스",
+   "카운트"
+  ],
+  "score": 14,
+  "zone_configs_possible": 120
+ },
+ "A6": {
+  "hand": [
+   "제로마키나"
+  ],
+  "final_monsters": [
+   "제우스",
+   "사이프리트",
+   "대왕시져",
+   "데스마키나"
+  ],
+  "contracts": [
+   "상암"
+  ],
+  "pzones": [
+   "토마스",
+   "카운트"
+  ],
+  "score": 14,
+  "zone_configs_possible": 120
+ },
+ "A7": {
+  "hand": [
+   "제로마키나"
+  ],
+  "final_monsters": [
+   "제우스",
+   "사이프리트",
+   "대왕시져",
+   "데스마키나"
+  ],
+  "contracts": [
+   "령왕",
+   "상암"
+  ],
+  "pzones": [
+   "토마스",
+   "제로마키나"
+  ],
+  "score": 14,
+  "zone_configs_possible": 120
+ },
+ "B1": {
+  "hand": [
+   "케플러"
+  ],
+  "final_monsters": [
+   "제우스",
+   "사이프리트",
+   "대왕시져",
+   "데스마키나"
+  ],
+  "contracts": [
+   "령왕",
+   "상암"
+  ],
+  "pzones": [
+   "스케일",
+   "제로마키나"
+  ],
+  "score": 14,
+  "zone_configs_possible": 120
+ },
+ "B2": {
+  "hand": [
+   "지옥문"
+  ],
+  "final_monsters": [
+   "제우스",
+   "사이프리트",
+   "대왕시져",
+   "데스마키나"
+  ],
+  "contracts": [
+   "령왕",
+   "상암"
+  ],
+  "pzones": [
+   "스케일",
+   "제로마키나"
+  ],
+  "score": 14,
+  "zone_configs_possible": 120
+ },
+ "B3": {
+  "hand": [
+   "제로마키나"
+  ],
+  "final_monsters": [
+   "제우스",
+   "사이프리트",
+   "대왕시져",
+   "데스마키나"
+  ],
+  "contracts": [
+   "령왕",
+   "상암"
+  ],
+  "pzones": [
+   "스케일",
+   "제로마키나"
+  ],
+  "score": 14,
+  "zone_configs_possible": 120
+ },
+ "C1": {
+  "hand": [
+   "제로마키나"
+  ],
+  "final_monsters": [
+   "제우스",
+   "대왕시져",
+   "사이프리트",
+   "데스마키나"
+  ],
+  "contracts": [],
+  "pzones": [
+   "토마스",
+   "카운트"
+  ],
+  "score": 12,
+  "zone_configs_possible": 84
+ },
+ "C2": {
+  "hand": [
+   "케플러"
+  ],
+  "final_monsters": [
+   "제우스",
+   "대왕시져",
+   "사이프리트",
+   "데스마키나"
+  ],
+  "contracts": [
+   "령왕"
+  ],
+  "pzones": [
+   "토마스",
+   "카운트"
+  ],
+  "score": 13.5,
+  "zone_configs_possible": 120
+ },
+ "C3": {
+  "hand": [
+   "지옥문"
+  ],
+  "final_monsters": [
+   "제우스",
+   "데스마키나",
+   "사이프리트",
+   "대왕시져"
+  ],
+  "contracts": [
+   "령왕",
+   "상암"
+  ],
+  "pzones": [
+   "토마스",
+   "카운트"
+  ],
+  "score": 14,
+  "zone_configs_possible": 120
+ },
+ "C4": {
+  "hand": [
+   "제로마키나"
+  ],
+  "final_monsters": [
+   "제우스",
+   "데스마키나",
+   "사이프리트",
+   "대왕시져"
+  ],
+  "contracts": [
+   "상암"
+  ],
+  "pzones": [
+   "토마스",
+   "카운트"
+  ],
+  "score": 14,
+  "zone_configs_possible": 72
+ },
+ "D1": {
+  "hand": [
+   "지옥문"
+  ],
+  "final_monsters": [
+   "제우스",
+   "데스마키나",
+   "대왕시져",
+   "사이프리트"
+  ],
+  "contracts": [
+   "령왕"
+  ],
+  "pzones": [],
+  "score": 12,
+  "zone_configs_possible": 120
+ },
+ "D2": {
+  "hand": [
+   "지옥문"
+  ],
+  "final_monsters": [
+   "제우스",
+   "데스마키나",
+   "대왕시져",
+   "사이프리트"
+  ],
+  "contracts": [
+   "령왕"
+  ],
+  "pzones": [],
+  "score": 12,
+  "zone_configs_possible": 120
+ },
+ "D3": {
+  "hand": [
+   "제로마키나"
+  ],
+  "final_monsters": [
+   "제우스",
+   "데스마키나",
+   "사이프리트",
+   "대왕시져"
+  ],
+  "contracts": [],
+  "pzones": [
+   "토마스",
+   "카운트"
+  ],
+  "score": 12,
+  "zone_configs_possible": 120
+ },
+ "D4": {
+  "hand": [
+   "제로마키나"
+  ],
+  "final_monsters": [
+   "제우스",
+   "대왕시져",
+   "데스마키나"
+  ],
+  "contracts": [],
+  "pzones": [],
+  "score": 9,
+  "zone_configs_possible": 40
+ },
+ "D5": {
+  "hand": [
+   "케플러"
+  ],
+  "final_monsters": [
+   "데스마키나",
+   "제우스",
+   "대왕시져"
+  ],
+  "contracts": [],
+  "pzones": [
+   "제로마키나",
+   "케플러"
+  ],
+  "score": 9,
+  "zone_configs_possible": 140
+ },
+ "D6": {
+  "hand": [
+   "케플러"
+  ],
+  "final_monsters": [
+   "제우스",
+   "사이프리트",
+   "데스마키나"
+  ],
+  "contracts": [
+   "령왕"
+  ],
+  "pzones": [
+   "토마스"
+  ],
+  "score": 9,
+  "zone_configs_possible": 40
+ },
+ "E1": {
+  "hand": [
+   "케플러",
+   "드롤"
+  ],
+  "final_monsters": [
+   "제우스",
+   "데스마키나",
+   "대왕시져",
+   "사이프리트"
+  ],
+  "contracts": [
+   "령왕"
+  ],
+  "pzones": [
+   "토마스",
+   "제로마키나"
+  ],
+  "score": 12,
+  "zone_configs_possible": 120
+ },
+ "E2": {
+  "hand": [
+   "지옥문",
+   "드롤"
+  ],
+  "final_monsters": [
+   "제우스",
+   "대왕시져",
+   "데스마키나"
+  ],
+  "contracts": [
+   "령왕"
+  ],
+  "pzones": [
+   "토마스"
+  ],
+  "score": 9,
+  "zone_configs_possible": 40
+ },
+ "F1": {
+  "hand": [
+   "케플러"
+  ],
+  "final_monsters": [
+   "데스마키나",
+   "대왕시져",
+   "사이프리트"
+  ],
+  "contracts": [
+   "령왕"
+  ],
+  "pzones": [],
+  "score": 10.5,
+  "zone_configs_possible": 180
+ },
+ "F2": {
+  "hand": [
+   "케플러"
+  ],
+  "final_monsters": [
+   "데스마키나",
+   "대왕시져",
+   "사이프리트"
+  ],
+  "contracts": [
+   "령왕"
+  ],
+  "pzones": [],
+  "score": 10.5,
+  "zone_configs_possible": 180
+ },
+ "F3": {
+  "hand": [
+   "지옥문"
+  ],
+  "final_monsters": [
+   "데스마키나",
+   "대왕시져",
+   "사이프리트"
+  ],
+  "contracts": [
+   "령왕"
+  ],
+  "pzones": [],
+  "score": 10.5,
+  "zone_configs_possible": 180
+ },
+ "F4": {
+  "hand": [
+   "지옥문"
+  ],
+  "final_monsters": [
+   "대왕시져",
+   "제우스",
+   "데스마키나"
+  ],
+  "contracts": [
+   "령왕"
+  ],
+  "pzones": [],
+  "score": 10.5,
+  "zone_configs_possible": 40
+ },
+ "F5": {
+  "hand": [
+   "제로마키나"
+  ],
+  "final_monsters": [
+   "제우스",
+   "대왕시져",
+   "데스마키나"
+  ],
+  "contracts": [
+   "령왕"
+  ],
+  "pzones": [],
+  "score": 10.5,
+  "zone_configs_possible": 40
+ },
+ "F6": {
+  "hand": [
+   "제로마키나"
+  ],
+  "final_monsters": [
+   "데스마키나",
+   "대왕시져",
+   "사이프리트"
+  ],
+  "contracts": [
+   "령왕"
+  ],
+  "pzones": [],
+  "score": 10.5,
+  "zone_configs_possible": 180
+ },
+ "G1": {
+  "hand": [
+   "제로마키나",
+   "지옥문"
+  ],
+  "final_monsters": [
+   "제우스",
+   "대왕시져",
+   "토마스",
+   "사이프리트",
+   "데스마키나"
+  ],
+  "contracts": [
+   "지옥문"
+  ],
+  "pzones": [
+   "스케일"
+  ],
+  "score": 13.8,
+  "zone_configs_possible": 144
+ }
+}

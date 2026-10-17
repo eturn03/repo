@@ -39,7 +39,7 @@
   function saveState() {
     try { window.localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* 저장 불가 환경 */ }
   }
-  var state = Object.assign({ tab: 'hand', hand: {}, concern: 'none', routeId: null, checks: {}, ht: null, htChecks: {}, rev: 'handMonster', theme: 'dark' }, loadState());
+  var state = Object.assign({ tab: 'hand', hand: {}, concern: 'none', routeId: null, checks: {}, ht: null, htChecks: {}, htSrc: 'live', rev: 'handMonster', theme: 'dark' }, loadState());
   if (state.theme !== 'light') state.theme = 'dark';
   delete state.trap;
   Object.keys(state.hand).forEach(function (n) {
@@ -268,6 +268,138 @@
     s.onerror = function () { htStatus[id] = 'error'; if (state.routeId === id && state.tab === 'route') render(); };
     document.head.appendChild(s);
   }
+  // ------------------------------------------------------------ 계산기(assets/calc/engine.js 를 Web Worker 로)
+  // 사이트 카드 이름 → 계산기 이름
+  var CALC_NAME = { '스몰 월드': '스몰월드', '다크 오컬티즘': '다크오컬티즘', '말살의 지명자': '말살', '도미나스 임펄스': '도미나스' };
+  function calcName(full) { return CALC_NAME[full] || short(full); }
+  function calcHandFull() {
+    var out = [];
+    Object.keys(state.hand).forEach(function (n) { for (var i = 0; i < state.hand[n]; i++) out.push(calcName(n)); });
+    return out.sort();
+  }
+  var CALC_MODEL = ['케플러', '코페르', '토마스', '오르트로스', '카운트', '그리폰', '스케일', '제로마키나', '네크로', '랜스', '드롤', '지옥문', '령왕', '상암'];
+  function calcHandModeled() { return calcHandFull().filter(function (n) { return CALC_MODEL.indexOf(n) >= 0; }); }
+  // 루트 계산용 패: 선택한 패(모델 카드) + 빠진 루트 시작 카드. 패를 안 골랐으면 null(=시작 패 기준)
+  function routeHand(r) {
+    if (!handSize(state.hand)) return { hand: null, added: [] };
+    var h = calcHandModeled(), added = [];
+    r.requiredHand.forEach(function (q) { var n = calcName(q.card); if (h.indexOf(n) < 0) { h.push(n); added.push(n); } });
+    return { hand: h.sort(), added: added };
+  }
+  var Calc = (function () {
+    var worker = null, broken = '', seq = 0, pending = {}, cache = {};
+    var SOFT_MS = 1000, HARD_MS = 30000;
+    function workerMain() {
+      var calc = null;
+      self.onmessage = function (e) {
+        var m = e.data;
+        if (m.type === 'init') { try { calc = DD_CALC_FACTORY(m.routes); } catch (err) { calc = null; self.postMessage({ type: 'initError', error: String(err && err.message || err) }); } return; }
+        var t = Date.now();
+        try {
+          if (!calc) throw new Error('계산기 초기화 실패');
+          var j = m.job, res;
+          if (j.type === 'record') res = calc.record(j.rid, j.k, j.trap, j.hand || undefined);
+          else if (j.type === 'solve') res = calc.solveFull(j.hand);
+          self.postMessage({ id: m.id, ok: true, result: res, ms: Date.now() - t });
+        } catch (err) { self.postMessage({ id: m.id, ok: false, error: String(err && err.message || err), ms: Date.now() - t }); }
+      };
+    }
+    function start() {
+      try {
+        if (typeof DD_CALC_FACTORY !== 'function') throw new Error('assets/calc/engine.js 없음');
+        var src = 'var DD_CALC_FACTORY = ' + DD_CALC_FACTORY.toString() + ';\n(' + workerMain.toString() + ')();';
+        worker = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
+        worker.onmessage = onMsg;
+        worker.onerror = function (e) { fail('Web Worker 오류: ' + (e && e.message || '')); };
+        worker.postMessage({ type: 'init', routes: D.routes.map(function (r) { return { id: r.id, title: r.name, steps: r.steps.map(function (x) { return x.text; }) }; }) });
+      } catch (err) { worker = null; broken = String(err && err.message || err); }
+    }
+    function fail(msg) {
+      broken = msg;
+      Object.keys(pending).forEach(function (id) { var p = pending[id]; p.ent.status = 'error'; p.ent.error = msg; done(p); });
+      pending = {};
+      try { if (worker) worker.terminate(); } catch (e) { /* 무시 */ }
+      worker = null;
+    }
+    function done(p) { clearTimeout(p.ent.soft); clearTimeout(p.ent.hard); if (p.cb) p.cb(); }
+    function onMsg(e) {
+      var m = e.data;
+      if (m.type === 'initError') { fail('계산기 초기화 실패: ' + m.error); return; }
+      var p = pending[m.id];
+      if (!p) return;
+      delete pending[m.id];
+      p.ent.ms = m.ms;
+      if (m.ok) { p.ent.status = 'done'; p.ent.result = m.result; } else { p.ent.status = 'error'; p.ent.error = m.error; }
+      done(p);
+    }
+    function restart() {
+      Object.keys(pending).forEach(function (id) { var p = pending[id]; if (p.ent.status === 'running') { p.ent.status = 'timeout'; done(p); } });
+      pending = {};
+      try { if (worker) worker.terminate(); } catch (e) { /* 무시 */ }
+      worker = null;
+    }
+    // ent.status: running(1초 전) | slow(1초 넘음, 계속 계산) | done | error | timeout
+    function request(key, job, cb) {
+      if (cache[key]) { cache[key].cb = cb; return cache[key]; }
+      // 같은 종류(패 계산 / 패트랩 계산)의 이전 요청이 아직 돌고 있으면 버리고 새로 시작
+      var slot = key.split('|')[0], stale = false;
+      Object.keys(pending).forEach(function (id) { if (pending[id].slot === slot) stale = true; });
+      if (stale) {
+        Object.keys(pending).forEach(function (id) {
+          var pp = pending[id];
+          clearTimeout(pp.ent.soft); clearTimeout(pp.ent.hard);
+          if (pp.slot === slot) delete cache[pp.key];
+          else { pp.ent.status = 'timeout'; pp.ent.error = '다른 계산 때문에 중단'; delete cache[pp.key]; }
+        });
+        pending = {};
+        try { if (worker) worker.terminate(); } catch (e) { /* 무시 */ }
+        worker = null;
+      }
+      var ent = cache[key] = { status: 'running', started: Date.now(), cb: cb };
+      if (!worker && !broken) start();
+      if (!worker) { ent.status = 'error'; ent.error = broken || 'Web Worker를 만들 수 없음'; return ent; }
+      var id = ++seq;
+      var p = { ent: ent, slot: slot, key: key, cb: function () { if (ent.cb) ent.cb(); } };
+      pending[id] = p;
+      worker.postMessage({ type: 'job', id: id, job: job });
+      ent.soft = setTimeout(function () { if (ent.status === 'running') { ent.status = 'slow'; if (ent.cb) ent.cb(); } }, SOFT_MS);
+      ent.hard = setTimeout(function () { if (ent.status === 'running' || ent.status === 'slow') { restart(); ent.status = 'timeout'; if (ent.cb) ent.cb(); } }, HARD_MS);
+      return ent;
+    }
+    return { request: request, status: function () { return broken ? 'broken' : worker ? 'on' : 'idle'; }, brokenReason: function () { return broken; } };
+  })();
+  // 다시 그릴 때 스크롤·포커스가 크게 튀지 않게, 요청한 화면일 때만 다시 그림
+  function rerenderIf(tab) { return function () { if (state.tab === tab) render(); }; }
+
+  // 대비용 수순 모음(dd-planlib.json)
+  var planlibStatus = '';
+  function loadPlanlib() {
+    if (window.DD_PLANLIB || planlibStatus) return;
+    planlibStatus = 'loading';
+    var s = document.createElement('script');
+    s.src = 'data/planlib.js';
+    s.onload = function () { planlibStatus = window.DD_PLANLIB ? 'ok' : 'error'; if (state.tab === 'hand') render(); };
+    s.onerror = function () { planlibStatus = 'error'; if (state.tab === 'hand') render(); };
+    document.head.appendChild(s);
+  }
+  function planlibPick(full) {
+    var PL = window.DD_PLANLIB;
+    if (!PL) return null;
+    var deck = PL._about.deck_counts;
+    function usable(p, h, ban) {
+      for (var c in p.needs_in_hand) if ((h[c] || 0) < p.needs_in_hand[c]) return false;
+      for (var d in p.deck_pulls) if (p.deck_pulls[d] > (deck[d] || 0) - (h[d] || 0) - ((ban && ban[d]) || 0)) return false;
+      return true;
+    }
+    function count(list) { var o = {}; list.forEach(function (n) { o[n] = (o[n] || 0) + 1; }); return o; }
+    var h = count(full), best = null;
+    PL.plans.forEach(function (p) {
+      if (p.assumes_opponent && p.assumes_opponent.length) return;
+      if (usable(p, h) && (!best || p.final_score > best.plan.final_score)) best = { plan: p, sw: null };
+    });
+    return best;
+  }
+
   function htAt(id, step) { return (htData(id) || []).filter(function (x) { return x.step === step; }); }
   function stepTrapKeys(id, step) { return (HTM && HTM.stepTraps[id] && HTM.stepTraps[id][step]) || []; }
   function trapName(key) { return (HTM && HTM.traps[key]) || key; }
@@ -330,6 +462,7 @@
     var hand = state.hand, size = handSize(hand);
     var h = '<h2>추천 루트</h2><h4>상대 유발 예상</h4>' + concernSel();
     if (!size) return h + '<div class="empty">왼쪽에서 패를 고르면 문서의 조회표·1장/2장 조합 기준으로 루트를 보여준다.</div>';
+    h += renderSolve();
     var res = evaluate(hand, state.concern);
     var ok = viable(res);
     res.plans.forEach(function (p) {
@@ -385,6 +518,49 @@
     notes.push(D.quotes.leftovers);
     h += '<h4>문서 메모</h4>' + notes.map(quote).join('');
     return h;
+  }
+
+  // 실제 패로 계산한 수순(계산기) — 1초를 넘거나 실패하면 dd-planlib.json 의 수순을 대신 보여준다
+  function solvePlanHtml(plan, key, idp) {
+    var sk = plan.skipped_original_steps || [];
+    return '<p class="small muted">바탕 루트: ' + ridLink(plan.base_route) + ' ' + plan.resume_from_step + '단계부터 · 점수 ' + plan.final.score + '</p>' +
+      todoHtml(plan.steps, key, idp) +
+      (sk.length ? '<details class="inner"><summary>건너뛴 원래 단계 ' + sk.length + '개</summary><ul class="small">' + sk.map(function (x) { return '<li>' + x.step + '. ' + esc(x.text) + ' <span class="muted">— ' + esc(x.why) + '</span></li>'; }).join('') + '</ul></details>' : '') +
+      '<h4>결과 필드</h4>' + fieldHtml(plan.final);
+  }
+  function renderSolve() {
+    var full = calcHandFull();
+    var key = 'solve|' + full.join('+');
+    var ent = Calc.request(key, { type: 'solve', hand: full }, rerenderIf('hand'));
+    var h = '<section class="solve"><h3>이 패로 계산한 수순</h3><p class="small muted">계산기(Python 계산기를 옮긴 것)가 루트 29개 수순을 이어 붙여 이 패에서 가장 점수가 높은 수순을 찾는다. 결과는 "최소 이만큼은 된다"는 하한이고 MD 실기 미확인.</p>';
+    if (ent.status === 'done') {
+      var r = ent.result;
+      var opts = [];
+      if (r.base) opts.push({ title: '패 그대로', res: r.base });
+      r.smallWorld.forEach(function (w) { if (w.result) opts.push({ title: '스몰 월드: ' + w.reveal + ' 보여줌 → 다리 ' + w.bridge + ' → ' + w.target + ' 서치', res: w.result }); });
+      opts.sort(function (a, b) { return b.res.score - a.res.score; });
+      h += '<div class="box ok small calc-src"><strong>실시간 계산</strong> · 패: ' + esc(full.join('·')) + ' · ' + ent.ms + 'ms</div>';
+      if (!opts.length) h += '<div class="box warn small">' + esc(r.note || '계산할 수 있는 수순이 없다') + '</div>';
+      opts.forEach(function (o, i) {
+        h += '<div class="route-item"><div class="title">' + esc(o.title) + ' — 점수 ' + o.res.score + '</div>' +
+          (i === 0 ? solvePlanHtml(o.res.plan, key + '|' + i, 'sv' + i) : '<details class="inner"><summary>수순 보기</summary>' + solvePlanHtml(o.res.plan, key + '|' + i, 'sv' + i) + '</details>') + '</div>';
+      });
+      if (r.smallWorld.length && r.smallWorld.length > 1) h += '<p class="small muted">스몰 월드 경로 ' + r.smallWorld.length + '가지를 계산했다.</p>';
+    } else if (ent.status === 'running') {
+      h += '<div class="box small calc-src">계산 중… (패: ' + esc(full.join('·')) + ')</div>';
+    } else {
+      loadPlanlib();
+      var why = ent.status === 'slow' ? '계산이 1초를 넘어서, 끝날 때까지 미리 만든 수순을 보여준다(끝나면 바뀜)' : ent.status === 'timeout' ? '계산이 너무 오래 걸려 멈췄다' : '계산 실패: ' + (ent.error || '');
+      h += '<div class="box warn small calc-src"><strong>미리 만든 수순</strong>(dd-planlib.json) · ' + esc(why) + '</div>';
+      if (!window.DD_PLANLIB) h += '<div class="box small">' + (planlibStatus === 'error' ? 'data/planlib.js를 못 불러왔다.' : '수순 모음 불러오는 중…') + '</div>';
+      else {
+        var pk = planlibPick(full);
+        if (!pk) h += '<div class="box warn small">이 패에 맞는 미리 만든 수순이 없다(장수 검사 기준).</div>';
+        else h += '<div class="route-item"><div class="title">' + esc(pk.plan.label) + ' — 점수 ' + pk.plan.final_score + '</div>' +
+          todoHtml(pk.plan.steps, 'planlib|' + pk.plan.id, 'pl') + '<p class="small">결과 몬스터: ' + chips(pk.plan.final_monsters) + '</p></div>';
+      }
+    }
+    return h + '</section>';
   }
 
   // ------------------------------------------------------------ 렌더: 루트 진행
@@ -461,18 +637,35 @@
       h += '<p class="small">니비루 · 진행 위치 <strong>' + cur + '단계</strong> 기준. 단계를 체크해 진행하면 따라 바뀐다. <button data-act="ht-close">니비루 닫기</button></p>';
     }
     if (ht.trap) {
-      var st = htStatus[r.id];
+      var rh = routeHand(r);
+      var key = 'rec|' + r.id + '|' + step + '|' + ht.trap + '|' + (rh.hand ? rh.hand.join('+') : '시작패');
+      var live = Calc.request(key, { type: 'record', rid: r.id, k: step, trap: ht.trap, hand: rh.hand }, rerenderIf('route'));
+      var handLabel = rh.hand ? rh.hand.join('·') + (rh.added.length ? ' (루트 시작 카드 ' + rh.added.join('·') + '는 패에 없어서 넣고 계산)' : '') : '루트 시작 패(' + r.requiredHand.map(function (q) { return short(q.card); }).join('·') + ')';
       var data = htData(r.id);
-      if (!data) {
-        h += st === 'error' ? '<div class="box bad">data/handtraps/' + r.id + '.js를 못 불러왔다.</div>' : '<div class="box">패트랩 데이터 불러오는 중…</div>';
+      var jrec = data ? htAt(r.id, step).filter(function (x) { return x.trap === ht.trap; })[0] : null;
+      var toJson = '<button data-act="ht-src" data-v="json">미리 만든 데이터로 보기</button>';
+      if (state.htSrc === 'json') {
+        h += '<div class="box small calc-src"><strong>미리 만든 데이터</strong>(dd-handtraps.json, 루트 시작 패 기준) · 직접 고름 <button data-act="ht-src" data-v="live">실시간 계산으로 보기</button></div>';
+        if (!data) h += '<div class="box">패트랩 데이터 불러오는 중…</div>';
+        else if (!jrec) h += '<div class="box warn">' + step + '단계에는 ' + esc(trapName(ht.trap)) + ' 데이터가 없다.' + (ht.trap === 'nibiru' ? nibiruHint(r, step) : '') + '</div>';
+        else h += renderRecord(r, jrec, ht, 'json');
+      } else if (live.status === 'done' && live.result && !live.result.not_applicable) {
+        h += '<div class="box ok small calc-src"><strong>실시간 계산</strong> · 패: ' + esc(handLabel) + ' · ' + live.ms + 'ms ' + toJson +
+          (jrec && jrec.if_extra_card_in_hand ? '<br><span class="muted">미리 만든 데이터에는 "패에 ' + esc(jrec.if_extra_card_in_hand.map(function (e) { return e.card; }).join('/')) + ' 있으면" 탭이 있다. 실시간 계산은 고른 패를 그대로 쓴다.</span>' : '') + '</div>';
+        h += renderRecord(r, live.result, ht, 'live');
+      } else if (live.status === 'done' && live.result && live.result.not_applicable) {
+        h += '<div class="box warn small calc-src"><strong>실시간 계산</strong> · 패: ' + esc(handLabel) + '<br>이 패로는 ' + step + '단계에서 ' + esc(trapName(ht.trap)) + '이(가) 걸리지 않는다(계산기 판정).</div>';
+      } else if (live.status === 'running') {
+        h += '<div class="box small calc-src">계산 중… (패: ' + esc(handLabel) + ')</div>';
       } else {
-        var rec = htAt(r.id, step).filter(function (x) { return x.trap === ht.trap; })[0];
-        if (!rec) {
-          h += '<div class="box warn">' + step + '단계에는 ' + esc(trapName(ht.trap)) + ' 데이터가 없다.' +
-            (ht.trap === 'nibiru' ? nibiruHint(r, step) : '') + '</div>';
-        } else {
-          h += renderRecord(r, rec, ht);
-        }
+        var why = live.status === 'slow' ? '계산이 1초를 넘어서 끝날 때까지 미리 만든 데이터를 보여준다(끝나면 바뀜)' :
+          live.status === 'timeout' ? '계산이 너무 오래 걸려 멈췄다' : '계산 실패: ' + (live.error || '');
+        h += '<div class="box warn small calc-src"><strong>미리 만든 데이터</strong>(dd-handtraps.json, 루트 시작 패 기준) · ' + esc(why) + '</div>';
+        if (!data) {
+          h += htStatus[r.id] === 'error' ? '<div class="box bad">data/handtraps/' + r.id + '.js를 못 불러왔다.</div>' : '<div class="box">패트랩 데이터 불러오는 중…</div>';
+        } else if (!jrec) {
+          h += '<div class="box warn">' + step + '단계에는 ' + esc(trapName(ht.trap)) + ' 데이터가 없다.' + (ht.trap === 'nibiru' ? nibiruHint(r, step) : '') + '</div>';
+        } else h += renderRecord(r, jrec, ht, 'json');
       }
     }
     return h + limitsHtml();
@@ -516,13 +709,14 @@
   }
   function sec(no, title, body) { return '<div class="ht-sec"><h4><span class="no">' + no + '</span> ' + title + '</h4>' + body + '</div>'; }
 
-  function renderRecord(r, rec, ht) {
+  function renderRecord(r, rec, ht, src) {
     var v = ht.variant || defaultVariant(rec);
-    var key = r.id + '|' + rec.step + '|' + rec.trap + '|' + v;
+    if (!planFor(rec, v) && v !== 'continue' && v !== 'base') v = defaultVariant(rec);
+    var key = r.id + '|' + rec.step + '|' + rec.trap + '|' + v + '|' + (src || 'json');
     var mdStep = r.steps[rec.step - 1];
     var h = '<h3 style="margin-top:14px">' + esc(rec.trap_name) + ' · ' + rec.step + '단계</h3>' +
       '<p class="small">"' + hl(rec.step_text || (mdStep && mdStep.text)) + '"' +
-      ' · 여기까지 소환한 몬스터 ' + rec.monsters_summoned_so_far + '장 <span class="muted">(데이터)</span></p>';
+      ' · 여기까지 소환한 몬스터 ' + rec.monsters_summoned_so_far + '장 <span class="muted">(' + (src === 'live' ? '계산' : '데이터') + ')</span></p>';
     // 문서 루트
     if (rec.documented) {
       var self = rec.documented.match(/^이 루트\(([A-G]\d{1,2})\) 자체가/);
@@ -576,19 +770,26 @@
       return h;
     }
     if (!plan) return h + sec('3', label, '<p class="muted">이 경우의 수순 데이터가 없다.</p>');
-    var checks = state.htChecks[key] || [];
-    var todo = plan.steps.length ? '<ol class="todo">' + plan.steps.map(function (s, i) {
-      var on = checks.indexOf(i) >= 0, sub = s.indexOf('(대체)') >= 0;
-      var id = 'td-' + i;
-      return '<li class="' + (on ? 'done' : '') + '"><input type="checkbox" id="' + id + '" data-act="ht-check" data-key="' + esc(key) + '" data-i="' + i + '"' + (on ? ' checked' : '') + '>' +
-        '<span class="num">' + (i + 1) + '</span><label class="txt" for="' + id + '">' + esc(s) + (sub ? ' <span class="tag sub">대체: 원래 루트와 소재·대상이 다름</span>' : '') + '</label></li>';
-    }).join('') + '</ol>' : '<p class="muted">이어서 할 수 있는 단계가 없다.</p>';
-    h += sec('3', label, '<p class="small muted">이어 붙인 수순: ' + ridLink(plan.base_route) + ' ' + plan.resume_from_step + '단계부터</p>' + todo);
+    h += sec('3', label, '<p class="small muted">이어 붙인 수순: ' + ridLink(plan.base_route) + ' ' + plan.resume_from_step + '단계부터</p>' + todoHtml(plan.steps, key, 'td'));
     var sk = plan.skipped_original_steps || [];
     h += sec('4', '건너뛴 원래 단계', sk.length ? '<details class="inner"><summary>' + sk.length + '개 펼치기</summary><ul class="small">' +
       sk.map(function (s) { return '<li>' + s.step + '. ' + esc(s.text) + ' <span class="muted">— ' + esc(s.why) + '</span></li>'; }).join('') + '</ul></details>' : '<p class="muted small">없음</p>');
     h += sec('5', '결과 필드', fieldHtml(plan.final));
     return h;
+  }
+
+  // 수순 체크리스트. "(대체)" = 소재·대상을 바꾼 단계, "(추가)" = 원래 루트에 없던 트리거를 끼워 넣은 단계
+  function todoHtml(steps, key, idp) {
+    if (!steps.length) return '<p class="muted">이어서 할 수 있는 단계가 없다.</p>';
+    var checks = state.htChecks[key] || [];
+    return '<ol class="todo">' + steps.map(function (s, i) {
+      var on = checks.indexOf(i) >= 0, sub = s.indexOf('(대체)') >= 0, add = s.indexOf('(추가)') >= 0;
+      var id = idp + '-' + i;
+      return '<li class="' + (on ? 'done' : '') + '"><input type="checkbox" id="' + id + '" data-act="ht-check" data-key="' + esc(key) + '" data-i="' + i + '"' + (on ? ' checked' : '') + '>' +
+        '<span class="num">' + (i + 1) + '</span><label class="txt" for="' + id + '">' + esc(s) +
+        (sub ? ' <span class="tag sub">대체: 원래 루트와 소재·대상이 다름</span>' : '') +
+        (add ? ' <span class="tag addx">추가: 원래 루트에 없던 트리거를 끼워 넣음</span>' : '') + '</label></li>';
+    }).join('') + '</ol>';
   }
 
   function stateHtml(s) {
@@ -766,6 +967,7 @@
         if (r) { var k = el.dataset.key; if (state.ht && state.ht.trap === k && state.ht.routeId === r.id) setHT({ trap: null, variant: null }); else setHT({ trap: k, variant: null }); render(); scrollTrap(); }
         return;
       case 'ht-variant': if (r) { setHT({ variant: el.dataset.v }); render(); } return;
+      case 'ht-src': state.htSrc = el.dataset.v; if (r) setHT({ variant: null }); render(); return;
     }
   });
   document.addEventListener('change', function (e) {

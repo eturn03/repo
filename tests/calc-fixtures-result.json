@@ -1,0 +1,5988 @@
+{
+ "initMs": 132,
+ "routes": [
+  {
+   "id": "A1",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "A2",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "A3",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "A4",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "A5",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "A6",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "A7",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "B1",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "B2",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "B3",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "C1",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "사이프리트",
+     "데스마키나"
+    ],
+    "zones": 84
+   },
+   "got": {
+    "score": 12,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "사이프리트",
+     "데스마키나"
+    ],
+    "zones": 84
+   }
+  },
+  {
+   "id": "C2",
+   "ok": true,
+   "expected": {
+    "score": 13.5,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "사이프리트",
+     "데스마키나"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 13.5,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "사이프리트",
+     "데스마키나"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "C3",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "사이프리트",
+     "대왕시져"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "사이프리트",
+     "대왕시져"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "C4",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "사이프리트",
+     "대왕시져"
+    ],
+    "zones": 72
+   },
+   "got": {
+    "score": 14,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "사이프리트",
+     "대왕시져"
+    ],
+    "zones": 72
+   }
+  },
+  {
+   "id": "D1",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 12,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "D2",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 12,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "D3",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "사이프리트",
+     "대왕시져"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 12,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "사이프리트",
+     "대왕시져"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "D4",
+   "ok": true,
+   "expected": {
+    "score": 9,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 40
+   },
+   "got": {
+    "score": 9,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 40
+   }
+  },
+  {
+   "id": "D5",
+   "ok": true,
+   "expected": {
+    "score": 9,
+    "mons": [
+     "데스마키나",
+     "제우스",
+     "대왕시져"
+    ],
+    "zones": 140
+   },
+   "got": {
+    "score": 9,
+    "mons": [
+     "데스마키나",
+     "제우스",
+     "대왕시져"
+    ],
+    "zones": 140
+   }
+  },
+  {
+   "id": "D6",
+   "ok": true,
+   "expected": {
+    "score": 9,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "데스마키나"
+    ],
+    "zones": 40
+   },
+   "got": {
+    "score": 9,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "데스마키나"
+    ],
+    "zones": 40
+   }
+  },
+  {
+   "id": "E1",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 120
+   },
+   "got": {
+    "score": 12,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 120
+   }
+  },
+  {
+   "id": "E2",
+   "ok": true,
+   "expected": {
+    "score": 9,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 40
+   },
+   "got": {
+    "score": 9,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 40
+   }
+  },
+  {
+   "id": "F1",
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "mons": [
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 180
+   },
+   "got": {
+    "score": 10.5,
+    "mons": [
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 180
+   }
+  },
+  {
+   "id": "F2",
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "mons": [
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 180
+   },
+   "got": {
+    "score": 10.5,
+    "mons": [
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 180
+   }
+  },
+  {
+   "id": "F3",
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "mons": [
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 180
+   },
+   "got": {
+    "score": 10.5,
+    "mons": [
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 180
+   }
+  },
+  {
+   "id": "F4",
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "mons": [
+     "대왕시져",
+     "제우스",
+     "데스마키나"
+    ],
+    "zones": 40
+   },
+   "got": {
+    "score": 10.5,
+    "mons": [
+     "대왕시져",
+     "제우스",
+     "데스마키나"
+    ],
+    "zones": 40
+   }
+  },
+  {
+   "id": "F5",
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 40
+   },
+   "got": {
+    "score": 10.5,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ],
+    "zones": 40
+   }
+  },
+  {
+   "id": "F6",
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "mons": [
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 180
+   },
+   "got": {
+    "score": 10.5,
+    "mons": [
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ],
+    "zones": 180
+   }
+  },
+  {
+   "id": "G1",
+   "ok": true,
+   "expected": {
+    "score": 13.8,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "토마스",
+     "사이프리트",
+     "데스마키나"
+    ],
+    "zones": 144
+   },
+   "got": {
+    "score": 13.8,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "토마스",
+     "사이프리트",
+     "데스마키나"
+    ],
+    "zones": 144
+   }
+  }
+ ],
+ "hands": [
+  {
+   "i": 0,
+   "hand": [
+    "그리폰",
+    "스케일",
+    "케플러",
+    "토마스"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A2",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A2",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1005
+  },
+  {
+   "i": 1,
+   "hand": [
+    "드롤",
+    "령왕",
+    "제로마키나",
+    "케플러",
+    "케플러"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 2188
+  },
+  {
+   "i": 2,
+   "hand": [
+    "랜스",
+    "스케일",
+    "지옥문",
+    "케플러",
+    "케플러"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1152
+  },
+  {
+   "i": 3,
+   "hand": [
+    "지옥문",
+    "케플러"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1445
+  },
+  {
+   "i": 4,
+   "hand": [
+    "카운트",
+    "케플러"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A2",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A2",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 596
+  },
+  {
+   "i": 5,
+   "hand": [
+    "오르트로스",
+    "지옥문"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 15.5,
+    "route": "B2",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 15.5,
+    "route": "B2",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 997
+  },
+  {
+   "i": 6,
+   "hand": [
+    "네크로",
+    "드롤",
+    "제로마키나"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 6.3,
+    "route": "D1",
+    "mons": [
+     "제우스",
+     "코페르",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 6.3,
+    "route": "D1",
+    "mons": [
+     "제우스",
+     "코페르",
+     "데스마키나"
+    ]
+   },
+   "ms": 507
+  },
+  {
+   "i": 7,
+   "hand": [
+    "네크로",
+    "제로마키나",
+    "코페르"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 6.6,
+    "route": "A7",
+    "mons": [
+     "제우스",
+     "클로비스",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 6.6,
+    "route": "A7",
+    "mons": [
+     "제우스",
+     "클로비스",
+     "데스마키나"
+    ]
+   },
+   "ms": 864
+  },
+  {
+   "i": 8,
+   "hand": [
+    "그리폰",
+    "지옥문"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 632
+  },
+  {
+   "i": 9,
+   "hand": [
+    "드롤",
+    "령왕",
+    "제로마키나"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A5",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A5",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 759
+  },
+  {
+   "i": 10,
+   "hand": [
+    "드롤",
+    "드롤",
+    "지옥문"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 725
+  },
+  {
+   "i": 11,
+   "hand": [
+    "제로마키나",
+    "지옥문",
+    "지옥문"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1470
+  },
+  {
+   "i": 12,
+   "hand": [
+    "스케일",
+    "케플러",
+    "코페르"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 705
+  },
+  {
+   "i": 13,
+   "hand": [
+    "그리폰",
+    "상암",
+    "지옥문"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 12.3,
+    "route": "D1",
+    "mons": [
+     "그리폰",
+     "제우스",
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ]
+   },
+   "got": {
+    "score": 12.3,
+    "route": "D1",
+    "mons": [
+     "그리폰",
+     "제우스",
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ]
+   },
+   "ms": 691
+  },
+  {
+   "i": 14,
+   "hand": [
+    "그리폰",
+    "드롤",
+    "랜스",
+    "령왕",
+    "지옥문",
+    "케플러"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1345
+  },
+  {
+   "i": 15,
+   "hand": [
+    "제로마키나"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A5",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A5",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 715
+  },
+  {
+   "i": 16,
+   "hand": [
+    "령왕",
+    "지옥문",
+    "케플러"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1405
+  },
+  {
+   "i": 17,
+   "hand": [
+    "그리폰",
+    "케플러",
+    "토마스"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A2",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A2",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 819
+  },
+  {
+   "i": 18,
+   "hand": [
+    "제로마키나",
+    "지옥문"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1714
+  },
+  {
+   "i": 19,
+   "hand": [
+    "그리폰",
+    "오르트로스",
+    "제로마키나",
+    "코페르"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "route": "F5",
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 10.5,
+    "route": "F5",
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 791
+  },
+  {
+   "i": 20,
+   "hand": [
+    "제로마키나",
+    "케플러"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1741
+  },
+  {
+   "i": 21,
+   "hand": [
+    "제로마키나",
+    "카운트"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A7",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A7",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 809
+  },
+  {
+   "i": 22,
+   "hand": [
+    "드롤",
+    "제로마키나",
+    "지옥문",
+    "지옥문"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1858
+  },
+  {
+   "i": 23,
+   "hand": [
+    "네크로",
+    "제로마키나",
+    "코페르"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 6.6,
+    "route": "A7",
+    "mons": [
+     "제우스",
+     "클로비스",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 6.6,
+    "route": "A7",
+    "mons": [
+     "제우스",
+     "클로비스",
+     "데스마키나"
+    ]
+   },
+   "ms": 823
+  },
+  {
+   "i": 24,
+   "hand": [
+    "네크로",
+    "랜스",
+    "제로마키나",
+    "케플러"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 8.6,
+    "route": "C2",
+    "mons": [
+     "제우스",
+     "텔",
+     "그리폰",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 8.6,
+    "route": "C2",
+    "mons": [
+     "제우스",
+     "텔",
+     "그리폰",
+     "데스마키나"
+    ]
+   },
+   "ms": 1240
+  },
+  {
+   "i": 25,
+   "hand": [
+    "지옥문",
+    "케플러",
+    "케플러"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1491
+  },
+  {
+   "i": 26,
+   "hand": [
+    "령왕",
+    "스케일",
+    "지옥문",
+    "케플러",
+    "토마스"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A2",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A2",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1828
+  },
+  {
+   "i": 27,
+   "hand": [
+    "그리폰",
+    "케플러",
+    "케플러"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 622
+  },
+  {
+   "i": 28,
+   "hand": [
+    "제로마키나",
+    "카운트",
+    "케플러"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A2",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A2",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1664
+  },
+  {
+   "i": 29,
+   "hand": [
+    "스케일",
+    "제로마키나",
+    "코페르"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 15.5,
+    "route": "B3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 15.5,
+    "route": "B3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1238
+  },
+  {
+   "i": 30,
+   "hand": [
+    "그리폰",
+    "그리폰",
+    "령왕",
+    "스케일",
+    "지옥문"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 833
+  },
+  {
+   "i": 31,
+   "hand": [
+    "그리폰",
+    "랜스",
+    "오르트로스",
+    "지옥문"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 10.8,
+    "route": "B2",
+    "mons": [
+     "제우스",
+     "그리폰",
+     "사이프리트",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 10.8,
+    "route": "B2",
+    "mons": [
+     "제우스",
+     "그리폰",
+     "사이프리트",
+     "데스마키나"
+    ]
+   },
+   "ms": 1043
+  },
+  {
+   "i": 32,
+   "hand": [
+    "제로마키나",
+    "지옥문",
+    "지옥문"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1645
+  },
+  {
+   "i": 33,
+   "hand": [
+    "상암",
+    "제로마키나"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "route": "A5",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 12,
+    "route": "A5",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1049
+  },
+  {
+   "i": 34,
+   "hand": [
+    "그리폰",
+    "그리폰",
+    "드롤",
+    "지옥문"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 777
+  },
+  {
+   "i": 35,
+   "hand": [
+    "드롤",
+    "랜스",
+    "상암",
+    "제로마키나",
+    "카운트"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 4.5,
+    "route": "A6",
+    "mons": [
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 4.5,
+    "route": "A6",
+    "mons": [
+     "데스마키나"
+    ]
+   },
+   "ms": 344
+  },
+  {
+   "i": 36,
+   "hand": [
+    "오르트로스",
+    "제로마키나"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "route": "F5",
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 10.5,
+    "route": "F5",
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 483
+  },
+  {
+   "i": 37,
+   "hand": [
+    "령왕",
+    "지옥문"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 474
+  },
+  {
+   "i": 38,
+   "hand": [
+    "제로마키나",
+    "카운트",
+    "케플러",
+    "코페르"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 14,
+    "route": "A1",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 1786
+  },
+  {
+   "i": 39,
+   "hand": [
+    "드롤",
+    "상암",
+    "지옥문"
+   ],
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "got": {
+    "score": 12,
+    "route": "A3",
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 703
+  }
+ ],
+ "handtraps": [
+  {
+   "i": 0,
+   "route": "C2",
+   "step": 23,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 10.9,
+    "counter": 13.5
+   },
+   "got": {
+    "score": 10.9,
+    "counter": 13.5,
+    "mons": [
+     "제우스",
+     "빌가메스",
+     "데스마키나",
+     "데스마키나"
+    ]
+   },
+   "ms": 104
+  },
+  {
+   "i": 1,
+   "route": "A7",
+   "step": 18,
+   "trap": "belle",
+   "ok": true,
+   "expected": {
+    "score": 6.6,
+    "counter": 14
+   },
+   "got": {
+    "score": 6.6,
+    "counter": 14,
+    "mons": [
+     "제우스",
+     "오르트로스",
+     "데스마키나",
+     "스케일"
+    ]
+   },
+   "ms": 318
+  },
+  {
+   "i": 2,
+   "route": "D6",
+   "step": 22,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": 9.3
+   },
+   "got": {
+    "score": 0,
+    "counter": 9.3,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 158
+  },
+  {
+   "i": 3,
+   "route": "F5",
+   "step": 19,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 8.4,
+    "counter": null
+   },
+   "got": {
+    "score": 8.4,
+    "counter": null,
+    "mons": [
+     "테무진",
+     "데스마키나",
+     "데스마키나",
+     "스케일"
+    ]
+   },
+   "ms": 33
+  },
+  {
+   "i": 4,
+   "route": "A4",
+   "step": 8,
+   "trap": "gyban",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "counter": null
+   },
+   "got": {
+    "score": 12,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 51
+  },
+  {
+   "i": 5,
+   "route": "A1",
+   "step": 24,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 6.3,
+    "counter": null
+   },
+   "got": {
+    "score": 6.3,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "스케일",
+     "데스마키나"
+    ]
+   },
+   "ms": 19
+  },
+  {
+   "i": 6,
+   "route": "F5",
+   "step": 11,
+   "trap": "droll",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "counter": null
+   },
+   "got": {
+    "score": 14,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 74
+  },
+  {
+   "i": 7,
+   "route": "C3",
+   "step": 25,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 6.78,
+    "counter": 14
+   },
+   "got": {
+    "score": 6.78,
+    "counter": 14,
+    "mons": [
+     "제우스",
+     "오르트로스",
+     "알프레드(무효)",
+     "토마스",
+     "데스마키나"
+    ]
+   },
+   "ms": 425
+  },
+  {
+   "i": 8,
+   "route": "C2",
+   "step": 18,
+   "trap": "ogre",
+   "ok": false,
+   "expected": {
+    "score": 10.5,
+    "counter": 11.3
+   },
+   "got": {
+    "score": 10.5,
+    "counter": 13.5,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "대왕시져"
+    ]
+   },
+   "ms": 120
+  },
+  {
+   "i": 9,
+   "route": "B3",
+   "step": 9,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 10.8,
+    "counter": null
+   },
+   "got": {
+    "score": 10.8,
+    "counter": null,
+    "mons": [
+     "케플러",
+     "제우스",
+     "사이프리트",
+     "데스마키나"
+    ]
+   },
+   "ms": 45
+  },
+  {
+   "i": 10,
+   "route": "F5",
+   "step": 13,
+   "trap": "nibiru",
+   "ok": false,
+   "expected": {
+    "score": 7.5,
+    "counter": null
+   },
+   "got": {
+    "score": 8.1,
+    "counter": null,
+    "mons": [
+     "니비루토큰",
+     "테무진",
+     "데스마키나",
+     "사이프리트"
+    ]
+   },
+   "ms": 92
+  },
+  {
+   "i": 11,
+   "route": "F5",
+   "step": 21,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 1.5,
+    "counter": null
+   },
+   "got": {
+    "score": 1.5,
+    "counter": null,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 286
+  },
+  {
+   "i": 12,
+   "route": "E2",
+   "step": 22,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": 9
+   },
+   "got": {
+    "score": 0,
+    "counter": 9,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 147
+  },
+  {
+   "i": 13,
+   "route": "B1",
+   "step": 14,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "counter": null
+   },
+   "got": {
+    "score": 14,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 74
+  },
+  {
+   "i": 14,
+   "route": "C2",
+   "step": 14,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 7.8,
+    "counter": 10.8
+   },
+   "got": {
+    "score": 7.8,
+    "counter": 10.8,
+    "mons": [
+     "니비루토큰",
+     "랜스",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 131
+  },
+  {
+   "i": 15,
+   "route": "B1",
+   "step": 15,
+   "trap": "nibiru",
+   "ok": false,
+   "expected": {
+    "score": 7.5,
+    "counter": null
+   },
+   "got": {
+    "score": 8.1,
+    "counter": null,
+    "mons": [
+     "니비루토큰",
+     "테무진",
+     "데스마키나",
+     "사이프리트"
+    ]
+   },
+   "ms": 103
+  },
+  {
+   "i": 16,
+   "route": "E2",
+   "step": 9,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 9,
+    "counter": null
+   },
+   "got": {
+    "score": 9,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "데스마키나"
+    ]
+   },
+   "ms": 27
+  },
+  {
+   "i": 17,
+   "route": "A1",
+   "step": 26,
+   "trap": "belle",
+   "ok": true,
+   "expected": {
+    "score": 6.9,
+    "counter": 14
+   },
+   "got": {
+    "score": 6.9,
+    "counter": 14,
+    "mons": [
+     "제우스",
+     "테무진",
+     "스케일",
+     "데스마키나"
+    ]
+   },
+   "ms": 282
+  },
+  {
+   "i": 18,
+   "route": "A4",
+   "step": 7,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "counter": null
+   },
+   "got": {
+    "score": 12,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 47
+  },
+  {
+   "i": 19,
+   "route": "B1",
+   "step": 27,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 3,
+    "counter": 14
+   },
+   "got": {
+    "score": 3,
+    "counter": 14,
+    "mons": [
+     "니비루토큰",
+     "데스마키나"
+    ]
+   },
+   "ms": 166
+  },
+  {
+   "i": 20,
+   "route": "A3",
+   "step": 1,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "counter": null
+   },
+   "got": {
+    "score": 14,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 60
+  },
+  {
+   "i": 21,
+   "route": "D2",
+   "step": 1,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": null
+   },
+   "got": {
+    "score": 0,
+    "counter": null,
+    "mons": []
+   },
+   "ms": 21
+  },
+  {
+   "i": 22,
+   "route": "A2",
+   "step": 19,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "counter": 14
+   },
+   "got": {
+    "score": 14,
+    "counter": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 287
+  },
+  {
+   "i": 23,
+   "route": "C4",
+   "step": 4,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 1.59,
+    "counter": null
+   },
+   "got": {
+    "score": 1.59,
+    "counter": null,
+    "mons": [
+     "카운트(무효)"
+    ]
+   },
+   "ms": 23
+  },
+  {
+   "i": 24,
+   "route": "F5",
+   "step": 17,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 9,
+    "counter": null
+   },
+   "got": {
+    "score": 9,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 84
+  },
+  {
+   "i": 25,
+   "route": "E2",
+   "step": 5,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": null
+   },
+   "got": {
+    "score": 0,
+    "counter": null,
+    "mons": []
+   },
+   "ms": 22
+  },
+  {
+   "i": 26,
+   "route": "F2",
+   "step": 19,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 1.5,
+    "counter": null
+   },
+   "got": {
+    "score": 1.5,
+    "counter": null,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 218
+  },
+  {
+   "i": 27,
+   "route": "E2",
+   "step": 19,
+   "trap": "gyban",
+   "ok": true,
+   "expected": {
+    "score": 3,
+    "counter": 9.3
+   },
+   "got": {
+    "score": 3,
+    "counter": 9.3,
+    "mons": [
+     "데스마키나"
+    ]
+   },
+   "ms": 224
+  },
+  {
+   "i": 28,
+   "route": "F3",
+   "step": 22,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 7.89,
+    "counter": null
+   },
+   "got": {
+    "score": 7.89,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "랜스",
+     "대왕시져",
+     "스케일(무효)"
+    ]
+   },
+   "ms": 39
+  },
+  {
+   "i": 29,
+   "route": "A7",
+   "step": 24,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 12.6,
+    "counter": 14
+   },
+   "got": {
+    "score": 12.6,
+    "counter": 14,
+    "mons": [
+     "제우스",
+     "케플러",
+     "대왕시져",
+     "토마스",
+     "사이프리트",
+     "데스마키나"
+    ]
+   },
+   "ms": 191
+  },
+  {
+   "i": 30,
+   "route": "D6",
+   "step": 14,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 3,
+    "counter": null
+   },
+   "got": {
+    "score": 3,
+    "counter": null,
+    "mons": [
+     "데스마키나"
+    ]
+   },
+   "ms": 30
+  },
+  {
+   "i": 31,
+   "route": "A5",
+   "step": 26,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 6.9,
+    "counter": null
+   },
+   "got": {
+    "score": 6.9,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "테무진",
+     "스케일",
+     "데스마키나"
+    ]
+   },
+   "ms": 32
+  },
+  {
+   "i": 32,
+   "route": "A2",
+   "step": 26,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": 14
+   },
+   "got": {
+    "score": 0,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 198
+  },
+  {
+   "i": 33,
+   "route": "A7",
+   "step": 26,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 11.6,
+    "counter": 14
+   },
+   "got": {
+    "score": 11.6,
+    "counter": 14,
+    "mons": [
+     "제우스",
+     "클로비스",
+     "사이프리트",
+     "데스마키나"
+    ]
+   },
+   "ms": 147
+  },
+  {
+   "i": 34,
+   "route": "F6",
+   "step": 25,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 1.5,
+    "counter": 10.5
+   },
+   "got": {
+    "score": 1.5,
+    "counter": 10.5,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 155
+  },
+  {
+   "i": 35,
+   "route": "C1",
+   "step": 18,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "counter": 12
+   },
+   "got": {
+    "score": 12,
+    "counter": 12,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "사이프리트",
+     "데스마키나"
+    ]
+   },
+   "ms": 138
+  },
+  {
+   "i": 36,
+   "route": "C3",
+   "step": 23,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 6.6,
+    "counter": 14
+   },
+   "got": {
+    "score": 6.6,
+    "counter": 14,
+    "mons": [
+     "니비루토큰",
+     "알프레드",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 648
+  },
+  {
+   "i": 37,
+   "route": "F3",
+   "step": 8,
+   "trap": "belle",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "counter": null
+   },
+   "got": {
+    "score": 12,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 51
+  },
+  {
+   "i": 38,
+   "route": "F2",
+   "step": 9,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 10.8,
+    "counter": null
+   },
+   "got": {
+    "score": 10.8,
+    "counter": null,
+    "mons": [
+     "케플러",
+     "제우스",
+     "사이프리트",
+     "데스마키나"
+    ]
+   },
+   "ms": 44
+  },
+  {
+   "i": 39,
+   "route": "G1",
+   "step": 23,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": 13.8
+   },
+   "got": {
+    "score": 0,
+    "counter": 13.8,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 224
+  },
+  {
+   "i": 40,
+   "route": "E1",
+   "step": 27,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": 12.3
+   },
+   "got": {
+    "score": 0.3,
+    "counter": 12.3,
+    "mons": [
+     "니비루토큰",
+     "코페르"
+    ]
+   },
+   "ms": 311
+  },
+  {
+   "i": 41,
+   "route": "D5",
+   "step": 14,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": 9
+   },
+   "got": {
+    "score": 0.3,
+    "counter": 9,
+    "mons": [
+     "니비루토큰",
+     "스케일"
+    ]
+   },
+   "ms": 225
+  },
+  {
+   "i": 42,
+   "route": "F1",
+   "step": 12,
+   "trap": "nibiru",
+   "ok": false,
+   "expected": {
+    "score": 7.5,
+    "counter": null
+   },
+   "got": {
+    "score": 8.1,
+    "counter": null,
+    "mons": [
+     "니비루토큰",
+     "테무진",
+     "데스마키나",
+     "사이프리트"
+    ]
+   },
+   "ms": 98
+  },
+  {
+   "i": 43,
+   "route": "C2",
+   "step": 16,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 1.5,
+    "counter": 10.8
+   },
+   "got": {
+    "score": 1.5,
+    "counter": 10.8,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 131
+  },
+  {
+   "i": 44,
+   "route": "D4",
+   "step": 20,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 9,
+    "counter": null
+   },
+   "got": {
+    "score": 9,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 39
+  },
+  {
+   "i": 45,
+   "route": "A2",
+   "step": 16,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 9.3,
+    "counter": null
+   },
+   "got": {
+    "score": 9.3,
+    "counter": null,
+    "mons": [
+     "스케일",
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 48
+  },
+  {
+   "i": 46,
+   "route": "C4",
+   "step": 22,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": null
+   },
+   "got": {
+    "score": 0,
+    "counter": null,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 136
+  },
+  {
+   "i": 47,
+   "route": "B1",
+   "step": 35,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 2,
+    "counter": 14
+   },
+   "got": {
+    "score": 2,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 81
+  },
+  {
+   "i": 48,
+   "route": "D3",
+   "step": 25,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 6.8,
+    "counter": null
+   },
+   "got": {
+    "score": 6.8,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "텔",
+     "데스마키나"
+    ]
+   },
+   "ms": 24
+  },
+  {
+   "i": 49,
+   "route": "A6",
+   "step": 3,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 6,
+    "counter": null
+   },
+   "got": {
+    "score": 6,
+    "counter": null,
+    "mons": [
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 72
+  },
+  {
+   "i": 50,
+   "route": "C1",
+   "step": 4,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 1.8,
+    "counter": null
+   },
+   "got": {
+    "score": 1.8,
+    "counter": null,
+    "mons": [
+     "스케일"
+    ]
+   },
+   "ms": 28
+  },
+  {
+   "i": 51,
+   "route": "C3",
+   "step": 39,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 11.6,
+    "counter": null
+   },
+   "got": {
+    "score": 11.6,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "클로비스",
+     "데스마키나"
+    ]
+   },
+   "ms": 12
+  },
+  {
+   "i": 52,
+   "route": "D1",
+   "step": 1,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": null
+   },
+   "got": {
+    "score": 0,
+    "counter": null,
+    "mons": []
+   },
+   "ms": 20
+  },
+  {
+   "i": 53,
+   "route": "A7",
+   "step": 7,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "counter": null
+   },
+   "got": {
+    "score": 10.5,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "제우스",
+     "대왕시져"
+    ]
+   },
+   "ms": 33
+  },
+  {
+   "i": 54,
+   "route": "A4",
+   "step": 5,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 1.59,
+    "counter": null
+   },
+   "got": {
+    "score": 1.59,
+    "counter": null,
+    "mons": [
+     "카운트(무효)"
+    ]
+   },
+   "ms": 22
+  },
+  {
+   "i": 55,
+   "route": "F6",
+   "step": 5,
+   "trap": "droll",
+   "ok": true,
+   "expected": {
+    "score": 7.8,
+    "counter": null
+   },
+   "got": {
+    "score": 7.8,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "랜스",
+     "대왕시져"
+    ]
+   },
+   "ms": 36
+  },
+  {
+   "i": 56,
+   "route": "F6",
+   "step": 8,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "counter": null
+   },
+   "got": {
+    "score": 10.5,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "제우스",
+     "대왕시져"
+    ]
+   },
+   "ms": 34
+  },
+  {
+   "i": 57,
+   "route": "A5",
+   "step": 15,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": 12
+   },
+   "got": {
+    "score": 0,
+    "counter": 12,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 122
+  },
+  {
+   "i": 58,
+   "route": "D5",
+   "step": 2,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 0.09,
+    "counter": null
+   },
+   "got": {
+    "score": 0.09,
+    "counter": null,
+    "mons": [
+     "케플러(무효)"
+    ]
+   },
+   "ms": 30
+  },
+  {
+   "i": 59,
+   "route": "A4",
+   "step": 11,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 7.8,
+    "counter": null
+   },
+   "got": {
+    "score": 7.8,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "랜스",
+     "대왕시져"
+    ]
+   },
+   "ms": 34
+  },
+  {
+   "i": 60,
+   "route": "F1",
+   "step": 17,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 1.5,
+    "counter": null
+   },
+   "got": {
+    "score": 1.5,
+    "counter": null,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 61
+  },
+  {
+   "i": 61,
+   "route": "B1",
+   "step": 14,
+   "trap": "nibiru",
+   "ok": false,
+   "expected": {
+    "score": 7.5,
+    "counter": null
+   },
+   "got": {
+    "score": 8.1,
+    "counter": null,
+    "mons": [
+     "니비루토큰",
+     "테무진",
+     "데스마키나",
+     "사이프리트"
+    ]
+   },
+   "ms": 81
+  },
+  {
+   "i": 62,
+   "route": "A1",
+   "step": 36,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 2,
+    "counter": 14
+   },
+   "got": {
+    "score": 2,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 73
+  },
+  {
+   "i": 63,
+   "route": "D1",
+   "step": 19,
+   "trap": "nibiru",
+   "ok": false,
+   "expected": {
+    "score": 6.3,
+    "counter": 12
+   },
+   "got": {
+    "score": 6.6,
+    "counter": 12,
+    "mons": [
+     "니비루토큰",
+     "테무진",
+     "데스마키나",
+     "제우스"
+    ]
+   },
+   "ms": 142
+  },
+  {
+   "i": 64,
+   "route": "F2",
+   "step": 20,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "counter": null
+   },
+   "got": {
+    "score": 10.5,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "사이프리트",
+     "데스마키나"
+    ]
+   },
+   "ms": 64
+  },
+  {
+   "i": 65,
+   "route": "F1",
+   "step": 24,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "counter": null
+   },
+   "got": {
+    "score": 10.5,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 31
+  },
+  {
+   "i": 66,
+   "route": "A6",
+   "step": 30,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 2,
+    "counter": 14
+   },
+   "got": {
+    "score": 2,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 73
+  },
+  {
+   "i": 67,
+   "route": "A3",
+   "step": 5,
+   "trap": "droll",
+   "ok": true,
+   "expected": {
+    "score": 7.8,
+    "counter": null
+   },
+   "got": {
+    "score": 7.8,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "랜스",
+     "대왕시져"
+    ]
+   },
+   "ms": 54
+  },
+  {
+   "i": 68,
+   "route": "A3",
+   "step": 5,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 9,
+    "counter": null
+   },
+   "got": {
+    "score": 9,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ]
+   },
+   "ms": 51
+  },
+  {
+   "i": 69,
+   "route": "E1",
+   "step": 14,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 6.3,
+    "counter": 12.3
+   },
+   "got": {
+    "score": 6.3,
+    "counter": 12.3,
+    "mons": [
+     "데스마키나",
+     "코페르",
+     "대왕시져"
+    ]
+   },
+   "ms": 101
+  },
+  {
+   "i": 70,
+   "route": "D4",
+   "step": 4,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 6.3,
+    "counter": null
+   },
+   "got": {
+    "score": 6.3,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "스케일",
+     "데스마키나"
+    ]
+   },
+   "ms": 47
+  },
+  {
+   "i": 71,
+   "route": "C4",
+   "step": 22,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 9.8,
+    "counter": null
+   },
+   "got": {
+    "score": 9.8,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "텔",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 90
+  },
+  {
+   "i": 72,
+   "route": "G1",
+   "step": 20,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 7.5,
+    "counter": null
+   },
+   "got": {
+    "score": 7.5,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "데스마키나"
+    ]
+   },
+   "ms": 29
+  },
+  {
+   "i": 73,
+   "route": "C2",
+   "step": 20,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 9.8,
+    "counter": 11.3
+   },
+   "got": {
+    "score": 9.8,
+    "counter": 11.3,
+    "mons": [
+     "제우스",
+     "제로마키나",
+     "데스마키나",
+     "대왕시져"
+    ]
+   },
+   "ms": 150
+  },
+  {
+   "i": 74,
+   "route": "A2",
+   "step": 27,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 3,
+    "counter": 14
+   },
+   "got": {
+    "score": 3,
+    "counter": 14,
+    "mons": [
+     "니비루토큰",
+     "데스마키나"
+    ]
+   },
+   "ms": 148
+  },
+  {
+   "i": 75,
+   "route": "D2",
+   "step": 19,
+   "trap": "nibiru",
+   "ok": false,
+   "expected": {
+    "score": 6.3,
+    "counter": 12
+   },
+   "got": {
+    "score": 6.6,
+    "counter": 12,
+    "mons": [
+     "니비루토큰",
+     "테무진",
+     "데스마키나",
+     "사이프리트"
+    ]
+   },
+   "ms": 194
+  },
+  {
+   "i": 76,
+   "route": "A1",
+   "step": 17,
+   "trap": "nibiru",
+   "ok": false,
+   "expected": {
+    "score": 3.6,
+    "counter": 12
+   },
+   "got": {
+    "score": 6.6,
+    "counter": 12,
+    "mons": [
+     "니비루토큰",
+     "테무진",
+     "데스마키나",
+     "제우스"
+    ]
+   },
+   "ms": 105
+  },
+  {
+   "i": 77,
+   "route": "A4",
+   "step": 28,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "counter": null
+   },
+   "got": {
+    "score": 14,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 22
+  },
+  {
+   "i": 78,
+   "route": "A6",
+   "step": 15,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": 12
+   },
+   "got": {
+    "score": 0,
+    "counter": 12,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 117
+  },
+  {
+   "i": 79,
+   "route": "A2",
+   "step": 19,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 3,
+    "counter": 14
+   },
+   "got": {
+    "score": 3,
+    "counter": 14,
+    "mons": [
+     "니비루토큰",
+     "데스마키나"
+    ]
+   },
+   "ms": 248
+  },
+  {
+   "i": 80,
+   "route": "B3",
+   "step": 19,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 7.5,
+    "counter": null
+   },
+   "got": {
+    "score": 7.5,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "데스마키나"
+    ]
+   },
+   "ms": 34
+  },
+  {
+   "i": 81,
+   "route": "F1",
+   "step": 13,
+   "trap": "nibiru",
+   "ok": false,
+   "expected": {
+    "score": 7.5,
+    "counter": null
+   },
+   "got": {
+    "score": 8.1,
+    "counter": null,
+    "mons": [
+     "니비루토큰",
+     "테무진",
+     "데스마키나",
+     "사이프리트"
+    ]
+   },
+   "ms": 80
+  },
+  {
+   "i": 82,
+   "route": "D1",
+   "step": 15,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 6,
+    "counter": 6.6
+   },
+   "got": {
+    "score": 6,
+    "counter": 6.6,
+    "mons": [
+     "데스마키나",
+     "데스마키나"
+    ]
+   },
+   "ms": 95
+  },
+  {
+   "i": 83,
+   "route": "C3",
+   "step": 28,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": 14
+   },
+   "got": {
+    "score": 0.3,
+    "counter": 14,
+    "mons": [
+     "니비루토큰",
+     "스케일"
+    ]
+   },
+   "ms": 277
+  },
+  {
+   "i": 84,
+   "route": "B1",
+   "step": 23,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": 14
+   },
+   "got": {
+    "score": 0,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 218
+  },
+  {
+   "i": 85,
+   "route": "A2",
+   "step": 40,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 2,
+    "counter": 14
+   },
+   "got": {
+    "score": 2,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 96
+  },
+  {
+   "i": 86,
+   "route": "D4",
+   "step": 24,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": 9
+   },
+   "got": {
+    "score": 0,
+    "counter": 9,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 166
+  },
+  {
+   "i": 87,
+   "route": "D2",
+   "step": 25,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 9.6,
+    "counter": 12
+   },
+   "got": {
+    "score": 9.6,
+    "counter": 12,
+    "mons": [
+     "제우스",
+     "알프레드",
+     "데스마키나",
+     "사이프리트"
+    ]
+   },
+   "ms": 221
+  },
+  {
+   "i": 88,
+   "route": "D6",
+   "step": 5,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": null
+   },
+   "got": {
+    "score": 0.3,
+    "counter": null,
+    "mons": [
+     "코페르"
+    ]
+   },
+   "ms": 20
+  },
+  {
+   "i": 89,
+   "route": "A7",
+   "step": 30,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "counter": 14
+   },
+   "got": {
+    "score": 14,
+    "counter": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 135
+  },
+  {
+   "i": 90,
+   "route": "E1",
+   "step": 12,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 6,
+    "counter": null
+   },
+   "got": {
+    "score": 6,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "데스마키나"
+    ]
+   },
+   "ms": 29
+  },
+  {
+   "i": 91,
+   "route": "F4",
+   "step": 21,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 1.5,
+    "counter": null
+   },
+   "got": {
+    "score": 1.5,
+    "counter": null,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 276
+  },
+  {
+   "i": 92,
+   "route": "E1",
+   "step": 28,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": 12.3
+   },
+   "got": {
+    "score": 0.3,
+    "counter": 12.3,
+    "mons": [
+     "니비루토큰",
+     "코페르"
+    ]
+   },
+   "ms": 365
+  },
+  {
+   "i": 93,
+   "route": "A5",
+   "step": 35,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 2,
+    "counter": 14
+   },
+   "got": {
+    "score": 2,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 51
+  },
+  {
+   "i": 94,
+   "route": "G1",
+   "step": 22,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": 13.8
+   },
+   "got": {
+    "score": 0.3,
+    "counter": 13.8,
+    "mons": [
+     "니비루토큰",
+     "스케일"
+    ]
+   },
+   "ms": 180
+  },
+  {
+   "i": 95,
+   "route": "C4",
+   "step": 8,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 6,
+    "counter": null
+   },
+   "got": {
+    "score": 6,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "대왕시져"
+    ]
+   },
+   "ms": 56
+  },
+  {
+   "i": 96,
+   "route": "F2",
+   "step": 24,
+   "trap": "belle",
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "counter": null
+   },
+   "got": {
+    "score": 10.5,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 28
+  },
+  {
+   "i": 97,
+   "route": "C2",
+   "step": 23,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 10.9,
+    "counter": null
+   },
+   "got": {
+    "score": 10.9,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "빌가메스",
+     "데스마키나",
+     "데스마키나"
+    ]
+   },
+   "ms": 31
+  },
+  {
+   "i": 98,
+   "route": "F3",
+   "step": 11,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 7.8,
+    "counter": null
+   },
+   "got": {
+    "score": 7.8,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "랜스",
+     "대왕시져"
+    ]
+   },
+   "ms": 27
+  },
+  {
+   "i": 99,
+   "route": "C3",
+   "step": 24,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 6.6,
+    "counter": null
+   },
+   "got": {
+    "score": 6.6,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "오르트로스",
+     "토마스",
+     "데스마키나"
+    ]
+   },
+   "ms": 19
+  },
+  {
+   "i": 100,
+   "route": "D2",
+   "step": 6,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 1.59,
+    "counter": null
+   },
+   "got": {
+    "score": 1.59,
+    "counter": null,
+    "mons": [
+     "코페르(무효)"
+    ]
+   },
+   "ms": 24
+  },
+  {
+   "i": 101,
+   "route": "D4",
+   "step": 23,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 6,
+    "counter": null
+   },
+   "got": {
+    "score": 6,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "데스마키나"
+    ]
+   },
+   "ms": 31
+  },
+  {
+   "i": 102,
+   "route": "A1",
+   "step": 22,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 11,
+    "counter": 14
+   },
+   "got": {
+    "score": 11,
+    "counter": 14,
+    "mons": [
+     "니비루토큰",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 463
+  },
+  {
+   "i": 103,
+   "route": "D2",
+   "step": 26,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": 12
+   },
+   "got": {
+    "score": 0.3,
+    "counter": 12,
+    "mons": [
+     "니비루토큰",
+     "오르트로스"
+    ]
+   },
+   "ms": 198
+  },
+  {
+   "i": 104,
+   "route": "E1",
+   "step": 12,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 9,
+    "counter": null
+   },
+   "got": {
+    "score": 9,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ]
+   },
+   "ms": 48
+  },
+  {
+   "i": 105,
+   "route": "A7",
+   "step": 21,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 3,
+    "counter": 14
+   },
+   "got": {
+    "score": 3,
+    "counter": 14,
+    "mons": [
+     "니비루토큰",
+     "데스마키나"
+    ]
+   },
+   "ms": 225
+  },
+  {
+   "i": 106,
+   "route": "A3",
+   "step": 34,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 11,
+    "counter": null
+   },
+   "got": {
+    "score": 11,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 9
+  },
+  {
+   "i": 107,
+   "route": "D4",
+   "step": 12,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": null
+   },
+   "got": {
+    "score": 0,
+    "counter": null,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 30
+  },
+  {
+   "i": 108,
+   "route": "F5",
+   "step": 5,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 14,
+    "counter": null
+   },
+   "got": {
+    "score": 14,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 111
+  },
+  {
+   "i": 109,
+   "route": "D5",
+   "step": 19,
+   "trap": "nibiru",
+   "ok": false,
+   "expected": {
+    "score": 6.3,
+    "counter": 9
+   },
+   "got": {
+    "score": 6.6,
+    "counter": 9,
+    "mons": [
+     "니비루토큰",
+     "테무진",
+     "데스마키나",
+     "제우스"
+    ]
+   },
+   "ms": 192
+  },
+  {
+   "i": 110,
+   "route": "D5",
+   "step": 18,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": 9
+   },
+   "got": {
+    "score": 0,
+    "counter": 9,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 159
+  },
+  {
+   "i": 111,
+   "route": "C4",
+   "step": 22,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 9.8,
+    "counter": null
+   },
+   "got": {
+    "score": 9.8,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "텔",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 67
+  },
+  {
+   "i": 112,
+   "route": "F6",
+   "step": 19,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 8.3,
+    "counter": null
+   },
+   "got": {
+    "score": 8.3,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "텔",
+     "데스마키나"
+    ]
+   },
+   "ms": 35
+  },
+  {
+   "i": 113,
+   "route": "A2",
+   "step": 3,
+   "trap": "droll",
+   "ok": true,
+   "expected": {
+    "score": 12.3,
+    "counter": null
+   },
+   "got": {
+    "score": 12.3,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "대왕시져",
+     "케플러",
+     "사이프리트"
+    ]
+   },
+   "ms": 60
+  },
+  {
+   "i": 114,
+   "route": "A3",
+   "step": 34,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 2,
+    "counter": 14
+   },
+   "got": {
+    "score": 2,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 38
+  },
+  {
+   "i": 115,
+   "route": "A2",
+   "step": 2,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 0.09,
+    "counter": null
+   },
+   "got": {
+    "score": 0.09,
+    "counter": null,
+    "mons": [
+     "케플러(무효)"
+    ]
+   },
+   "ms": 22
+  },
+  {
+   "i": 116,
+   "route": "D6",
+   "step": 21,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 9,
+    "counter": 9.3
+   },
+   "got": {
+    "score": 9,
+    "counter": 9.3,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "데스마키나"
+    ]
+   },
+   "ms": 161
+  },
+  {
+   "i": 117,
+   "route": "C3",
+   "step": 13,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 3,
+    "counter": 12
+   },
+   "got": {
+    "score": 3,
+    "counter": 12,
+    "mons": [
+     "니비루토큰",
+     "데스마키나"
+    ]
+   },
+   "ms": 148
+  },
+  {
+   "i": 118,
+   "route": "F4",
+   "step": 17,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 5.4,
+    "counter": null
+   },
+   "got": {
+    "score": 5.4,
+    "counter": null,
+    "mons": [
+     "알프레드",
+     "데스마키나",
+     "스케일"
+    ]
+   },
+   "ms": 26
+  },
+  {
+   "i": 119,
+   "route": "D1",
+   "step": 27,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 9.3,
+    "counter": null
+   },
+   "got": {
+    "score": 9.3,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "대왕시져",
+     "오르트로스"
+    ]
+   },
+   "ms": 21
+  },
+  {
+   "i": 120,
+   "route": "D3",
+   "step": 14,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 6.8,
+    "counter": null
+   },
+   "got": {
+    "score": 6.8,
+    "counter": null,
+    "mons": [
+     "텔",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 60
+  },
+  {
+   "i": 121,
+   "route": "B2",
+   "step": 21,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": 14
+   },
+   "got": {
+    "score": 0,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 297
+  },
+  {
+   "i": 122,
+   "route": "D6",
+   "step": 10,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 3,
+    "counter": null
+   },
+   "got": {
+    "score": 3,
+    "counter": null,
+    "mons": [
+     "데스마키나"
+    ]
+   },
+   "ms": 24
+  },
+  {
+   "i": 123,
+   "route": "B2",
+   "step": 36,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 2,
+    "counter": 14
+   },
+   "got": {
+    "score": 2,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 67
+  },
+  {
+   "i": 124,
+   "route": "D2",
+   "step": 23,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": 12
+   },
+   "got": {
+    "score": 0.3,
+    "counter": 12,
+    "mons": [
+     "니비루토큰",
+     "오르트로스"
+    ]
+   },
+   "ms": 262
+  },
+  {
+   "i": 125,
+   "route": "C3",
+   "step": 31,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 3.3,
+    "counter": 14
+   },
+   "got": {
+    "score": 3.3,
+    "counter": 14,
+    "mons": [
+     "니비루토큰",
+     "데스마키나",
+     "스케일"
+    ]
+   },
+   "ms": 359
+  },
+  {
+   "i": 126,
+   "route": "D1",
+   "step": 28,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": 12
+   },
+   "got": {
+    "score": 0.3,
+    "counter": 12,
+    "mons": [
+     "니비루토큰",
+     "오르트로스"
+    ]
+   },
+   "ms": 269
+  },
+  {
+   "i": 127,
+   "route": "E1",
+   "step": 12,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": null
+   },
+   "got": {
+    "score": 0.3,
+    "counter": null,
+    "mons": [
+     "니비루토큰",
+     "코페르"
+    ]
+   },
+   "ms": 34
+  },
+  {
+   "i": 128,
+   "route": "A6",
+   "step": 4,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 1.59,
+    "counter": null
+   },
+   "got": {
+    "score": 1.59,
+    "counter": null,
+    "mons": [
+     "카운트(무효)"
+    ]
+   },
+   "ms": 35
+  },
+  {
+   "i": 129,
+   "route": "A2",
+   "step": 11,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 6.8,
+    "counter": null
+   },
+   "got": {
+    "score": 6.8,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "제로마키나",
+     "데스마키나"
+    ]
+   },
+   "ms": 95
+  },
+  {
+   "i": 130,
+   "route": "A7",
+   "step": 19,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 7.5,
+    "counter": 14
+   },
+   "got": {
+    "score": 7.5,
+    "counter": 14,
+    "mons": [
+     "데스마키나",
+     "데스마키나"
+    ]
+   },
+   "ms": 214
+  },
+  {
+   "i": 131,
+   "route": "D2",
+   "step": 20,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "counter": 12
+   },
+   "got": {
+    "score": 12,
+    "counter": 12,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "대왕시져",
+     "사이프리트"
+    ]
+   },
+   "ms": 163
+  },
+  {
+   "i": 132,
+   "route": "G1",
+   "step": 12,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 6,
+    "counter": null
+   },
+   "got": {
+    "score": 6,
+    "counter": null,
+    "mons": [
+     "니비루토큰",
+     "데스마키나",
+     "사이프리트"
+    ]
+   },
+   "ms": 77
+  },
+  {
+   "i": 133,
+   "route": "C1",
+   "step": 24,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 9.6,
+    "counter": 12
+   },
+   "got": {
+    "score": 9.6,
+    "counter": 12,
+    "mons": [
+     "제우스",
+     "알프레드",
+     "사이프리트",
+     "데스마키나"
+    ]
+   },
+   "ms": 177
+  },
+  {
+   "i": 134,
+   "route": "C2",
+   "step": 23,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 1.8,
+    "counter": 13.5
+   },
+   "got": {
+    "score": 1.8,
+    "counter": 13.5,
+    "mons": [
+     "니비루토큰",
+     "그리폰"
+    ]
+   },
+   "ms": 112
+  },
+  {
+   "i": 135,
+   "route": "D3",
+   "step": 27,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 9.6,
+    "counter": null
+   },
+   "got": {
+    "score": 9.6,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "테무진",
+     "데스마키나",
+     "데스마키나"
+    ]
+   },
+   "ms": 19
+  },
+  {
+   "i": 136,
+   "route": "B3",
+   "step": 3,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": null
+   },
+   "got": {
+    "score": 0,
+    "counter": null,
+    "mons": []
+   },
+   "ms": 21
+  },
+  {
+   "i": 137,
+   "route": "F3",
+   "step": 7,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "counter": null
+   },
+   "got": {
+    "score": 12,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 47
+  },
+  {
+   "i": 138,
+   "route": "A5",
+   "step": 26,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 6.9,
+    "counter": null
+   },
+   "got": {
+    "score": 6.9,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "알프레드",
+     "스케일",
+     "데스마키나"
+    ]
+   },
+   "ms": 30
+  },
+  {
+   "i": 139,
+   "route": "A5",
+   "step": 35,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 11,
+    "counter": 14
+   },
+   "got": {
+    "score": 11,
+    "counter": 14,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 25
+  },
+  {
+   "i": 140,
+   "route": "D3",
+   "step": 18,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": null
+   },
+   "got": {
+    "score": 0,
+    "counter": null,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 35
+  },
+  {
+   "i": 141,
+   "route": "D4",
+   "step": 14,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": null
+   },
+   "got": {
+    "score": 0,
+    "counter": null,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 52
+  },
+  {
+   "i": 142,
+   "route": "C1",
+   "step": 29,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": 12
+   },
+   "got": {
+    "score": 0,
+    "counter": 12,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 114
+  },
+  {
+   "i": 143,
+   "route": "F3",
+   "step": 11,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 6.3,
+    "counter": null
+   },
+   "got": {
+    "score": 6.3,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "카운트",
+     "데스마키나"
+    ]
+   },
+   "ms": 67
+  },
+  {
+   "i": 144,
+   "route": "B2",
+   "step": 8,
+   "trap": "belle",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "counter": null
+   },
+   "got": {
+    "score": 12,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 46
+  },
+  {
+   "i": 145,
+   "route": "A4",
+   "step": 33,
+   "trap": "gyban",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "counter": 14
+   },
+   "got": {
+    "score": 12,
+    "counter": 14,
+    "mons": [
+     "제우스",
+     "사이프리트",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 329
+  },
+  {
+   "i": 146,
+   "route": "C1",
+   "step": 19,
+   "trap": "ogre",
+   "ok": false,
+   "expected": {
+    "score": 6.3,
+    "counter": 12
+   },
+   "got": {
+    "score": 6.9,
+    "counter": 12,
+    "mons": [
+     "그리폰",
+     "테무진",
+     "데스마키나",
+     "제우스"
+    ]
+   },
+   "ms": 204
+  },
+  {
+   "i": 147,
+   "route": "F4",
+   "step": 7,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 9.6,
+    "counter": null
+   },
+   "got": {
+    "score": 9.6,
+    "counter": null,
+    "mons": [
+     "카운트",
+     "제우스",
+     "데스마키나",
+     "코페르",
+     "대왕시져"
+    ]
+   },
+   "ms": 92
+  },
+  {
+   "i": 148,
+   "route": "C4",
+   "step": 6,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 1.8,
+    "counter": null
+   },
+   "got": {
+    "score": 1.8,
+    "counter": null,
+    "mons": [
+     "카운트"
+    ]
+   },
+   "ms": 38
+  },
+  {
+   "i": 149,
+   "route": "C2",
+   "step": 2,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": null
+   },
+   "got": {
+    "score": 0.3,
+    "counter": null,
+    "mons": [
+     "케플러"
+    ]
+   },
+   "ms": 22
+  },
+  {
+   "i": 150,
+   "route": "A6",
+   "step": 34,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 2,
+    "counter": 14
+   },
+   "got": {
+    "score": 2,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 53
+  },
+  {
+   "i": 151,
+   "route": "A2",
+   "step": 24,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": 14
+   },
+   "got": {
+    "score": 0,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 188
+  },
+  {
+   "i": 152,
+   "route": "B3",
+   "step": 7,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "counter": null
+   },
+   "got": {
+    "score": 10.5,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "제우스",
+     "대왕시져"
+    ]
+   },
+   "ms": 50
+  },
+  {
+   "i": 153,
+   "route": "D2",
+   "step": 27,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": 12
+   },
+   "got": {
+    "score": 0,
+    "counter": 12,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 316
+  },
+  {
+   "i": 154,
+   "route": "B2",
+   "step": 31,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 8,
+    "counter": 14
+   },
+   "got": {
+    "score": 8,
+    "counter": 14,
+    "mons": [
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 331
+  },
+  {
+   "i": 155,
+   "route": "C4",
+   "step": 21,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": null
+   },
+   "got": {
+    "score": 0,
+    "counter": null,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 155
+  },
+  {
+   "i": 156,
+   "route": "D4",
+   "step": 25,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 9,
+    "counter": 9
+   },
+   "got": {
+    "score": 9,
+    "counter": 9,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "데스마키나"
+    ]
+   },
+   "ms": 115
+  },
+  {
+   "i": 157,
+   "route": "A5",
+   "step": 6,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 6.3,
+    "counter": null
+   },
+   "got": {
+    "score": 6.3,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "카운트",
+     "데스마키나"
+    ]
+   },
+   "ms": 36
+  },
+  {
+   "i": 158,
+   "route": "D5",
+   "step": 5,
+   "trap": "ash",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": null
+   },
+   "got": {
+    "score": 0.3,
+    "counter": null,
+    "mons": [
+     "코페르"
+    ]
+   },
+   "ms": 20
+  },
+  {
+   "i": 159,
+   "route": "A7",
+   "step": 16,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 7.5,
+    "counter": null
+   },
+   "got": {
+    "score": 7.5,
+    "counter": null,
+    "mons": [
+     "니비루토큰",
+     "데스마키나",
+     "사이프리트"
+    ]
+   },
+   "ms": 54
+  },
+  {
+   "i": 160,
+   "route": "D1",
+   "step": 15,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 6.6,
+    "counter": 6.6
+   },
+   "got": {
+    "score": 6.6,
+    "counter": 6.6,
+    "mons": [
+     "테무진",
+     "데스마키나",
+     "사이프리트"
+    ]
+   },
+   "ms": 96
+  },
+  {
+   "i": 161,
+   "route": "C4",
+   "step": 8,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 4.5,
+    "counter": null
+   },
+   "got": {
+    "score": 4.5,
+    "counter": null,
+    "mons": [
+     "데스마키나"
+    ]
+   },
+   "ms": 28
+  },
+  {
+   "i": 162,
+   "route": "F5",
+   "step": 4,
+   "trap": "droll",
+   "ok": true,
+   "expected": {
+    "score": 1.8,
+    "counter": null
+   },
+   "got": {
+    "score": 1.8,
+    "counter": null,
+    "mons": [
+     "케플러"
+    ]
+   },
+   "ms": 23
+  },
+  {
+   "i": 163,
+   "route": "D5",
+   "step": 6,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": null
+   },
+   "got": {
+    "score": 0.3,
+    "counter": null,
+    "mons": [
+     "코페르"
+    ]
+   },
+   "ms": 21
+  },
+  {
+   "i": 164,
+   "route": "F2",
+   "step": 2,
+   "trap": "droll",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": null
+   },
+   "got": {
+    "score": 0.3,
+    "counter": null,
+    "mons": [
+     "케플러"
+    ]
+   },
+   "ms": 24
+  },
+  {
+   "i": 165,
+   "route": "D1",
+   "step": 12,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 6.6,
+    "counter": null
+   },
+   "got": {
+    "score": 6.6,
+    "counter": null,
+    "mons": [
+     "테무진",
+     "데스마키나",
+     "사이프리트"
+    ]
+   },
+   "ms": 33
+  },
+  {
+   "i": 166,
+   "route": "F2",
+   "step": 7,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 10.5,
+    "counter": null
+   },
+   "got": {
+    "score": 10.5,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "제우스",
+     "대왕시져"
+    ]
+   },
+   "ms": 36
+  },
+  {
+   "i": 167,
+   "route": "F1",
+   "step": 17,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 4.98,
+    "counter": null
+   },
+   "got": {
+    "score": 4.98,
+    "counter": null,
+    "mons": [
+     "알프레드(무효)",
+     "데스마키나",
+     "스케일"
+    ]
+   },
+   "ms": 29
+  },
+  {
+   "i": 168,
+   "route": "A2",
+   "step": 26,
+   "trap": "gyban",
+   "ok": true,
+   "expected": {
+    "score": 10.2,
+    "counter": 14
+   },
+   "got": {
+    "score": 10.2,
+    "counter": 14,
+    "mons": [
+     "제우스",
+     "테무진",
+     "케플러",
+     "사이프리트",
+     "토마스",
+     "데스마키나"
+    ]
+   },
+   "ms": 174
+  },
+  {
+   "i": 169,
+   "route": "F1",
+   "step": 21,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 1.5,
+    "counter": 10.5
+   },
+   "got": {
+    "score": 1.5,
+    "counter": 10.5,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 323
+  },
+  {
+   "i": 170,
+   "route": "B1",
+   "step": 22,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": 14
+   },
+   "got": {
+    "score": 0.3,
+    "counter": 14,
+    "mons": [
+     "니비루토큰",
+     "스케일"
+    ]
+   },
+   "ms": 281
+  },
+  {
+   "i": 171,
+   "route": "B3",
+   "step": 22,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": 14
+   },
+   "got": {
+    "score": 0.3,
+    "counter": 14,
+    "mons": [
+     "니비루토큰",
+     "스케일"
+    ]
+   },
+   "ms": 240
+  },
+  {
+   "i": 172,
+   "route": "A1",
+   "step": 9,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 6,
+    "counter": null
+   },
+   "got": {
+    "score": 6,
+    "counter": null,
+    "mons": [
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 76
+  },
+  {
+   "i": 173,
+   "route": "F5",
+   "step": 24,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 8.1,
+    "counter": 10.5
+   },
+   "got": {
+    "score": 8.1,
+    "counter": 10.5,
+    "mons": [
+     "테무진",
+     "제우스",
+     "데스마키나"
+    ]
+   },
+   "ms": 167
+  },
+  {
+   "i": 174,
+   "route": "G1",
+   "step": 28,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 6.3,
+    "counter": null
+   },
+   "got": {
+    "score": 6.3,
+    "counter": null,
+    "mons": [
+     "코페르",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 19
+  },
+  {
+   "i": 175,
+   "route": "F3",
+   "step": 5,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 1.59,
+    "counter": null
+   },
+   "got": {
+    "score": 1.59,
+    "counter": null,
+    "mons": [
+     "카운트(무효)"
+    ]
+   },
+   "ms": 23
+  },
+  {
+   "i": 176,
+   "route": "C1",
+   "step": 24,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 9.3,
+    "counter": 12
+   },
+   "got": {
+    "score": 9.3,
+    "counter": 12,
+    "mons": [
+     "제우스",
+     "그리폰",
+     "데스마키나",
+     "데스마키나"
+    ]
+   },
+   "ms": 175
+  },
+  {
+   "i": 177,
+   "route": "A2",
+   "step": 21,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 3,
+    "counter": 14
+   },
+   "got": {
+    "score": 3,
+    "counter": 14,
+    "mons": [
+     "니비루토큰",
+     "데스마키나"
+    ]
+   },
+   "ms": 360
+  },
+  {
+   "i": 178,
+   "route": "F4",
+   "step": 17,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 9,
+    "counter": null
+   },
+   "got": {
+    "score": 9,
+    "counter": null,
+    "mons": [
+     "대왕시져",
+     "제우스",
+     "데스마키나"
+    ]
+   },
+   "ms": 100
+  },
+  {
+   "i": 179,
+   "route": "D1",
+   "step": 10,
+   "trap": "dominus",
+   "ok": true,
+   "expected": {
+    "score": 6.6,
+    "counter": null
+   },
+   "got": {
+    "score": 6.6,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "테무진",
+     "데스마키나"
+    ]
+   },
+   "ms": 36
+  },
+  {
+   "i": 180,
+   "route": "D4",
+   "step": 25,
+   "trap": "gyban",
+   "ok": true,
+   "expected": {
+    "score": 9,
+    "counter": 9
+   },
+   "got": {
+    "score": 9,
+    "counter": 9,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "데스마키나"
+    ]
+   },
+   "ms": 153
+  },
+  {
+   "i": 181,
+   "route": "C2",
+   "step": 9,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 9.2,
+    "counter": null
+   },
+   "got": {
+    "score": 9.2,
+    "counter": null,
+    "mons": [
+     "제우스(무효)",
+     "텔",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 62
+  },
+  {
+   "i": 182,
+   "route": "A4",
+   "step": 13,
+   "trap": "nibiru",
+   "ok": false,
+   "expected": {
+    "score": 7.5,
+    "counter": null
+   },
+   "got": {
+    "score": 8.1,
+    "counter": null,
+    "mons": [
+     "니비루토큰",
+     "테무진",
+     "데스마키나",
+     "사이프리트"
+    ]
+   },
+   "ms": 93
+  },
+  {
+   "i": 183,
+   "route": "D1",
+   "step": 6,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 1.59,
+    "counter": null
+   },
+   "got": {
+    "score": 1.59,
+    "counter": null,
+    "mons": [
+     "코페르(무효)"
+    ]
+   },
+   "ms": 37
+  },
+  {
+   "i": 184,
+   "route": "A6",
+   "step": 33,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 11,
+    "counter": 14
+   },
+   "got": {
+    "score": 11,
+    "counter": 14,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 36
+  },
+  {
+   "i": 185,
+   "route": "C2",
+   "step": 30,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 4.5,
+    "counter": 14
+   },
+   "got": {
+    "score": 4.5,
+    "counter": 14,
+    "mons": [
+     "니비루토큰",
+     "데스마키나"
+    ]
+   },
+   "ms": 347
+  },
+  {
+   "i": 186,
+   "route": "A2",
+   "step": 26,
+   "trap": "ogre",
+   "ok": true,
+   "expected": {
+    "score": 11.6,
+    "counter": 14
+   },
+   "got": {
+    "score": 11.6,
+    "counter": 14,
+    "mons": [
+     "제우스",
+     "클로비스",
+     "사이프리트",
+     "데스마키나"
+    ]
+   },
+   "ms": 153
+  },
+  {
+   "i": 187,
+   "route": "G1",
+   "step": 32,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 10.59,
+    "counter": 13.8
+   },
+   "got": {
+    "score": 10.59,
+    "counter": 13.8,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "토마스(무효)",
+     "사이프리트"
+    ]
+   },
+   "ms": 135
+  },
+  {
+   "i": 188,
+   "route": "B3",
+   "step": 19,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 3,
+    "counter": 14
+   },
+   "got": {
+    "score": 3,
+    "counter": 14,
+    "mons": [
+     "니비루토큰",
+     "데스마키나"
+    ]
+   },
+   "ms": 229
+  },
+  {
+   "i": 189,
+   "route": "F2",
+   "step": 22,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 1.5,
+    "counter": 10.5
+   },
+   "got": {
+    "score": 1.5,
+    "counter": 10.5,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 330
+  },
+  {
+   "i": 190,
+   "route": "A3",
+   "step": 17,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0.3,
+    "counter": 9.4
+   },
+   "got": {
+    "score": 0.3,
+    "counter": 9.4,
+    "mons": [
+     "니비루토큰",
+     "스케일"
+    ]
+   },
+   "ms": 218
+  },
+  {
+   "i": 191,
+   "route": "F6",
+   "step": 4,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 1.59,
+    "counter": null
+   },
+   "got": {
+    "score": 1.59,
+    "counter": null,
+    "mons": [
+     "케플러(무효)"
+    ]
+   },
+   "ms": 22
+  },
+  {
+   "i": 192,
+   "route": "A6",
+   "step": 33,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 2,
+    "counter": 14
+   },
+   "got": {
+    "score": 2,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 45
+  },
+  {
+   "i": 193,
+   "route": "B2",
+   "step": 12,
+   "trap": "nibiru",
+   "ok": false,
+   "expected": {
+    "score": 7.5,
+    "counter": null
+   },
+   "got": {
+    "score": 8.1,
+    "counter": null,
+    "mons": [
+     "니비루토큰",
+     "테무진",
+     "데스마키나",
+     "사이프리트"
+    ]
+   },
+   "ms": 82
+  },
+  {
+   "i": 194,
+   "route": "G1",
+   "step": 17,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 0,
+    "counter": null
+   },
+   "got": {
+    "score": 0,
+    "counter": null,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 37
+  },
+  {
+   "i": 195,
+   "route": "D1",
+   "step": 27,
+   "trap": "gyban",
+   "ok": true,
+   "expected": {
+    "score": 12,
+    "counter": 12
+   },
+   "got": {
+    "score": 12,
+    "counter": 12,
+    "mons": [
+     "제우스",
+     "데스마키나",
+     "대왕시져",
+     "데스마키나"
+    ]
+   },
+   "ms": 200
+  },
+  {
+   "i": 196,
+   "route": "C2",
+   "step": 24,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 13.5,
+    "counter": 13.5
+   },
+   "got": {
+    "score": 13.5,
+    "counter": 13.5,
+    "mons": [
+     "제우스",
+     "대왕시져",
+     "사이프리트",
+     "데스마키나"
+    ]
+   },
+   "ms": 68
+  },
+  {
+   "i": 197,
+   "route": "A1",
+   "step": 35,
+   "trap": "nibiru",
+   "ok": true,
+   "expected": {
+    "score": 2,
+    "counter": 14
+   },
+   "got": {
+    "score": 2,
+    "counter": 14,
+    "mons": [
+     "니비루토큰"
+    ]
+   },
+   "ms": 44
+  },
+  {
+   "i": 198,
+   "route": "F1",
+   "step": 22,
+   "trap": "veiler",
+   "ok": true,
+   "expected": {
+    "score": 7.89,
+    "counter": null
+   },
+   "got": {
+    "score": 7.89,
+    "counter": null,
+    "mons": [
+     "데스마키나",
+     "랜스",
+     "대왕시져",
+     "스케일(무효)"
+    ]
+   },
+   "ms": 41
+  },
+  {
+   "i": 199,
+   "route": "A3",
+   "step": 23,
+   "trap": "imperm",
+   "ok": true,
+   "expected": {
+    "score": 6.3,
+    "counter": null
+   },
+   "got": {
+    "score": 6.3,
+    "counter": null,
+    "mons": [
+     "제우스",
+     "스케일",
+     "데스마키나"
+    ]
+   },
+   "ms": 18
+  }
+ ]
+}
