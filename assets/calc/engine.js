@@ -1044,11 +1044,9 @@ function DD_CALC_FACTORY(routeList) {
   ROUTE_IDS.forEach(function (rid) { PREFIX[rid] = prefixStates(rid); });
   ROUTE_IDS.forEach(function (rid) { PREFIX[rid].forEach(function (s, k) { POS.push([rid, k, sig(s)]); }); });
 
-  function bestContinuation(st, own, topk, extraFirst) {
-    if (topk === undefined) topk = 29;
-    extraFirst = extraFirst || [];
-    var cands = [];
-    if (own) cands.push([own[0], own[1]]);
+  // 같은 상태에서 여러 번 이어 붙일 때(패 하나에 루트별 호출) 위치 비교와 재생 결과를 한 번만 만든다.
+  // 후보·선택 규칙은 그대로라 결과는 매번 따로 부를 때와 같다(fixtures/hands.json 으로 확인).
+  function contCtx(st) {
     var sg = sig(st);
     var bestpos = {}, order = [];
     POS.forEach(function (p) {
@@ -1058,7 +1056,17 @@ function DD_CALC_FACTORY(routeList) {
       if (!(rid in bestpos)) { bestpos[rid] = [dd, k]; order.push(rid); }
       else if (dd < bestpos[rid][0]) bestpos[rid] = [dd, k];
     });
-    var ranked = stableSortBy(order, function (rid) { return bestpos[rid][0]; }).slice(0, topk);
+    return { st: st, bestpos: bestpos, ranked: stableSortBy(order, function (rid) { return bestpos[rid][0]; }), runs: {}, looks: {} };
+  }
+  function bestContinuation(st, own, topk, extraFirst, ctx) {
+    if (topk === undefined) topk = 29;
+    extraFirst = extraFirst || [];
+    if (!ctx || ctx.st !== st || extraFirst.length) ctx = contCtx(st);
+    var memo = !extraFirst.length;
+    var cands = [];
+    if (own) cands.push([own[0], own[1]]);
+    var bestpos = ctx.bestpos;
+    var ranked = ctx.ranked.slice(0, topk);
     var seen = {};
     ranked.forEach(function (rid) {
       var k = bestpos[rid][1];
@@ -1069,11 +1077,15 @@ function DD_CALC_FACTORY(routeList) {
     });
     var best = null, runs = [];
     cands.forEach(function (c) {
-      var rid = c[0], fr = c[1];
+      var rid = c[0], fr = c[1], mk = rid + ':' + fr;
       var steps = ROUTES[rid].steps.slice(fr - 1);
-      var pre = [], s0 = st;
-      extraFirst.forEach(function (raw) { var r = step(s0, 0, raw); if (r[1]) { s0 = r[0]; pre.push(raw); } });
-      var res = runSteps(s0, steps, fr, rid, false);
+      var pre = [], s0 = st, res;
+      if (memo && ctx.runs[mk]) res = ctx.runs[mk];
+      else {
+        extraFirst.forEach(function (raw) { var r = step(s0, 0, raw); if (r[1]) { s0 = r[0]; pre.push(raw); } });
+        res = runSteps(s0, steps, fr, rid, false);
+        if (memo) ctx.runs[mk] = res;
+      }
       var sc = score(res[0]);
       runs.push([sc, rid, fr, s0, pre, steps]);
       var cand = { route: rid, from: fr, pre: pre, done: res[1], skipped: res[2], state: res[0], score: sc };
@@ -1082,7 +1094,9 @@ function DD_CALC_FACTORY(routeList) {
     if (runs.length) {
       var top = stableSortBy(runs, function (x) { return -x[0]; }).slice(0, 2);
       top.forEach(function (x) {
-        var res = runSteps(x[3], x[5], x[2], x[1], true);
+        var mk = x[1] + ':' + x[2], res;
+        if (memo && ctx.looks[mk]) res = ctx.looks[mk];
+        else { res = runSteps(x[3], x[5], x[2], x[1], true); if (memo) ctx.looks[mk] = res; }
         var sc = score(res[0]);
         if (sc > best.score + 1e-9) best = { route: x[1], from: x[2], pre: x[4], done: res[1], skipped: res[2], state: res[0], score: sc };
       });
@@ -1352,20 +1366,21 @@ function DD_CALC_FACTORY(routeList) {
     return row;
   }
 
-  // 패 → 최고 수순 (fillgaps.solve 와 같은 방식)
-  function solveHand(mh, banish, allowNoStarter) {
+  // 패 → 최고 수순 (fillgaps.solve 와 같은 방식). shared=false 면 루트마다 위치 비교·재생을 새로 한다(비교 시험용)
+  function solveHand(mh, banish, allowNoStarter, shared) {
     var st = initState(mh);
     (banish || []).forEach(function (b) { if (g(st.deck, b) > 0) { st.deck[b] -= 1; inc(st.ban, b); } });
+    var ctx = shared === false ? null : contCtx(st);
     var hc = cfrom(mh), best = null, tried = [];
     ROUTE_IDS.forEach(function (rid) {
       var need = cfrom(STARTERS[rid]);
       for (var c in need) if (g(hc, c) < need[c]) return;
-      var b = bestContinuation(st, [rid, 1], 29);
+      var b = bestContinuation(st, [rid, 1], 29, null, ctx);
       tried.push(rid);
       if (best === null || b.score > best.score) best = b;
     });
     if (best === null && allowNoStarter !== false) ROUTE_IDS.forEach(function (rid) {
-      var b = bestContinuation(st, [rid, 1], 10);
+      var b = bestContinuation(st, [rid, 1], 10, null, ctx);
       if (best === null || b.score > best.score) best = b;
     });
     return { best: best, tried: tried };
@@ -1377,54 +1392,26 @@ function DD_CALC_FACTORY(routeList) {
     return { hand: mh, tried: r.tried, plan: planOf(p), score: p.score };
   }
 
-  // ------------------------------------------------------------ 스몰 월드 (smallworld.py 의 STATS·경로 규칙)
-  var SW_STATS = { '케플러': ['Fiend', 'DARK', 1, 0, 0], '코페르': ['Fiend', 'DARK', 4, 0, 0], '토마스': ['Fiend', 'DARK', 8, 1800, 2600],
-    '오르트로스': ['Fiend', 'DARK', 4, 600, 1800], '카운트': ['Fiend', 'DARK', 8, 2000, 2000], '그리폰': ['Fiend', 'DARK', 4, 1200, 1200],
-    '스케일': ['Fiend', 'DARK', 2, 0, 1000], '제로마키나': ['Fiend', 'DARK', 8, 3000, 0], '네크로': ['Fiend', 'DARK', 1, 300, 300],
-    '랜스': ['Fiend', 'DARK', 2, 400, 400], '우라라': ['Zombie', 'FIRE', 3, 0, 1800], '후와로스': ['Winged Beast', 'WIND', 4, 100, 600],
-    '증G': ['Insect', 'EARTH', 2, 500, 200], '드롤': ['Spellcaster', 'WIND', 1, 0, 0] };
-  var DECK40 = { '드롤': 2, '네크로': 1, '증G': 1, '랜스': 1, '우라라': 3, '후와로스': 3, '케플러': 3, '스케일': 2, '코페르': 1, '오르트로스': 1,
-    '그리폰': 2, '토마스': 1, '카운트': 1, '제로마키나': 3, '다크오컬티즘': 1, '스몰월드': 2, '지옥문': 3, '령왕': 1, '말살': 1, '무한포영': 3, '도미나스': 3, '상암': 1 };
-  function swOne(a, b) { var n = 0; for (var i = 0; i < 5; i++) if (SW_STATS[a][i] === SW_STATS[b][i]) n++; return n === 1; }
-  // 패(전체 이름)에서 스몰 월드로 갈 수 있는 [보여줄 카드, 다리, 서치 대상] 목록. targets 로 대상을 좁힌다
-  function smallWorldPaths(full, targets) {
-    var h = cfrom(full), out = [];
-    if (!g(h, '스몰월드')) return out;
-    Object.keys(SW_STATS).forEach(function (r) {
-      if (g(h, r) < 1) return;
-      Object.keys(SW_STATS).forEach(function (b) {
-        if (b === r || !swOne(r, b) || DECK40[b] - g(h, b) < 1) return;
-        Object.keys(SW_STATS).forEach(function (t) {
-          if (t === b || !swOne(b, t) || (targets && targets.indexOf(t) < 0)) return;
-          if (DECK40[t] - g(h, t) - (t === b ? 1 : 0) < 1) return;
-          out.push([r, b, t]);
-        });
-      });
-    });
-    return out;
-  }
   var MODEL = {}; Object.keys(MAIN).concat(Object.keys(CONTRACTS)).forEach(function (n) { MODEL[n] = 1; });
-  var INIT = ['케플러', '지옥문', '제로마키나'];
-  // 실제 패 전체(모델에 없는 카드 포함)로 수순 계산. 이니시가 없고 스몰 월드가 있으면 경로마다 패를 바꿔 계산
-  function solveFull(full) {
+  // 실제 패 전체(모델에 없는 카드 포함)로 수순 계산.
+  // sw: 스몰 월드 후보 [{reveal, bridge, target}] — 사이트가 dd-smallworld.json 경로를 dd-planlib.json 장수 검사로 골라 넘긴 것만 계산한다
+  function solveFull(full, sw) {
     var modeled = full.filter(function (n) { return MODEL[n]; }).sort();
     var res = { modeled: modeled, base: null, smallWorld: [], note: '' };
     var hasStarter = ROUTE_IDS.some(function (rid) { var need = cfrom(STARTERS[rid]), hc = cfrom(modeled); for (var c in need) if (g(hc, c) < need[c]) return false; return true; });
     if (hasStarter) res.base = solveHandOut(modeled);
-    if (!modeled.some(function (n) { return INIT.indexOf(n) >= 0; }) && full.indexOf('스몰월드') >= 0) {
-      var seen = {};
-      smallWorldPaths(full, ['케플러', '제로마키나']).forEach(function (p) {
-        var h2 = full.slice(); h2.splice(h2.indexOf(p[0]), 1); h2.splice(h2.indexOf('스몰월드'), 1); h2.push(p[2]);
-        var m2 = h2.filter(function (n) { return MODEL[n]; }).sort();
-        var ban = MODEL[p[1]] ? [p[1]] : [];
-        var key = m2.join('+') + '|' + ban.join('');
-        if (seen[key]) { seen[key].paths.push(p); return; }
-        var r = solveHandOut(m2, ban);
-        seen[key] = { reveal: p[0], bridge: p[1], target: p[2], paths: [p], result: r };
-        res.smallWorld.push(seen[key]);
-      });
-    }
-    if (!res.base && !res.smallWorld.length) res.note = modeled.length ? '이니시(루트 시작 카드)가 패에 없어 계산하지 않았다' : '계산기에 들어가는 카드가 패에 없다';
+    var seen = {};
+    (sw || []).forEach(function (p) {
+      if (full.indexOf(p.reveal) < 0 || full.indexOf('스몰월드') < 0) return;
+      var h2 = full.slice(); h2.splice(h2.indexOf(p.reveal), 1); h2.splice(h2.indexOf('스몰월드'), 1); h2.push(p.target);
+      var m2 = h2.filter(function (n) { return MODEL[n]; }).sort();
+      var ban = MODEL[p.bridge] ? [p.bridge] : [];
+      var key = m2.join('+') + '|' + ban.join('');
+      if (seen[key]) return;
+      seen[key] = { reveal: p.reveal, bridge: p.bridge, target: p.target, planlibScore: p.planlibScore, result: solveHandOut(m2, ban) };
+      res.smallWorld.push(seen[key]);
+    });
+    if (!res.base && !res.smallWorld.length) res.note = modeled.length ? '이니시(루트 시작 카드)가 패에 없고, 스몰 월드로 갈 수 있는 수순도 없어 계산하지 않았다' : '계산기에 들어가는 카드가 패에 없다';
     return res;
   }
 
@@ -1432,7 +1419,7 @@ function DD_CALC_FACTORY(routeList) {
     ROUTES: ROUTES, ROUTE_IDS: ROUTE_IDS, STARTERS: STARTERS, PREFIX: PREFIX, TRAPS: TRAPS, MODELED: Object.keys(MAIN).concat(Object.keys(CONTRACTS)),
     initState: initState, step: step, runSteps: runSteps, bestContinuation: bestContinuation, score: score, describe: describe,
     prefixStates: prefixStates, simulate: simulate, applicable: applicable, record: record, solveHand: solveHand, solveHandOut: solveHandOut,
-    solveFull: solveFull, smallWorldPaths: smallWorldPaths,
+    solveFull: solveFull,
     classify: classify, alts: alts, namesIn: namesIn, norm: norm,
     setDeadline: function (ms) { deadline = ms ? Date.now() + ms : Infinity; }
   };

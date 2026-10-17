@@ -85,11 +85,28 @@ async function shot(page, sel, name) {
       const minF = await page.$$eval('button', (bs) => Math.min(...bs.filter((b) => b.offsetParent).map((b) => parseFloat(getComputedStyle(b).fontSize))));
       check(`${tag} 버튼 글자 16px 이상`, minF >= 16, `${minF}px`);
       await noHScroll(page, `${tag} 패 선택`);
-      // 이 패로 계산한 수순(Web Worker). 1초를 넘으면 미리 만든 수순이 먼저 나오고, 끝나면 바뀐다
+      // 이 패로 계산한 수순: 미리 만든 수순(장수 검사)을 바로 보여주고, 계산기 결과가 더 좋을 때만 바꾼다
       await page.waitForSelector('#recs .solve ol.todo li', { timeout: 30000 });
-      await page.waitForSelector('#recs .solve .calc-src:has-text("실시간 계산")', { timeout: 30000 });
+      await page.waitForSelector('#recs .solve .calc-src:is(:has-text("실시간 계산"), :has-text("그대로 둠"))', { timeout: 30000 });
       const solveTxt = await page.textContent('#recs .solve');
-      check(`${tag} 패로 계산한 수순(실시간)`, /점수 \d/.test(solveTxt) && solveTxt.includes('결과 필드'), solveTxt.replace(/\s+/g, ' ').slice(0, 90));
+      check(`${tag} 패로 계산한 수순(장수 검사 → 계산기 비교)`, /점수 \d/.test(solveTxt) && /계산기 결과|실시간 계산/.test(solveTxt), solveTxt.replace(/\s+/g, ' ').slice(0, 120));
+      if (theme === 'dark' && vp.name === 'pc') {
+        // 스몰 월드: 이니시 없는 패. dd-smallworld.json 경로를 장수 검사로 거른 뒤 계산기로 확인
+        await page.click('button[data-act="hand-clear"]').catch(() => {});
+        for (const c of ['스몰 월드', '하루 우라라', '증식의 G', '도미나스 임펄스', '무한포영']) await addCard(page, c);
+        await page.waitForSelector('#recs .solve .calc-src:is(:has-text("실시간 계산"), :has-text("그대로 둠"))', { timeout: 30000 });
+        const swTxt = (await page.textContent('#recs .solve')).replace(/\s+/g, ' ');
+        check(`${tag} 스몰 월드(이니시 없음) → 경로 표시`, /스몰 월드: \S+ 보여줌 → 다리 \S+ → \S+ 서치/.test(swTxt) && /장수 검사로 거른 뒤 [12]가지만 계산기로/.test(swTxt), (swTxt.match(/스몰 월드: [^—]*/) || [''])[0] + ' / ' + (swTxt.match(/스몰 월드 경로[^.]*/) || [''])[0]);
+        // 이니시가 있어도 스몰 월드 경로를 본다(예전엔 이니시 없을 때만)
+        await page.click('button[data-act="hand-clear"]').catch(() => {});
+        for (const c of ['DD 마도현자 케플러', '스몰 월드', '하루 우라라', 'DD 랜스 솔저', '무한포영']) await addCard(page, c);
+        await page.waitForSelector('#recs .solve .calc-src:is(:has-text("실시간 계산"), :has-text("그대로 둠"))', { timeout: 30000 });
+        const sw2 = (await page.textContent('#recs .solve')).replace(/\s+/g, ' ');
+        check(`${tag} 스몰 월드(이니시 있음)도 경로 검사`, /스몰 월드 경로 \d+가지/.test(sw2) || /스몰 월드:/.test(sw2), (sw2.match(/스몰 월드 경로[^.]*/) || sw2.match(/스몰 월드: [^—]*/) || ['없음'])[0]);
+        await shot(page, null, `hand-smallworld-${theme}-${vp.name}.png`);
+        await page.click('button[data-act="hand-clear"]').catch(() => {});
+        for (const c of ['DD 마도현자 케플러', '하루 우라라', '무한포영', '마루챠미 후와로스', 'DD 스케일 서베이어']) await addCard(page, c);
+      }
       await shot(page, null, `hand-${theme}-${vp.name}.png`);
 
       // (a) A1 7단계 + 하루 우라라

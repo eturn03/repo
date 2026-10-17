@@ -299,7 +299,7 @@
           if (!calc) throw new Error('계산기 초기화 실패');
           var j = m.job, res;
           if (j.type === 'record') res = calc.record(j.rid, j.k, j.trap, j.hand || undefined);
-          else if (j.type === 'solve') res = calc.solveFull(j.hand);
+          else if (j.type === 'solve') res = calc.solveFull(j.hand, j.sw);
           self.postMessage({ id: m.id, ok: true, result: res, ms: Date.now() - t });
         } catch (err) { self.postMessage({ id: m.id, ok: false, error: String(err && err.message || err), ms: Date.now() - t }); }
       };
@@ -382,6 +382,7 @@
     s.onerror = function () { planlibStatus = 'error'; if (state.tab === 'hand') render(); };
     document.head.appendChild(s);
   }
+  // dd-planlib.json 장수 검사. 패 그대로 + dd-smallworld.json 경로마다 바꾼 패(다리 카드는 덱에서 1장 뺌)
   function planlibPick(full) {
     var PL = window.DD_PLANLIB;
     if (!PL) return null;
@@ -392,12 +393,49 @@
       return true;
     }
     function count(list) { var o = {}; list.forEach(function (n) { o[n] = (o[n] || 0) + 1; }); return o; }
-    var h = count(full), best = null;
-    PL.plans.forEach(function (p) {
-      if (p.assumes_opponent && p.assumes_opponent.length) return;
-      if (usable(p, h) && (!best || p.final_score > best.plan.final_score)) best = { plan: p, sw: null };
-    });
-    return best;
+    function bestPlan(h, ban) {
+      var best = null;
+      PL.plans.forEach(function (p) {
+        if (p.assumes_opponent && p.assumes_opponent.length) return;
+        if (usable(p, h, ban) && (!best || p.final_score > best.final_score)) best = p;
+      });
+      return best;
+    }
+    var h = count(full);
+    var out = { base: bestPlan(h, null), sw: [] };
+    var SW = window.DD_SW;
+    if (SW && h['스몰월드']) {
+      var d40 = SW._about.deck_40, seen = {};
+      SW.triples.forEach(function (t) {
+        if (!h[t.reveal]) return;
+        if ((d40[t.bridge] || 0) - (h[t.bridge] || 0) < 1) return;
+        if ((d40[t.target] || 0) - (h[t.target] || 0) - (t.target === t.bridge ? 1 : 0) < 1) return;
+        var h2 = {}; for (var k in h) h2[k] = h[k];
+        h2[t.reveal] -= 1; h2['스몰월드'] -= 1; h2[t.target] = (h2[t.target] || 0) + 1;
+        var ban = {}; ban[t.bridge] = 1;
+        var p = bestPlan(h2, ban);
+        if (!p) return;
+        // 계산기에 들어가는 패가 같으면(모델 밖 카드만 다르면) 한 번만
+        var mk = Object.keys(h2).filter(function (n) { return h2[n] > 0 && CALC_MODEL.indexOf(n) >= 0; }).sort().map(function (n) { return n + h2[n]; }).join('+') + '|' + (CALC_MODEL.indexOf(t.bridge) >= 0 ? t.bridge : '');
+        if (seen[mk]) return;
+        seen[mk] = 1;
+        out.sw.push({ reveal: t.reveal, bridge: t.bridge, target: t.target, plan: p, planlibScore: p.final_score });
+      });
+      out.sw = stableSort(out.sw, function (x) { return -x.planlibScore; });
+    }
+    // 가장 좋은 것(같은 점수면 스몰 월드를 안 쓰는 쪽 — smallworld.py best_for 와 같은 순서)
+    out.best = out.base ? { title: '패 그대로', plan: out.base } : null;
+    if (out.sw.length && (!out.best || out.sw[0].planlibScore > out.best.plan.final_score)) out.best = { title: swTitle(out.sw[0]), plan: out.sw[0].plan, sw: out.sw[0] };
+    return out;
+  }
+  function swTitle(w) { return '스몰 월드: ' + w.reveal + ' 보여줌 → 다리 ' + w.bridge + ' → ' + w.target + ' 서치'; }
+  function stableSort(list, key) { return list.map(function (x, i) { return [key(x), i, x]; }).sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }).map(function (x) { return x[2]; }); }
+  // 계산기로 확인할 스몰 월드 후보: 장수 검사 점수가 패 그대로보다 낮지 않은 것 중 위에서 2개
+  function swCandidates(pk) {
+    if (!pk) return [];
+    var floor = pk.base ? pk.base.final_score : -Infinity;
+    return pk.sw.filter(function (w) { return w.planlibScore >= floor; }).slice(0, 2)
+      .map(function (w) { return { reveal: w.reveal, bridge: w.bridge, target: w.target, planlibScore: w.planlibScore }; });
   }
 
   function htAt(id, step) { return (htData(id) || []).filter(function (x) { return x.step === step; }); }
@@ -528,37 +566,54 @@
       (sk.length ? '<details class="inner"><summary>건너뛴 원래 단계 ' + sk.length + '개</summary><ul class="small">' + sk.map(function (x) { return '<li>' + x.step + '. ' + esc(x.text) + ' <span class="muted">— ' + esc(x.why) + '</span></li>'; }).join('') + '</ul></details>' : '') +
       '<h4>결과 필드</h4>' + fieldHtml(plan.final);
   }
+  // 패를 넣으면 dd-planlib.json 장수 검사 결과를 바로 보여주고, 계산기 결과가 더 좋을 때만 바꾼다(PORTING.md 속도 대책 1)
+  function planlibHtml(pb, idp) {
+    return '<div class="route-item"><div class="title">' + esc(pb.title) + ' — ' + esc(pb.plan.label) + ' — 점수 ' + pb.plan.final_score + '</div>' +
+      todoHtml(pb.plan.steps, 'planlib|' + pb.plan.id + '|' + (pb.sw ? pb.sw.reveal + pb.sw.bridge + pb.sw.target : ''), idp) +
+      '<p class="small">결과 몬스터: ' + chips(pb.plan.final_monsters) + '</p></div>';
+  }
+  function calcOpts(r) {
+    var opts = [];
+    if (r.base) opts.push({ title: '패 그대로', res: r.base });
+    r.smallWorld.forEach(function (w) { if (w.result) opts.push({ title: swTitle(w), res: w.result }); });
+    return stableSort(opts, function (o) { return -o.res.score; });
+  }
+  function calcOptsHtml(opts, key) {
+    return opts.map(function (o, i) {
+      return '<div class="route-item"><div class="title">' + esc(o.title) + ' — 점수 ' + o.res.score + '</div>' +
+        (i === 0 ? solvePlanHtml(o.res.plan, key + '|' + i, 'sv' + i) : '<details class="inner"><summary>수순 보기</summary>' + solvePlanHtml(o.res.plan, key + '|' + i, 'sv' + i) + '</details>') + '</div>';
+    }).join('');
+  }
   function renderSolve() {
     var full = calcHandFull();
-    var key = 'solve|' + full.join('+');
-    var ent = Calc.request(key, { type: 'solve', hand: full }, rerenderIf('hand'));
-    var h = '<section class="solve"><h3>이 패로 계산한 수순</h3><p class="small muted">계산기(Python 계산기를 옮긴 것)가 루트 29개 수순을 이어 붙여 이 패에서 가장 점수가 높은 수순을 찾는다. 결과는 "최소 이만큼은 된다"는 하한이고 MD 실기 미확인.</p>';
+    var h = '<section class="solve"><h3>이 패로 계산한 수순</h3><p class="small muted">먼저 미리 만든 수순 모음(dd-planlib.json)에서 이 패로 쓸 수 있는 것을 장수로 골라 바로 보여주고, 계산기(Python 계산기를 옮긴 것)가 루트 29개 수순을 이어 붙여 더 좋은 수순을 찾으면 바꾼다. 결과는 "최소 이만큼은 된다"는 하한이고 MD 실기 미확인.</p>';
+    loadPlanlib();
+    if (!window.DD_PLANLIB && planlibStatus !== 'error') return h + '<div class="box small calc-src">수순 모음 불러오는 중…</div></section>';
+    var pk = planlibPick(full);
+    var sw = swCandidates(pk);
+    var key = 'solve|' + full.join('+') + '|' + sw.map(function (w) { return w.reveal + w.bridge + w.target; }).join(',');
+    var ent = Calc.request(key, { type: 'solve', hand: full, sw: sw }, rerenderIf('hand'));
+    var pb = pk && pk.best;
+    var plNote = planlibStatus === 'error' ? 'data/planlib.js를 못 불러와서 미리 만든 수순이 없다.' : !pb ? '이 패에 맞는 미리 만든 수순이 없다(장수 검사 기준).' : '';
     if (ent.status === 'done') {
-      var r = ent.result;
-      var opts = [];
-      if (r.base) opts.push({ title: '패 그대로', res: r.base });
-      r.smallWorld.forEach(function (w) { if (w.result) opts.push({ title: '스몰 월드: ' + w.reveal + ' 보여줌 → 다리 ' + w.bridge + ' → ' + w.target + ' 서치', res: w.result }); });
-      opts.sort(function (a, b) { return b.res.score - a.res.score; });
-      h += '<div class="box ok small calc-src"><strong>실시간 계산</strong> · 패: ' + esc(full.join('·')) + ' · ' + ent.ms + 'ms</div>';
-      if (!opts.length) h += '<div class="box warn small">' + esc(r.note || '계산할 수 있는 수순이 없다') + '</div>';
-      opts.forEach(function (o, i) {
-        h += '<div class="route-item"><div class="title">' + esc(o.title) + ' — 점수 ' + o.res.score + '</div>' +
-          (i === 0 ? solvePlanHtml(o.res.plan, key + '|' + i, 'sv' + i) : '<details class="inner"><summary>수순 보기</summary>' + solvePlanHtml(o.res.plan, key + '|' + i, 'sv' + i) + '</details>') + '</div>';
-      });
-      if (r.smallWorld.length && r.smallWorld.length > 1) h += '<p class="small muted">스몰 월드 경로 ' + r.smallWorld.length + '가지를 계산했다.</p>';
-    } else if (ent.status === 'running') {
-      h += '<div class="box small calc-src">계산 중… (패: ' + esc(full.join('·')) + ')</div>';
-    } else {
-      loadPlanlib();
-      var why = ent.status === 'slow' ? '계산이 1초를 넘어서, 끝날 때까지 미리 만든 수순을 보여준다(끝나면 바뀜)' : ent.status === 'timeout' ? '계산이 너무 오래 걸려 멈췄다' : '계산 실패: ' + (ent.error || '');
-      h += '<div class="box warn small calc-src"><strong>미리 만든 수순</strong>(dd-planlib.json) · ' + esc(why) + '</div>';
-      if (!window.DD_PLANLIB) h += '<div class="box small">' + (planlibStatus === 'error' ? 'data/planlib.js를 못 불러왔다.' : '수순 모음 불러오는 중…') + '</div>';
-      else {
-        var pk = planlibPick(full);
-        if (!pk) h += '<div class="box warn small">이 패에 맞는 미리 만든 수순이 없다(장수 검사 기준).</div>';
-        else h += '<div class="route-item"><div class="title">' + esc(pk.plan.label) + ' — 점수 ' + pk.plan.final_score + '</div>' +
-          todoHtml(pk.plan.steps, 'planlib|' + pk.plan.id, 'pl') + '<p class="small">결과 몬스터: ' + chips(pk.plan.final_monsters) + '</p></div>';
+      var r = ent.result, opts = calcOpts(r), top = opts[0];
+      var better = top && (!pb || top.res.score > pb.plan.final_score + 1e-9);
+      if (better || !pb) {
+        h += '<div class="box ok small calc-src"><strong>실시간 계산</strong> · 패: ' + esc(full.join('·')) + ' · ' + ent.ms + 'ms' +
+          (pb ? ' · 미리 만든 수순(' + pb.plan.final_score + '점)보다 높아서 바꿈' : '') + '</div>';
+        if (!opts.length) h += '<div class="box warn small">' + esc(r.note || '계산할 수 있는 수순이 없다') + '</div>';
+        h += calcOptsHtml(opts, key);
+        if (pb) h += '<details class="inner"><summary>미리 만든 수순 보기(' + pb.plan.final_score + '점)</summary>' + planlibHtml(pb, 'pl') + '</details>';
+      } else {
+        h += '<div class="box small calc-src"><strong>미리 만든 수순</strong>(dd-planlib.json 장수 검사) · 계산기 결과(' + (top ? top.res.score + '점' : '수순 없음') + ', ' + ent.ms + 'ms)가 더 좋지 않아서 그대로 둠</div>';
+        h += planlibHtml(pb, 'pl');
+        if (opts.length) h += '<details class="inner"><summary>계산기 결과 보기(' + top.res.score + '점)</summary>' + calcOptsHtml(opts, key) + '</details>';
       }
+      if (r.smallWorld.length) h += '<p class="small muted">스몰 월드 경로 ' + pk.sw.length + '가지를 장수 검사로 거른 뒤 ' + r.smallWorld.length + '가지만 계산기로 확인했다.</p>';
+    } else {
+      var why = ent.status === 'running' || ent.status === 'slow' ? '계산기 계산 중… 끝나면 더 좋을 때만 바뀐다' : ent.status === 'timeout' ? '계산이 너무 오래 걸려 멈췄다' : '계산 실패: ' + (ent.error || '');
+      h += '<div class="box ' + (ent.status === 'running' || ent.status === 'slow' ? '' : 'warn ') + 'small calc-src"><strong>미리 만든 수순</strong>(dd-planlib.json 장수 검사) · ' + esc(why) + '</div>';
+      h += plNote ? '<div class="box warn small">' + esc(plNote) + '</div>' : planlibHtml(pb, 'pl');
     }
     return h + '</section>';
   }

@@ -22,13 +22,18 @@ for (const [rid, e] of Object.entries(fx('routes'))) {
   const ok = close(g.score, e.score) && JSON.stringify(g.mons) === JSON.stringify(e.final_monsters) && g.zones === e.zone_configs_possible;
   out.routes.push({ id: rid, ok, expected: { score: e.score, mons: e.final_monsters, zones: e.zone_configs_possible }, got: g });
 }
-// 2) hands: 패 → 최고 수순
+// 2) hands: 패 → 최고 수순. 후보 목록을 한 번만 만드는 방식(기본)과 루트마다 새로 만드는 방식(shared=false)을 둘 다 돌린다
 fx('hands').forEach((h, i) => {
-  const t = Date.now();
+  let t = Date.now();
   const r = calc.solveHand(h.hand_modeled);
   const ms = Date.now() - t;
+  t = Date.now();
+  const r0 = calc.solveHand(h.hand_modeled, null, undefined, false);
+  const ms0 = Date.now() - t;
   const g = { score: r.best.score, route: r.best.route, mons: r.best.state.field.map((m) => m.name) };
-  out.hands.push({ i, hand: h.hand_modeled, ok: close(g.score, h.expected_score), expected: { score: h.expected_score, route: h.expected_base_route, mons: h.expected_final_monsters }, got: g, ms });
+  const g0 = { score: r0.best.score, route: r0.best.route, mons: r0.best.state.field.map((m) => m.name) };
+  const same = JSON.stringify(g) === JSON.stringify(g0) && JSON.stringify(r.best.done) === JSON.stringify(r0.best.done);
+  out.hands.push({ i, hand: h.hand_modeled, ok: close(g.score, h.expected_score), expected: { score: h.expected_score, route: h.expected_base_route, mons: h.expected_final_monsters }, got: g, ms, perRoute: { ok: close(g0.score, h.expected_score), sameAsShared: same, got: g0, ms: ms0 } });
 });
 // 3) handtraps: 패트랩 레코드
 fx('handtraps').forEach((r, i) => {
@@ -51,4 +56,6 @@ for (const k of ['routes', 'hands', 'handtraps']) {
   console.log(`${k}: ${s.n - s.bad}/${s.n} 일치` + (k !== 'routes' ? ` (평균 ${avgMs(k)} ms, 최대 ${maxMs(k)} ms)` : ''));
   s.list.forEach((x) => console.log('  다름', JSON.stringify({ id: x.id ?? x.i, route: x.route, step: x.step, trap: x.trap, hand: x.hand, expected: x.expected, got: x.got })));
 }
+const pr = out.hands.map((x) => x.perRoute);
+console.log(`hands(루트마다 새로): ${pr.filter((x) => x.ok).length}/${pr.length} 일치, 공유 방식과 수순까지 같음 ${pr.filter((x) => x.sameAsShared).length}/${pr.length} (평균 ${Math.round(pr.reduce((a, x) => a + x.ms, 0) / pr.length)} ms, 최대 ${Math.max(...pr.map((x) => x.ms))} ms)`);
 process.exit(0);

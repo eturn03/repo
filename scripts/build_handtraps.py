@@ -223,7 +223,9 @@ def main():
     # ---- md 안에서 서로 어긋나는 설명
     s1 = secs.get("1", {}).get("markdown", "")
     l6 = bullets(secs.get("6", {}).get("markdown", ""))
-    zone6 = next((b for b in l6 if "링크 마커" in b and "검사하지 않았다" in b), None)
+    # 6장 한계 문장이 몬스터 존 배치를 '검사하지 않았다'고 하는지(문장 앞부분이 존 배치에 대한 것인지)만 본다
+    zone6 = next((b for b in l6 if re.search(r"몬스터 존[^.]*?검사하지 않았다", b) and not re.search(r"몬스터 존[^.]*?검사한다", b)), None)
+    check("md 6장 한계 문장이 1장 '몬스터 존 배치도 검사한다'와 맞음", not (zone6 and "몬스터 존 배치" in s1), zone6 or "")
     if zone6 and "몬스터 존 배치" in s1:
         issues.append(f"md 1장·7장은 몬스터 존 배치(링크 마커)도 검사한다고 하는데, 6장 한계에는 아직 '{zone6}'가 남아 있다. 사이트는 6장 문장을 그대로 보여준다.")
 
@@ -279,6 +281,33 @@ def main():
         (DATA / "planlib.js").write_text("// 자동 생성: scripts/build_handtraps.py (원본 data/dd-planlib.json, 내용 그대로)\nwindow.DD_PLANLIB=" +
                                          json.dumps(planlib, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
         meta["planlibCount"] = len(plans)
+    # 스몰 월드 경로(dd-smallworld.json). 사이트는 triples 전체를 dd-planlib.json 장수 검사로 먼저 거른다
+    sw_path = DATA / "dd-smallworld.json"
+    if sw_path.exists():
+        sw = json.loads(sw_path.read_text(encoding="utf-8"))
+        stats, deck40, triples = sw["_about"].get("stats", {}), sw["_about"].get("deck_40", {}), sw.get("triples", [])
+        keys = ("race", "attribute", "level", "atk", "def")
+
+        def one(a, b):
+            return sum(stats[a][k] == stats[b][k] for k in keys) == 1
+        bad_sw = [f"{t['reveal']}→{t['bridge']}→{t['target']}" for t in triples
+                  if not all(n in stats for n in (t["reveal"], t["bridge"], t["target"])) or not one(t["reveal"], t["bridge"]) or not one(t["bridge"], t["target"])]
+        check(f"dd-smallworld.json 경로 {len(triples)}개가 '정확히 1개만 같음' 규칙에 맞음", not bad_sw, ", ".join(bad_sw[:5]))
+        full = sorted((r, b, t) for r in stats for b in stats for t in stats if r != b and b != t and one(r, b) and one(b, t))
+        got = sorted((t["reveal"], t["bridge"], t["target"]) for t in triples)
+        if full != got:
+            issues.append(f"dd-smallworld.json triples {len(got)}개가 stats로 만든 전체 경로 {len(full)}개와 다르다.")
+        if sum(deck40.values()) != 40:
+            issues.append(f"dd-smallworld.json deck_40 합계가 {sum(deck40.values())}장이다.")
+        if pl_path.exists():
+            dc = planlib["_about"].get("deck_counts", {})
+            diff = [f"{c}: smallworld {deck40.get(c)} / planlib {n}" for c, n in dc.items() if deck40.get(c) != n]
+            if diff:
+                issues.append("dd-smallworld.json deck_40과 dd-planlib.json deck_counts 장수가 다르다: " + ", ".join(diff))
+        (DATA / "smallworld.js").write_text("// 자동 생성: scripts/build_handtraps.py (원본 data/dd-smallworld.json, 내용 그대로)\nwindow.DD_SW=" +
+                                            json.dumps(sw, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
+        meta["smallworldCount"] = len(triples)
+        info.append(f"스몰 월드 경로 {len(triples)}개(dd-smallworld.json).")
     marks = Counter()
     for x in records:
         for pl in [x.get("plan")] + [(x.get("counter") or {}).get("plan")] + [e.get("plan") for e in x.get("if_extra_card_in_hand", [])] + [w.get("plan") for w in x.get("with_my_droll", [])]:

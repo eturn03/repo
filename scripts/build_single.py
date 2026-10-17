@@ -30,6 +30,8 @@ def main():
     html = html.replace('<script src="assets/calc/engine.js"></script>', "<script>\n" + eng + "</script>")
     meta = inline_js(ROOT / "data" / "handtraps" / "meta.js")
     html = html.replace('<script src="data/handtraps/meta.js"></script>', "<script>\n" + meta + "</script>")
+    sw = inline_js(ROOT / "data" / "smallworld.js")
+    html = html.replace('<script src="data/smallworld.js"></script>', "<script>\n" + sw + "</script>")
     assert not re.search(r'<(script|link)[^>]+(src|href)="(assets|data)/', html), "치환 실패"
 
     args = sys.argv[1:]
