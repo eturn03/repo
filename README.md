@@ -1,6 +1,6 @@
 # DD4 전개 도우미
 
-마스터 듀얼 DD 덱("DD4")용 전개 도우미 정적 사이트. 데이터는 `data/dd-guide.md`, `data/dd-routes.md`, 패트랩 대응 `data/dd-handtraps.json`·`data/dd-handtraps.md`만 쓴다.
+마스터 듀얼 DD 덱("DD4")용 전개 도우미 정적 사이트. 데이터는 `data/dd-guide.md`, `data/dd-routes.md`, 패트랩 대응 `data/dd-handtraps.json`·`data/dd-handtraps.md`, 수순 모음 `data/dd-planlib.json`만 쓴다.
 
 ## 여는 방법
 
@@ -10,7 +10,7 @@
 - 기본은 다크 테마. 오른쪽 위 "다크/라이트"로 바꾼다(선택은 브라우저에 저장).
 - **계산기**: 패를 고르면 그 자리에서 수순을 계산하고(패 선택 화면 "이 패로 계산한 수순"), 패트랩 버튼도 그 자리에서 계산한다. 계산은 `assets/calc/engine.js`(Python 계산기를 옮긴 것)를 Web Worker로 돌린다. 1초를 넘거나 실패하면 미리 만든 데이터(`dd-handtraps.json`, `dd-planlib.json`)를 먼저 보여주고, 계산이 끝나면 바꾼다.
 - 패트랩 대응은 루트를 열 때 그 루트 파일만 불러온다. 화면에 나오는 계산 결과는 "최소 이만큼은 된다"는 하한이고 MD 실기로 확인하지 않았다(dd-handtraps.md 6장).
-- **폰에서 열 때**: `index.html`은 옆에 있는 `assets/`·`data/` 폴더가 같이 있어야 동작한다. 폰으로는 폴더째 옮기기 어려우니 파일 하나로 합친 `dd4-helper.html`(약 9.7MB, 패트랩 데이터 포함)을 쓴다. GitHub 앱이나 웹에서 html 파일을 누르면 페이지가 실행되지 않고 코드만 보인다. 그러니 파일을 기기에 받은 뒤 브라우저로 열거나, GitHub Pages 주소로 연다.
+- **폰에서 열 때**: `index.html`은 옆에 있는 `assets/`·`data/` 폴더가 같이 있어야 동작한다. 폰으로는 폴더째 옮기기 어려우니 파일 하나로 합친 `dd4-helper.html`(약 11.6MB, 패트랩 데이터·계산기·수순 모음 포함)을 쓴다. GitHub 앱이나 웹에서 html 파일을 누르면 페이지가 실행되지 않고 코드만 보인다. 그러니 파일을 기기에 받은 뒤 브라우저로 열거나, GitHub Pages 주소로 연다.
 
 ## md를 고친 뒤 데이터 다시 만들기
 
