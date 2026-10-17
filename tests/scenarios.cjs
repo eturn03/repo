@@ -121,6 +121,20 @@ async function shot(page, sel, name) {
       const h2 = await page.textContent('main h2');
       check(`${tag} (c) F1 열기`, h2.includes('F1'), h2.trim().slice(0, 40));
 
+      // 무효 배지(negated_monsters): A1 2단계 무한포영 → 결과 필드 케플러 옆 '무효'
+      await openRouteAt(page, 'A1', 2);
+      await page.click('button.trap-btn[data-key="imperm"]');
+      await page.waitForSelector('#trapPanel .ht-sec');
+      await page.click('#trapPanel button[role="tab"][data-v="base"]'); // 패에 스케일이 있어 기본 탭이 아니므로
+      const negTxt = await page.$$eval('#trapPanel .ht-sec .chip', (cs) => cs.filter((c) => c.querySelector('.neg')).map((c) => c.textContent.trim()));
+      check(`${tag} negated_monsters → '무효' 배지`, negTxt.some((t) => t.startsWith('케플러')), negTxt.join(', '));
+      // documented가 자기 루트: D1 1단계 드롤
+      await openRouteAt(page, 'D1', 1);
+      await page.click('button.trap-btn[data-key="droll"]');
+      await page.waitForSelector('#trapPanel .box.ok');
+      const selfTxt = await page.textContent('#trapPanel .box.ok');
+      check(`${tag} 자기 루트 documented → '지금 보고 있는 루트'`, selfTxt.includes('지금 보고 있는 루트(D1)가 이 상황의 대응') && !(await page.$('#trapPanel .box.ok button[data-act="open-route"]')));
+
       // 니비루: 상단 버튼 하나, 현재 단계 기준
       await openRouteAt(page, 'A1', 15);
       check(`${tag} 니비루는 단계별 버튼에 없음`, (await page.$$('#trapPanel button[data-act="ht-trap"][data-key="nibiru"]')).length === 0);

@@ -422,7 +422,7 @@
         (keys.length ? '<span class="tag">패트랩 데이터 ' + keys.length + '종</span>' : '') +
         (picked === s.n ? '<span class="tag bad">여기서 맞음</span>' : '') + '</span></label></li>';
     });
-    h += '</ol><p class="small muted">"소환 n번째"는 앱이 단계 문장으로 센 참고값(한 단계 여러 장 P소환도 1번). 패트랩 화면의 소환 수는 데이터(summons_so_far) 값이다.</p></section>';
+    h += '</ol><p class="small muted">"소환 n번째"는 앱이 단계 문장으로 센 참고값(한 단계 여러 장 P소환도 1번). 패트랩 화면의 소환 수는 데이터(monsters_summoned_so_far, 장수 기준) 값이다.</p></section>';
     h += '<div class="side"><section class="panel" id="trapPanel">' + renderTrapPanel(r, cur) + '</section>';
     h += '<section class="panel">' + renderFinal(r) + '</section>';
     h += '<section class="panel">' + renderReverse(r) + '</section>';
@@ -499,12 +499,16 @@
     if (v === 'continue') return null;
     return rec.plan;
   }
-  function chips(list) {
+  // negated: 효과 무효 상태인 몬스터 이름 배열(negated_monsters). 그 몬스터 옆에 '무효' 배지
+  function chips(list, negated) {
     if (!list || !list.length) return '<span class="muted">없음</span>';
-    return list.map(function (n) { return '<span class="chip">' + esc(n) + '</span>'; }).join(' ');
+    var neg = negated || [];
+    return list.map(function (n) {
+      return '<span class="chip">' + esc(n) + (neg.indexOf(n) >= 0 ? ' <span class="tag bad neg">무효</span>' : '') + '</span>';
+    }).join(' ');
   }
   function fieldHtml(f) {
-    return '<dl class="kv"><dt>몬스터</dt><dd>' + chips(f.monsters) + '</dd>' +
+    return '<dl class="kv"><dt>몬스터</dt><dd>' + chips(f.monsters, f.negated_monsters) + '</dd>' +
       '<dt>방해</dt><dd>' + (f.interruptions && f.interruptions.length ? '<ul style="margin:0;padding-left:18px">' + f.interruptions.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul>' : '<span class="muted">없음</span>') + '</dd>' +
       (f.contracts ? '<dt>계약서</dt><dd>' + chips(f.contracts) + '</dd>' : '') +
       (f.pzones ? '<dt>P존</dt><dd>' + chips(f.pzones) + '</dd>' : '') +
@@ -517,13 +521,15 @@
     var key = r.id + '|' + rec.step + '|' + rec.trap + '|' + v;
     var mdStep = r.steps[rec.step - 1];
     var h = '<h3 style="margin-top:14px">' + esc(rec.trap_name) + ' · ' + rec.step + '단계</h3>' +
-      '<p class="small">"' + hl(mdStep ? mdStep.text : rec.step_text) + '"' + (mdStep && mdStep.text !== rec.step_text ? ' <span class="muted">(데이터 문장: ' + esc(rec.step_text) + ')</span>' : '') +
-      ' · 여기까지 소환 ' + rec.summons_so_far + '체 <span class="muted">(데이터)</span></p>';
+      '<p class="small">"' + hl(rec.step_text || (mdStep && mdStep.text)) + '"' +
+      ' · 여기까지 소환한 몬스터 ' + rec.monsters_summoned_so_far + '장 <span class="muted">(데이터)</span></p>';
     // 문서 루트
     if (rec.documented) {
-      var ids = (rec.documented.match(/[A-G]\d{1,2}/g) || []).filter(function (id) { return routesById[id]; });
-      var cond = rec.documented.match(/패에 (\S+?)이\(가\) 있으면/);
-      h += '<div class="box ok"><h4>' + (ids.length ? '문서 루트 ' + ids.join('·') + ' 참조' : '문서 기록 있음') + '</h4><p>' + esc(rec.documented) + '</p>';
+      var self = rec.documented.match(/^이 루트\(([A-G]\d{1,2})\) 자체가/);
+      var ids = self ? [] : (rec.documented.match(/[A-G]\d{1,2}/g) || []).filter(function (id) { return routesById[id]; });
+      var cond = rec.documented.match(/패에 (\S+?)(?:이\(가\)|이|가) 있으면/);
+      if (self) h += '<div class="box ok"><h4>지금 보고 있는 루트(' + esc(self[1]) + ')가 이 상황의 대응</h4><p>' + esc(rec.documented) + '</p><p class="small">왼쪽 단계 목록을 그대로 진행하면 된다.</p>';
+      else h += '<div class="box ok"><h4>' + (ids.length ? '문서 루트 ' + ids.join('·') + ' 참조' : '문서 기록 있음') + '</h4><p>' + esc(rec.documented) + '</p>';
       if (ids.length) h += '<div class="row8">' + ids.map(function (id) { return '<button class="btn primary" data-act="open-route" data-id="' + id + '">' + id + ' 열기</button>'; }).join('') + '</div>';
       if (cond) {
         var cc = resolve(cond[1]);
@@ -534,7 +540,7 @@
       if (!hasCalc) {
         return h + sec('1', '맞은 시점 상태', stateHtml(rec.state_at_hit));
       }
-      h += '<p class="small muted">아래는 계산 결과다. 위 문서 루트의 조건이 안 맞을 때 참고.</p>';
+      h += '<p class="small muted">' + (cond ? '아래는 계산 결과다. 위 문서 루트의 조건이 안 맞을 때 참고.' : '아래는 같은 레코드에 함께 들어 있는 계산 결과(참고).') + '</p>';
     }
     // 카운터 선택지(맨 위)
     if (rec.counter) {
@@ -585,7 +591,7 @@
 
   function stateHtml(s) {
     if (!s) return '<p class="muted">없음</p>';
-    return '<dl class="kv"><dt>몬스터</dt><dd>' + chips(s.monsters) + '</dd><dt>계약서</dt><dd>' + chips(s.contracts) + '</dd><dt>P존</dt><dd>' + chips(s.pzones) +
+    return '<dl class="kv"><dt>몬스터</dt><dd>' + chips(s.monsters, s.negated_monsters) + '</dd><dt>계약서</dt><dd>' + chips(s.contracts) + '</dd><dt>P존</dt><dd>' + chips(s.pzones) +
       '</dd><dt>패</dt><dd>' + chips(s.hand) + '</dd><dt>엑덱 앞면</dt><dd>' + chips(s.extra_faceup) + '</dd></dl>';
   }
 
@@ -598,7 +604,7 @@
     rec.with_my_droll.forEach(function (w, i) {
       var on = v === 'd:' + i;
       h += '<div class="opt' + (on ? ' on' : '') + '"><strong>' + w.activate_after_step + '단계 직후 내 드롤</strong><div class="big">상대 ' + w.opp_draws + '장</div>' +
-        '<div class="small">결과 몬스터: ' + esc((w.plan.final.monsters || []).join(', ') || '없음') + '</div>' +
+        '<div class="small">결과 몬스터: ' + chips(w.plan.final.monsters, w.plan.final.negated_monsters) + '</div>' +
         '<div class="small muted">방해 ' + (w.plan.final.interruptions || []).length + '개: ' + esc((w.plan.final.interruptions || []).map(function (x) { return x.split('(')[0]; }).join(', ') || '없음') + '</div>' +
         '<button data-act="ht-variant" data-v="d:' + i + '" aria-pressed="' + (on ? 'true' : 'false') + '">이 수순 보기</button></div>';
     });
