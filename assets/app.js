@@ -434,12 +434,13 @@
         if (d !== '제로마키나' && dz - (hd['제로마키나'] || 0) < 1) return;
         hd['제로마키나'] = (hd['제로마키나'] || 0) + 1;
         var mk2 = Object.keys(hd).filter(function (n) { return hd[n] > 0 && CALC_MODEL.indexOf(n) >= 0; }).sort().map(function (n) { return n + hd[n]; }).join('+') + '|' + (CALC_MODEL.indexOf(d) >= 0 && d !== '제로마키나' ? d : '');
-        if (dseen[mk2]) return;
-        dseen[mk2] = 1;
+        if (dseen[mk2]) { dseen[mk2].discards.push(d); return; }
         var p2 = bestPlan(hd, null);
-        if (p2) out.dark.push({ discard: d, fromGy: d === '제로마키나', plan: p2, planlibScore: p2.final_score });
+        dseen[mk2] = { discard: d, discards: [d], fromGy: d === '제로마키나', plan: p2, planlibScore: p2 ? p2.final_score : -1 };
+        if (p2) out.dark.push(dseen[mk2]);
       });
-      out.dark = stableSort(out.dark, function (x) { return -x.planlibScore; });
+      out.dark.forEach(keepUrara);
+      out.dark = stableSort(out.dark, darkKey(function (x) { return x.planlibScore; }));
     }
     // 가장 좋은 것(같은 점수면 패 그대로 → 스몰 월드 → 다크 오컬티즘 순 — smallworld.py best_for 처럼 안 바꾼 패 우선)
     out.best = out.base ? { title: '패 그대로', plan: out.base } : null;
@@ -447,6 +448,13 @@
     if (out.dark.length && (!out.best || out.dark[0].planlibScore > out.best.plan.final_score)) out.best = { title: darkTitle(out.dark[0]), plan: out.dark[0].plan, dark: out.dark[0] };
     return out;
   }
+  // 다크 오컬티즘으로 버릴 카드: 점수가 같으면 우라라는 남긴다(버릴 후보 맨 뒤, 우라라만 버리는 수순은 같은 점수 중 맨 뒤)
+  function keepUrara(w) {
+    w.discards = w.discards.filter(function (x) { return x !== '우라라'; }).concat(w.discards.filter(function (x) { return x === '우라라'; }));
+    w.discard = w.discards[0];
+    w.onlyUrara = w.discard === '우라라';
+  }
+  function darkKey(score) { return function (x) { return -score(x) + (x.onlyUrara ? 1e-6 : 0); }; }
   function darkTitle(w) { return '다크 오컬티즘: ' + (w.discards || [w.discard]).join('/') + ' 버림 → 제로마키나 ' + (w.fromGy ? '묘지에서 회수' : '덱에서 서치'); }
   function swTitle(w) { return '스몰 월드: ' + w.reveal + ' 보여줌 → 다리 ' + w.bridge + ' → ' + w.target + ' 서치'; }
   function stableSort(list, key) { return list.map(function (x, i) { return [key(x), i, x]; }).sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }).map(function (x) { return x[2]; }); }
@@ -596,8 +604,8 @@
     var opts = [];
     if (r.base) opts.push({ title: r.base.noStarter ? '패 그대로 (이니시 없음 — 29개 루트 전부 시도)' : '패 그대로', res: r.base });
     r.smallWorld.forEach(function (w) { if (w.result) opts.push({ title: swTitle(w), res: w.result }); });
-    (r.dark || []).forEach(function (w) { if (w.result) opts.push({ title: darkTitle(w), res: w.result }); });
-    return stableSort(opts, function (o) { return -o.res.score; });
+    (r.dark || []).forEach(function (w) { if (w.result) opts.push({ title: darkTitle(w), res: w.result, onlyUrara: w.onlyUrara }); });
+    return stableSort(opts, darkKey(function (o) { return o.res.score; }));
   }
   function calcOptsHtml(opts, key) {
     return opts.map(function (o, i) {

@@ -1442,6 +1442,12 @@ function DD_CALC_FACTORY(routeList) {
         dseen[key] = { discard: d, discards: [d], fromGy: fromGy, result: dr && dr.score > 0 ? dr : null };
         res.dark.push(dseen[key]);
       });
+      // 같은 결과면 우라라는 남긴다(버릴 카드 목록에서 맨 뒤로)
+      res.dark.forEach(function (w) {
+        w.discards = w.discards.filter(function (x) { return x !== '우라라'; }).concat(w.discards.filter(function (x) { return x === '우라라'; }));
+        w.discard = w.discards[0];
+        w.onlyUrara = w.discard === '우라라';
+      });
     }
     if (!res.base && !res.smallWorld.some(function (w) { return w.result; }) && !res.dark.some(function (w) { return w.result; })) res.note = modeled.length ? '수순 없음 — 29개 루트를 전부 시도했지만 몬스터가 남는 수순을 못 찾았다' : '수순 없음 — 계산기에 들어가는 카드(DD 몬스터·계약서)가 패에 없다';
     return res;

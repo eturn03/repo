@@ -111,6 +111,12 @@ async function shot(page, sel, name) {
         const dk = (await page.textContent('#recs .solve')).replace(/\s+/g, ' ');
         check(`${tag} 다크 오컬티즘 → 제로마키나 서치 패로 계산`, /다크 오컬티즘: \S+ 버림 → 제로마키나 덱에서 서치/.test(dk) && !dk.includes('수순 없음'), (dk.match(/다크 오컬티즘: [^—]*— [^—]*— 점수 [\d.]+/) || dk.match(/다크 오컬티즘: [^—]*/) || [''])[0]);
         await shot(page, null, `hand-darkoccult-${theme}-${vp.name}.png`);
+        // 점수가 같으면 우라라는 남긴다
+        await page.click('button[data-act="hand-clear"]').catch(() => {});
+        for (const c of ['다크 오컬티즘', '하루 우라라', 'DD 카운트 서베이어', 'DD 마도현자 토마스']) await addCard(page, c);
+        await page.waitForSelector('#recs .solve .calc-src:is(:has-text("실시간 계산"), :has-text("그대로 둠"))', { timeout: 30000 });
+        const firstTitle = (await page.textContent('#recs .solve .route-item .title')).replace(/\s+/g, ' ');
+        check(`${tag} 다크 오컬티즘: 같은 점수면 우라라는 안 버림`, firstTitle.includes('다크 오컬티즘:') && !/: 우라라 버림/.test(firstTitle), firstTitle.slice(0, 60));
         // 이니시도 스몰 월드도 없는 패: 29개 루트 전부 시도
         await page.click('button[data-act="hand-clear"]').catch(() => {});
         for (const c of ['DD 그리폰', 'DD 스케일 서베이어', '하루 우라라']) await addCard(page, c);
