@@ -538,7 +538,9 @@
       h += '</div>';
       var hasCalc = rec.plan || rec.with_my_droll || rec.counter || rec.if_extra_card_in_hand;
       if (!hasCalc) {
-        return h + sec('1', '맞은 시점 상태', stateHtml(rec.state_at_hit));
+        h += sec('1', '맞은 시점 상태', stateHtml(rec.state_at_hit));
+        if (rec.hit_effect) h += sec('2', '맞아서 생긴 일', '<p>' + esc(rec.hit_effect === 'negated' ? '효과 무효 (negated)' : rec.hit_effect) + '</p>');
+        return h;
       }
       h += '<p class="small muted">' + (cond ? '아래는 계산 결과다. 위 문서 루트의 조건이 안 맞을 때 참고.' : '아래는 같은 레코드에 함께 들어 있는 계산 결과(참고).') + '</p>';
     }

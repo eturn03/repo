@@ -1,6 +1,6 @@
 # DD4 패트랩 대응 데이터 (Claude Code 입력용)
 
-작성: 2026-10-17. 짝 파일: `dd-handtraps.json`(전체 데이터 3,121건), `dd-routes.md`(루트 29개 단계), `dd-guide.md`(덱·카드·최종 필드).
+작성: 2026-10-17. 짝 파일: `dd-handtraps.json`(전체 데이터 3,138건), `dd-routes.md`(루트 29개 단계), `dd-guide.md`(덱·카드·최종 필드).
 
 ## 1. 이 데이터가 뭔지
 
@@ -110,4 +110,5 @@ with_my_droll[]             (증G·후와로스) activate_after_step 직후 내 
   - 오르트로스 P효과 단계에 유령토끼 레코드 추가: 어차피 자기 자신을 파괴하는 효과라 영향 거의 없음으로 처리.
   - step_text를 dd-routes.md 원문(주석 포함)으로 통일.
   - "케플러(무효)" 표기 대신 negated_monsters 필드로 분리.
-  - documented가 지금 진행 중인 루트를 가리키면 "이 루트(X) 자체가 이 상황의 대응 루트"로 표기.
+  - documented가 지금 진행 중인 루트를 가리키면 "이 루트(X) 자체가 이 상황의 대응 루트"로 표기하고, 이런 레코드에는 계산 결과(plan·with_my_droll 등)를 넣지 않음.
+  - 머리말 건수 3,121 → 3,138 정정.

@@ -118,9 +118,7 @@ def main():
     calc_keys = ("plan", "with_my_droll", "counter", "if_extra_card_in_hand")
     uncond_calc = [f"{x['route']} {x['step']}단계 {x['trap_name']} '{x['documented']}' ({','.join(k for k in calc_keys if k in x)})"
                    for x in records if "documented" in x and not is_cond(x["documented"]) and any(k in x for k in calc_keys)]
-    if uncond_calc:
-        issues.append("md 5장은 '무조건 적용이면 plan 없음'인데, 조건 없는 documented에 계산 결과가 같이 있다: " + "; ".join(uncond_calc) +
-                      ". 화면은 문서 표시를 먼저 두고 계산 결과를 아래에 참고로 보여준다.")
+    check("조건 없는 documented에는 계산 결과가 없음(md 5장)", not uncond_calc, "; ".join(uncond_calc))
     cond_nocalc = [f"{x['route']} {x['step']}단계 {x['trap_name']}" for x in records
                    if "documented" in x and is_cond(x["documented"]) and not any(k in x for k in calc_keys)]
     check("조건부 documented에는 조건이 안 맞을 때 쓸 계산 결과가 있음(md 5장)", not cond_nocalc, "; ".join(cond_nocalc))
