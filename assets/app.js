@@ -423,11 +423,31 @@
       });
       out.sw = stableSort(out.sw, function (x) { return -x.planlibScore; });
     }
-    // 가장 좋은 것(같은 점수면 스몰 월드를 안 쓰는 쪽 — smallworld.py best_for 와 같은 순서)
+    // 다크 오컬티즘: 패 1장 버리고 제로 마키나 서치(dd-guide.md 조회표 2단계). 버린 게 제로 마키나면 묘지에서 회수
+    out.dark = [];
+    if (h['다크오컬티즘']) {
+      var dz = (deck['제로마키나'] || 0), dseen = {};
+      Object.keys(h).forEach(function (d) {
+        if (!h[d] || (d === '다크오컬티즘' && h[d] < 2)) return;
+        var hd = {}; for (var k2 in h) hd[k2] = h[k2];
+        hd['다크오컬티즘'] -= 1; hd[d] -= 1;
+        if (d !== '제로마키나' && dz - (hd['제로마키나'] || 0) < 1) return;
+        hd['제로마키나'] = (hd['제로마키나'] || 0) + 1;
+        var mk2 = Object.keys(hd).filter(function (n) { return hd[n] > 0 && CALC_MODEL.indexOf(n) >= 0; }).sort().map(function (n) { return n + hd[n]; }).join('+') + '|' + (CALC_MODEL.indexOf(d) >= 0 && d !== '제로마키나' ? d : '');
+        if (dseen[mk2]) return;
+        dseen[mk2] = 1;
+        var p2 = bestPlan(hd, null);
+        if (p2) out.dark.push({ discard: d, fromGy: d === '제로마키나', plan: p2, planlibScore: p2.final_score });
+      });
+      out.dark = stableSort(out.dark, function (x) { return -x.planlibScore; });
+    }
+    // 가장 좋은 것(같은 점수면 패 그대로 → 스몰 월드 → 다크 오컬티즘 순 — smallworld.py best_for 처럼 안 바꾼 패 우선)
     out.best = out.base ? { title: '패 그대로', plan: out.base } : null;
     if (out.sw.length && (!out.best || out.sw[0].planlibScore > out.best.plan.final_score)) out.best = { title: swTitle(out.sw[0]), plan: out.sw[0].plan, sw: out.sw[0] };
+    if (out.dark.length && (!out.best || out.dark[0].planlibScore > out.best.plan.final_score)) out.best = { title: darkTitle(out.dark[0]), plan: out.dark[0].plan, dark: out.dark[0] };
     return out;
   }
+  function darkTitle(w) { return '다크 오컬티즘: ' + (w.discards || [w.discard]).join('/') + ' 버림 → 제로마키나 ' + (w.fromGy ? '묘지에서 회수' : '덱에서 서치'); }
   function swTitle(w) { return '스몰 월드: ' + w.reveal + ' 보여줌 → 다리 ' + w.bridge + ' → ' + w.target + ' 서치'; }
   function stableSort(list, key) { return list.map(function (x, i) { return [key(x), i, x]; }).sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }).map(function (x) { return x[2]; }); }
   // 계산기로 확인할 스몰 월드 후보: 장수 검사 점수가 패 그대로보다 낮지 않은 것 중 위에서 2개
@@ -569,13 +589,14 @@
   // 패를 넣으면 dd-planlib.json 장수 검사 결과를 바로 보여주고, 계산기 결과가 더 좋을 때만 바꾼다(PORTING.md 속도 대책 1)
   function planlibHtml(pb, idp) {
     return '<div class="route-item"><div class="title">' + esc(pb.title) + ' — ' + esc(pb.plan.label) + ' — 점수 ' + pb.plan.final_score + '</div>' +
-      todoHtml(pb.plan.steps, 'planlib|' + pb.plan.id + '|' + (pb.sw ? pb.sw.reveal + pb.sw.bridge + pb.sw.target : ''), idp) +
+      todoHtml(pb.plan.steps, 'planlib|' + pb.plan.id + '|' + (pb.sw ? pb.sw.reveal + pb.sw.bridge + pb.sw.target : pb.dark ? 'dark' + pb.dark.discard : ''), idp) +
       '<p class="small">결과 몬스터: ' + chips(pb.plan.final_monsters) + '</p></div>';
   }
   function calcOpts(r) {
     var opts = [];
     if (r.base) opts.push({ title: r.base.noStarter ? '패 그대로 (이니시 없음 — 29개 루트 전부 시도)' : '패 그대로', res: r.base });
     r.smallWorld.forEach(function (w) { if (w.result) opts.push({ title: swTitle(w), res: w.result }); });
+    (r.dark || []).forEach(function (w) { if (w.result) opts.push({ title: darkTitle(w), res: w.result }); });
     return stableSort(opts, function (o) { return -o.res.score; });
   }
   function calcOptsHtml(opts, key) {

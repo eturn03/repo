@@ -104,6 +104,13 @@ async function shot(page, sel, name) {
         const sw2 = (await page.textContent('#recs .solve')).replace(/\s+/g, ' ');
         check(`${tag} 스몰 월드(이니시 있음)도 경로 검사`, /스몰 월드 경로 \d+가지/.test(sw2) || /스몰 월드:/.test(sw2), (sw2.match(/스몰 월드 경로[^.]*/) || sw2.match(/스몰 월드: [^—]*/) || ['없음'])[0]);
         await shot(page, null, `hand-smallworld-${theme}-${vp.name}.png`);
+        // 다크 오컬티즘: 1장 버리고 제로 마키나 서치한 패로 계산(dd-guide.md 조회표 2단계)
+        await page.click('button[data-act="hand-clear"]').catch(() => {});
+        for (const c of ['다크 오컬티즘', '하루 우라라', 'DD 그리폰', '무한포영', '도미나스 임펄스']) await addCard(page, c);
+        await page.waitForSelector('#recs .solve .calc-src:is(:has-text("실시간 계산"), :has-text("그대로 둠"))', { timeout: 30000 });
+        const dk = (await page.textContent('#recs .solve')).replace(/\s+/g, ' ');
+        check(`${tag} 다크 오컬티즘 → 제로마키나 서치 패로 계산`, /다크 오컬티즘: \S+ 버림 → 제로마키나 덱에서 서치/.test(dk) && !dk.includes('수순 없음'), (dk.match(/다크 오컬티즘: [^—]*— [^—]*— 점수 [\d.]+/) || dk.match(/다크 오컬티즘: [^—]*/) || [''])[0]);
+        await shot(page, null, `hand-darkoccult-${theme}-${vp.name}.png`);
         // 이니시도 스몰 월드도 없는 패: 29개 루트 전부 시도
         await page.click('button[data-act="hand-clear"]').catch(() => {});
         for (const c of ['DD 그리폰', 'DD 스케일 서베이어', '하루 우라라']) await addCard(page, c);

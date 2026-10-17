@@ -1371,9 +1371,11 @@ function DD_CALC_FACTORY(routeList) {
   }
 
   // 패 → 최고 수순 (fillgaps.solve 와 같은 방식). shared=false 면 루트마다 위치 비교·재생을 새로 한다(비교 시험용)
-  function solveHand(mh, banish, allowNoStarter, shared) {
+  // toGy: 패에서 버려 묘지에 있는 카드(다크 오컬티즘 코스트). 덱에서 빼고 묘지에 넣는다
+  function solveHand(mh, banish, allowNoStarter, shared, toGy) {
     var st = initState(mh);
     (banish || []).forEach(function (b) { if (g(st.deck, b) > 0) { st.deck[b] -= 1; inc(st.ban, b); } });
+    (toGy || []).forEach(function (b) { if (g(st.deck, b) > 0) { st.deck[b] -= 1; inc(st.gy, b); } });
     var ctx = shared === false ? null : contCtx(st);
     var hc = cfrom(mh), best = null, tried = [];
     ROUTE_IDS.forEach(function (rid) {
@@ -1389,13 +1391,14 @@ function DD_CALC_FACTORY(routeList) {
     });
     return { best: best, tried: tried };
   }
-  function solveHandOut(mh, banish, allowNoStarter) {
-    var r = solveHand(mh, banish, allowNoStarter);
+  function solveHandOut(mh, banish, allowNoStarter, toGy) {
+    var r = solveHand(mh, banish, allowNoStarter, true, toGy);
     if (!r.best) return null;
     var p = pack(r.best);
     return { hand: mh, tried: r.tried, plan: planOf(p), score: p.score };
   }
 
+  var DECK_ZM_SRC = []; for (var zi = 0; zi < (MAIN['제로마키나'] ? MAIN['제로마키나'][0] : 3); zi++) DECK_ZM_SRC.push('제로마키나');
   var MODEL = {}; Object.keys(MAIN).concat(Object.keys(CONTRACTS)).forEach(function (n) { MODEL[n] = 1; });
   // 실제 패 전체(모델에 없는 카드 포함)로 수순 계산.
   // sw: 스몰 월드 후보 [{reveal, bridge, target}] — 사이트가 dd-smallworld.json 경로를 dd-planlib.json 장수 검사로 골라 넘긴 것만 계산한다
@@ -1421,7 +1424,26 @@ function DD_CALC_FACTORY(routeList) {
       seen[key] = { reveal: p.reveal, bridge: p.bridge, target: p.target, planlibScore: p.planlibScore, result: sr && sr.score > 0 ? sr : null };
       res.smallWorld.push(seen[key]);
     });
-    if (!res.base && !res.smallWorld.some(function (w) { return w.result; })) res.note = modeled.length ? '수순 없음 — 29개 루트를 전부 시도했지만 몬스터가 남는 수순을 못 찾았다' : '수순 없음 — 계산기에 들어가는 카드(DD 몬스터·계약서)가 패에 없다';
+    // 다크 오컬티즘(dd-guide.md 조회표 2단계): 패 1장 버리고 제로 마키나 서치. 버리는 카드마다 계산(같은 결과가 되는 카드는 하나로)
+    res.dark = [];
+    if (full.indexOf('다크오컬티즘') >= 0) {
+      var rest = full.slice(); rest.splice(rest.indexOf('다크오컬티즘'), 1);
+      var dseen = {};
+      rest.forEach(function (d, i) {
+        var h3 = rest.slice(); h3.splice(i, 1);
+        var fromGy = d === '제로마키나';
+        if (!fromGy && g(cfrom(DECK_ZM_SRC), '제로마키나') - g(cfrom(rest), '제로마키나') < 1) return;
+        h3.push('제로마키나');
+        var m3 = h3.filter(function (n) { return MODEL[n]; }).sort();
+        var gy = MODEL[d] && !fromGy ? [d] : [];
+        var key = m3.join('+') + '|' + gy.join('');
+        if (dseen[key]) { dseen[key].discards.push(d); return; }
+        var dr = solveHandOut(m3, [], true, gy);
+        dseen[key] = { discard: d, discards: [d], fromGy: fromGy, result: dr && dr.score > 0 ? dr : null };
+        res.dark.push(dseen[key]);
+      });
+    }
+    if (!res.base && !res.smallWorld.some(function (w) { return w.result; }) && !res.dark.some(function (w) { return w.result; })) res.note = modeled.length ? '수순 없음 — 29개 루트를 전부 시도했지만 몬스터가 남는 수순을 못 찾았다' : '수순 없음 — 계산기에 들어가는 카드(DD 몬스터·계약서)가 패에 없다';
     return res;
   }
 
