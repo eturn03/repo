@@ -1,9 +1,9 @@
 import Foundation
 
 /// 빅뱅 전 StatusBar.img로 상태바 아래쪽(LV·이름·HP/MP/EXP) 부분을 합성.
-/// 결과 크기 570×38: 원본 800×71 바탕에서 아래 38줄, EXP 칸 끝(570)까지.
+/// 결과 크기 565×38: 원본 800×71 바탕에서 아래 38줄, EXP 칸 끝(+은색 테두리 2칸)까지.
 public struct StatusBarSkin {
-    public static let size = (width: 570, height: 38)
+    public static let size = (width: 565, height: 38)
     static let cropY = 33
     static let gaugeOrigin = (x: 216, y: 37 - 33)
     /// HP·MP·EXP 막대의 안쪽 채움 영역 (gauge/bar 기준 x 범위, y 15...28)
@@ -92,7 +92,7 @@ public struct StatusBarSkin {
                         hpText: String, mpText: String, expText: String) -> Bitmap {
         var out = Bitmap(width: Self.size.width, height: Self.size.height)
         out.draw(background, x: 0, y: 0, sx: 0, sy: Self.cropY, w: Self.size.width, h: Self.size.height)
-        out.draw(background2, x: 0, y: 0, sx: 0, sy: Self.cropY, w: background2.width, h: Self.size.height)
+        out.draw(background2, x: 0, y: 0, sx: 0, sy: Self.cropY, w: Self.size.width, h: Self.size.height)
 
         var gauge = bar
         for ((x0, x1), fraction) in zip(Self.segments, [hp, mp, exp]) {

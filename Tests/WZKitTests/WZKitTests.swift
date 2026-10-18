@@ -71,7 +71,7 @@ final class WZKitTests: XCTestCase {
             emptyColor: (204, 204, 204), glyphs: glyphs
         )
         let out = skin.compose(hp: 0.5, mp: 1, exp: 0, hpText: "[1:00/2:00]", mpText: "[1/1]", expText: "")
-        XCTAssertEqual(out.width, 570)
+        XCTAssertEqual(out.width, 565)
         XCTAssertEqual(out.height, 38)
         // HP 막대 오른쪽 끝은 회색, 왼쪽 끝은 막대 색
         XCTAssertTrue(out.pixel(x: 216 + 100, y: 4 + 20) == (204, 204, 204, 255))
@@ -80,6 +80,6 @@ final class WZKitTests: XCTestCase {
         XCTAssertTrue(out.pixel(x: 216 + 224, y: 4 + 20) == (204, 204, 204, 255))
         XCTAssertTrue(out.pixel(x: 216 + 213, y: 4 + 20) == (200, 200, 200, 255))
         // 오른쪽 끝은 backgrnd2 판
-        XCTAssertTrue(out.pixel(x: 565, y: 20) == (20, 20, 20, 255))
+        XCTAssertTrue(out.pixel(x: 560, y: 20) == (20, 20, 20, 255))
     }
 }
