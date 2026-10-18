@@ -107,6 +107,11 @@ public struct Schedule: Codable, Equatable {
         }
     }
 
+    /// 블록 하나 삭제 (뒤 일정 시간은 그대로, 지운 자리는 빈 시간)
+    public mutating func removeBlock(id: UUID) {
+        blocks.removeAll { $0.id == id }
+    }
+
     public mutating func resetToOriginal() {
         for k in blocks.indices {
             blocks[k].start = blocks[k].originalStart

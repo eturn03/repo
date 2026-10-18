@@ -166,6 +166,14 @@ final class ScheduleCoreTests: XCTestCase {
         XCTAssertEqual(s.position(at: at(10, 10)), .inBlock(index: 2))
     }
 
+    func testRemoveBlockLeavesGap() {
+        var s = sample()
+        s.removeBlock(id: s.blocks[1].id)   // B 삭제
+        XCTAssertEqual(s.blocks.map(\.title), ["A", "C"])
+        XCTAssertEqual(s.blocks[1].start, at(10, 45))
+        XCTAssertEqual(s.position(at: at(10, 10)), .gap(nextIndex: 1))
+    }
+
     func testResetToOriginal() {
         var s = sample()
         s.endCurrent(at: at(9, 40), mode: .pullForward, status: .completed)

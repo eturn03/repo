@@ -277,6 +277,22 @@ final class AppStore: ObservableObject {
         persistAndRefresh()
     }
 
+    /// 블록 하나 삭제. 진행 중인 블록을 지워도 레벨업·블록 시작음 없이 표시만 바뀜.
+    func deleteBlock(id: UUID) {
+        schedule.removeBlock(id: id)
+        lastPosition = schedule.position(at: Date())
+        play(.delete)
+        persistAndRefresh()
+    }
+
+    /// 오늘 일정 전체 삭제
+    func deleteAllBlocks() {
+        schedule = Schedule()
+        lastPosition = .empty
+        play(.delete)
+        persistAndRefresh()
+    }
+
     func setLaunchAtLogin(_ on: Bool) {
         do {
             try LoginItem.set(on)

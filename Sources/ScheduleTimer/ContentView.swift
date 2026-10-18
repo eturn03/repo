@@ -22,6 +22,7 @@ struct ContentView: View {
     @State private var parseErrors: [ParseError] = []
     @State private var importMessage: String?
     @State private var confirmTrash = false
+    @State private var confirmDeleteAll = false
 
     var body: some View {
         ScrollView {
@@ -119,11 +120,25 @@ struct ContentView: View {
                                 .foregroundStyle(Color.accentColor)
                                 .id("now")
                         }
-                        BlockRow(
-                            block: block,
-                            isCurrent: position == .inBlock(index: index),
-                            isPast: block.end <= store.now
-                        )
+                        HStack(alignment: .top) {
+                            BlockRow(
+                                block: block,
+                                isCurrent: position == .inBlock(index: index),
+                                isPast: block.end <= store.now
+                            )
+                            Spacer(minLength: 4)
+                            Button {
+                                store.deleteBlock(id: block.id)
+                            } label: {
+                                Image(systemName: "trash")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.borderless)
+                            .help("이 블록 삭제 (뒤 일정 시간은 그대로)")
+                        }
+                        .contextMenu {
+                            Button("이 블록 삭제") { store.deleteBlock(id: block.id) }
+                        }
                         .id(position == .inBlock(index: index) ? "now" : block.id.uuidString)
                     }
                 }
@@ -131,6 +146,18 @@ struct ContentView: View {
             }
             .frame(minHeight: 120, maxHeight: 320)
             .onAppear { proxy.scrollTo("now", anchor: .center) }
+        }
+        .safeAreaInset(edge: .bottom, alignment: .leading) {
+            if !blocks.isEmpty {
+                Button("오늘 일정 전체 삭제") { confirmDeleteAll = true }
+                    .confirmationDialog("오늘 일정 \(blocks.count)개를 모두 지울까?", isPresented: $confirmDeleteAll) {
+                        Button("전체 삭제", role: .destructive) { store.deleteAllBlocks() }
+                        Button("취소", role: .cancel) {}
+                    } message: {
+                        Text("되돌릴 수 없어. 새 일정은 일정 입력으로 다시 넣으면 돼.")
+                    }
+                    .padding(.top, 4)
+            }
         }
     }
 

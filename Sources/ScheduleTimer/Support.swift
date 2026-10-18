@@ -67,7 +67,7 @@ struct Storage {
 /// 효과음이 나는 상황. 소리는 설정 창에서 바꿀 수 있고, quiet는 "작은 효과음" 볼륨을 씀.
 enum SoundEvent: String, CaseIterable, Identifiable {
     case levelUp, allDone, blockStart, skip, scheduleSaved, scheduleFailed
-    case extend, reset, click, openSettings, dragStart, dragEnd
+    case extend, reset, delete, click, openSettings, dragStart, dragEnd
 
     var id: String { rawValue }
 
@@ -81,6 +81,7 @@ enum SoundEvent: String, CaseIterable, Identifiable {
         case .scheduleFailed: return "일정 저장 실패"
         case .extend: return "연장 (+5/+10분)"
         case .reset: return "원래 일정으로 되돌리기"
+        case .delete: return "일정 삭제"
         case .click: return "버튼 클릭"
         case .openSettings: return "설정 창 열기"
         case .dragStart: return "상태바 끌기 시작"
@@ -99,6 +100,7 @@ enum SoundEvent: String, CaseIterable, Identifiable {
         case .scheduleFailed: return "Game/EnchantFailure"
         case .extend: return "Game/DropItem"
         case .reset: return "Game/Transform"
+        case .delete: return "UI/MenuDown"
         case .click: return "UI/BtMouseClick"
         case .openSettings: return "UI/MenuUp"
         case .dragStart: return "UI/DragStart"
