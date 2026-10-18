@@ -140,7 +140,7 @@ struct StatusBarView: View {
             )
         }
         .padding(.horizontal, s(8))
-        .padding(.vertical, s(4))
+        .padding(.vertical, s(3))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             RoundedRectangle(cornerRadius: s(4))
@@ -180,7 +180,7 @@ private struct Gauge: View {
     let scale: CGFloat
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3 * scale) {
+        VStack(alignment: .leading, spacing: 2 * scale) {
             HStack(alignment: .firstTextBaseline, spacing: 3 * scale) {
                 Text(label)
                     .font(.system(size: 14 * scale, weight: .heavy))
@@ -212,7 +212,7 @@ private struct Gauge: View {
                         .strokeBorder(Color.black.opacity(0.85), lineWidth: scale)
                 )
             }
-            .frame(height: 15 * scale)
+            .frame(height: 19 * scale)
         }
         .frame(maxWidth: .infinity)
     }
