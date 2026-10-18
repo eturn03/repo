@@ -37,7 +37,8 @@ bash build.sh
 ```
 
 - 마지막에 `✅ 설치 완료`가 나오고, 화면 아래쪽에 상태바가 뜨면 성공.
-- 앱은 `~/Applications/ScheduleTimer.app`(내 홈 폴더 안의 응용 프로그램)에 설치됨.
+- 앱은 `/Applications/ScheduleTimer.app`(응용 프로그램 폴더)에 설치됨. 쓸 권한이 없으면 `~/Applications`(내 홈의 응용 프로그램).
+- 한 번 가져온 메이플 파일은 앱 데이터 폴더에 남아서, 앱을 켤 때·업데이트 후에도 자동으로 읽음.
 
 ### 5. 처음 실행하면
 - 화면 아래쪽에 상태바가 뜨고, 일정이 없으면 설정 창이 같이 열림.
@@ -116,6 +117,8 @@ bash build.sh
 | `UIWindow.img` | UI.wz | 일정 입력창을 메이플 메신저 창 모양으로 |
 | 글꼴 (.ttf/.otf/.ttc) | 윈도우 `C:\Windows\Fonts`의 굴림·돋움 등 | 상태바 이름·입력창 글꼴 (설정 창에서 선택, 기본은 돋움 우선) |
 
+- 윈도우 원본 `gulim.ttc`(굴림·돋움 4종)에는 12px 비트맵 글자가 들어 있어서, 상태바 이름 줄이 옛날 게임처럼 각진 글자로 나옴. 변환된 낱개 .ttf는 한글 비트맵이 깨진 경우가 있어 앱이 알아서 건너뜀.
+
 - 파일이 없으면 코드로 그린 모양과 macOS 기본음을 씀.
 - 이 폴더의 파일은 내 맥에만 있고 GitHub 저장소에는 올라가지 않음.
 
@@ -166,6 +169,6 @@ bash build.sh
 1. 메뉴 막대 창에서 **종료**.
 2. 터미널에서:
 ```bash
-rm -rf ~/Applications/ScheduleTimer.app ~/Library/Application\ Support/ScheduleTimer
+rm -rf /Applications/ScheduleTimer.app ~/Applications/ScheduleTimer.app ~/Library/Application\ Support/ScheduleTimer
 ```
 3. 시스템 설정 > 일반 > 로그인 항목에 남아 있으면 제거.

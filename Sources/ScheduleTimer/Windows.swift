@@ -277,6 +277,7 @@ private struct StatusBarRoot: View {
                     snapshot: store.snapshot,
                     nickname: store.nickname,
                     fontName: store.customFontName,
+                    pixelFont: store.pixelFont,
                     scale: store.barScale,
                     onOpenSettings: onOpenSettings,
                     onDrag: onDrag

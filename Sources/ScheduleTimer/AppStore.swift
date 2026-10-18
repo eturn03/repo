@@ -35,6 +35,8 @@ final class AppStore: ObservableObject {
     /// UIWindow.img의 메신저 창 (있으면 일정 입력을 메이플 창으로)
     @Published private(set) var messengerSkin: MessengerSkin?
     @Published private(set) var skinMessage = ""
+    /// 옛 윈도우 굴림·돋움의 12px 비트맵 글자 (있으면 상태바 이름을 원본처럼 각지게)
+    @Published private(set) var pixelFont: BitmapFont?
     /// Skin 폴더에 넣은 글꼴들
     @Published private(set) var fontChoices: [FontLoader.Face] = []
     /// 고른 글꼴 (PostScript 이름, "" = 시스템 글꼴, nil = 자동: 돋움 우선)
@@ -190,6 +192,9 @@ final class AppStore: ObservableObject {
         soundBank = bank.sounds.isEmpty ? nil : bank
         fontChoices = FontLoader.registerAll(in: AppFolder.skin)
         messages.append(fontChoices.isEmpty ? "글꼴: 시스템 글꼴 (ttf/otf/ttc 없음)" : "글꼴: \(fontChoices.count)개 불러옴")
+        let pixel = PixelFontLoader.load(folder: AppFolder.skin, preferred: selectedFontName)
+        pixelFont = pixel?.font
+        messages.append(pixel.map { "상태바 글자: \($0.label) 비트맵" } ?? "상태바 글자: 비트맵 글꼴 없음 (부드러운 글꼴 사용)")
         skinMessage = messages.joined(separator: "\n")
     }
 

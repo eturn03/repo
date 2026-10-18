@@ -263,6 +263,34 @@ enum FontLoader {
     }
 }
 
+/// Skin 폴더 글꼴 중 12px 비트맵 글자(옛 윈도우 굴림·돋움)가 제대로 들어 있는 것 찾기
+enum PixelFontLoader {
+    static func load(folder: URL, preferred: String?) -> (font: BitmapFont, label: String)? {
+        let files = ((try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? [])
+            .filter { ["ttf", "otf", "ttc"].contains($0.pathExtension.lowercased()) }
+        var candidates: [(rank: Int, data: [UInt8], face: BitmapFont.Face, file: String)] = []
+        for url in files {
+            guard let data = try? [UInt8](Data(contentsOf: url)) else { continue }
+            for face in BitmapFont.faces(in: data) {
+                let family = face.family.lowercased()
+                let rank: Int
+                if let preferred, face.postScriptName == preferred { rank = 0 }
+                else if family.contains("dotum"), !family.contains("che") { rank = 1 }
+                else if family.contains("gulim"), !family.contains("che") { rank = 2 }
+                else { rank = 3 }
+                candidates.append((rank, data, face, url.lastPathComponent))
+            }
+        }
+        // 낱개로 변환된 파일은 한글 조각 연결이 깨진 경우가 있어서 실제로 그려지는지 확인
+        for c in candidates.sorted(by: { ($0.rank, $0.file) < ($1.rank, $1.file) }) {
+            if let font = BitmapFont(data: c.data, face: c.face, ppem: 12), font.canDraw("가나다경임택ABC12[]") {
+                return (font, "\(c.face.family) 12px (\(c.file))")
+            }
+        }
+        return nil
+    }
+}
+
 /// 로그인 시 자동 실행
 enum LoginItem {
     static var isEnabled: Bool { SMAppService.mainApp.status == .enabled }

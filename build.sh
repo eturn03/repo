@@ -21,10 +21,16 @@ if [ "${BUILD_ONLY:-0}" = "1" ]; then
     exit 0
 fi
 
-DEST="$HOME/Applications/ScheduleTimer.app"
+# 맥 기본 '응용 프로그램' 폴더에 설치 (쓸 수 없으면 내 홈의 응용 프로그램 폴더)
+if [ -w /Applications ]; then
+    DEST="/Applications/ScheduleTimer.app"
+    rm -rf "$HOME/Applications/ScheduleTimer.app"   # 예전 위치의 복사본 정리
+else
+    DEST="$HOME/Applications/ScheduleTimer.app"
+    mkdir -p "$HOME/Applications"
+fi
 pkill -x ScheduleTimer 2>/dev/null || true
 sleep 1
-mkdir -p "$HOME/Applications"
 rm -rf "$DEST"
 cp -R "$APP" "$DEST"
 open "$DEST"

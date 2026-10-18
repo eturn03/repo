@@ -8,6 +8,8 @@ struct SkinStatusBarView: View {
     let snapshot: StatusSnapshot
     let nickname: String
     let fontName: String?
+    /// 있으면 이름 두 줄을 원본처럼 12px 비트맵 글자로
+    let pixelFont: BitmapFont?
     let scale: CGFloat
     var onOpenSettings: () -> Void = {}
     var onDrag: (DragGesture.Value?) -> Void = { _ in }
@@ -20,19 +22,21 @@ struct SkinStatusBarView: View {
             barImage
                 .frame(width: s(size.width), height: s(size.height))
 
-            // 지금 할 일 / 닉네임: 화면 크기 그대로 부드럽게 (12px에서 확대하면 맥에서 획이 뭉개짐)
-            VStack(alignment: .leading, spacing: 0) {
-                bracketText(snapshot.title, base: snapshot.phase == .inBlock ? .white : Color(white: 0.75))
-                    .frame(height: s(14), alignment: .leading)
-                bracketText(nickname, base: .white)
-                    .frame(height: s(14), alignment: .leading)
+            // 지금 할 일 / 닉네임: 비트맵 글꼴이 없으면 화면 크기 그대로 부드럽게
+            if pixelFont == nil {
+                VStack(alignment: .leading, spacing: 0) {
+                    bracketText(snapshot.title, base: snapshot.phase == .inBlock ? .white : Color(white: 0.75))
+                        .frame(height: s(14), alignment: .leading)
+                    bracketText(nickname, base: .white)
+                        .frame(height: s(14), alignment: .leading)
+                }
+                .font(nameFont)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .frame(width: s(StatusBarSkin.nameMaxX - StatusBarSkin.nameOrigin.x), alignment: .leading)
+                .offset(x: s(StatusBarSkin.nameOrigin.x), y: s(StatusBarSkin.nameOrigin.y))
+                .allowsHitTesting(false)
             }
-            .font(nameFont)
-            .lineLimit(1)
-            .truncationMode(.tail)
-            .frame(width: s(StatusBarSkin.nameMaxX - StatusBarSkin.nameOrigin.x), alignment: .leading)
-            .offset(x: s(StatusBarSkin.nameOrigin.x), y: s(StatusBarSkin.nameOrigin.y))
-            .allowsHitTesting(false)
         }
         .frame(width: s(size.width), height: s(size.height), alignment: .topLeading)
         .contentShape(Rectangle())
@@ -53,13 +57,28 @@ struct SkinStatusBarView: View {
             hp: snapshot.hpFraction, mp: snapshot.mpFraction, exp: snapshot.expProgress,
             hpText: snapshot.hpText, mpText: snapshot.mpText, expText: snapshot.expText
         )
-        if let cgImage = base.cgImage() {
+        let bitmap = pixelFont.map { withPixelNames(base, font: $0) } ?? base
+        if let cgImage = bitmap.cgImage() {
             Image(decorative: cgImage, scale: 1)
                 .interpolation(.none)
                 .resizable()
         } else {
             Color.black
         }
+    }
+
+    /// 이름 두 줄을 비트맵 글자로 이미지 안에 그림 (괄호만 초록)
+    private func withPixelNames(_ base: Bitmap, font: BitmapFont) -> Bitmap {
+        var out = base
+        let origin = StatusBarSkin.nameOrigin
+        let maxWidth = StatusBarSkin.nameMaxX - origin.x
+        let titleColor: (r: UInt8, g: UInt8, b: UInt8) = snapshot.phase == .inBlock ? (255, 255, 255) : (190, 190, 190)
+        func colors(_ base: (r: UInt8, g: UInt8, b: UInt8)) -> (Character) -> (r: UInt8, g: UInt8, b: UInt8) {
+            { ch in ch == "[" || ch == "]" ? PixelText.bracketColor : base }
+        }
+        out.draw(font.render(snapshot.title, maxWidth: maxWidth, color: colors(titleColor)), x: origin.x, y: origin.y)
+        out.draw(font.render(nickname, maxWidth: maxWidth, color: colors((255, 255, 255))), x: origin.x, y: origin.y + 14)
+        return out
     }
 
     private var nameFont: Font {
