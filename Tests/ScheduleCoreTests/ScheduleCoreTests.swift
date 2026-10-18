@@ -186,6 +186,27 @@ final class ScheduleCoreTests: XCTestCase {
         XCTAssertEqual(s.blocks.map(\.title), ["C"])
     }
 
+    func testDayBoundaryIsFourAM() {
+        XCTAssertEqual(Schedule.dayBoundary(for: at(10, 0), calendar: cal), at(4, 0))
+        XCTAssertEqual(Schedule.dayBoundary(for: at(4, 0), calendar: cal), at(4, 0))
+        // 새벽 1시는 아직 전날 일정
+        XCTAssertEqual(Schedule.dayBoundary(for: at(1, 0, dayOffset: 1), calendar: cal), at(4, 0))
+    }
+
+    func testExpiredBlocksDoNotCount() {
+        // 10:10에 등록: A(9-10)는 이미 끝남 → 지남, B는 진행 중
+        let blocks = Schedule.markingExpired(sample().blocks, now: at(10, 10))
+        var s = Schedule(blocks: blocks)
+        XCTAssertEqual(s.blocks[0].status, .expired)
+        var snap = StatusSnapshot(schedule: s, now: at(10, 10))
+        XCTAssertEqual(snap.level, 0)
+        XCTAssertEqual(snap.mpTotal, 2)
+        XCTAssertEqual(snap.phase, .inBlock)
+        s.resetToOriginal()
+        snap = StatusSnapshot(schedule: s, now: at(10, 10))
+        XCTAssertEqual(snap.level, 0)   // 되돌려도 지남은 그대로
+    }
+
     func testRemoveBlockLeavesGap() {
         var s = sample()
         s.removeBlock(id: s.blocks[1].id)   // B 삭제

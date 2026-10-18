@@ -5,6 +5,7 @@ public enum BlockStatus: String, Codable {
     case completed   // 일찍 끝냄
     case skipped     // 건너뜀
     case dropped     // 연장 때문에 시간이 0이 되어 없어짐
+    case expired     // 등록할 때 이미 끝나 있던 블록 (레벨에 안 침)
 }
 
 public struct Block: Codable, Identifiable, Equatable {
@@ -144,7 +145,22 @@ public struct Schedule: Codable, Equatable {
         for k in blocks.indices {
             blocks[k].start = blocks[k].originalStart
             blocks[k].end = blocks[k].originalEnd
-            blocks[k].status = .scheduled
+            if blocks[k].status != .expired { blocks[k].status = .scheduled }
+        }
+    }
+
+    /// 하루의 경계: 가장 최근의 새벽 4시 (자정 넘어 공부해도 그날 일정으로 취급)
+    public static func dayBoundary(for now: Date, calendar: Calendar = .current) -> Date {
+        let today4 = calendar.date(bySettingHour: 4, minute: 0, second: 0, of: now) ?? calendar.startOfDay(for: now)
+        return today4 <= now ? today4 : calendar.date(byAdding: .day, value: -1, to: today4) ?? today4
+    }
+
+    /// 등록 시점에 이미 끝난 블록은 '지남'으로 (레벨·MP에 안 침)
+    public static func markingExpired(_ blocks: [Block], now: Date) -> [Block] {
+        blocks.map { block in
+            var b = block
+            if b.end <= now { b.status = .expired }
+            return b
         }
     }
 

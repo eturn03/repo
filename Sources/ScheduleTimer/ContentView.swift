@@ -453,6 +453,7 @@ private struct BlockRow: View {
         case .completed: return "일찍 끝냄"
         case .skipped: return "건너뜀"
         case .dropped: return "없어짐"
+        case .expired: return "지남 (등록 전)"
         case .scheduled:
             if block.isModified { return "시간 변경" }
             return isPast ? "지남" : nil

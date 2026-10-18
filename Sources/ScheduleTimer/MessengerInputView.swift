@@ -194,7 +194,7 @@ struct MessengerInputView: View {
         let result = AppStore.parse(text, tomorrow: tomorrow)
         guard append else { return (result.blocks.count, result.errors) }
         var copy = store.schedule
-        copy.removeBlocks(endingBefore: Calendar.current.startOfDay(for: Date()))
+        copy.removeBlocks(endingBefore: Schedule.dayBoundary(for: Date()))
         let (added, conflicts) = copy.merge(result)
         return (added, (result.errors + conflicts).sorted { $0.lineNumber < $1.lineNumber })
     }

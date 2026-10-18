@@ -87,6 +87,7 @@ final class AppStore: ObservableObject {
     private var lastSecond = 0
     private var lastPosition: Position
     private var quietNextTransition = false
+    private var lastBoundary = Date.distantPast
     private var activity: NSObjectProtocol?
 
     init() {
@@ -108,6 +109,13 @@ final class AppStore: ObservableObject {
         quietVolume = defaults.object(forKey: Keys.quietVolume) as? Double ?? 0.2
         selectedFontName = defaults.string(forKey: Keys.fontName)
         schedule = storage.load()
+        // 지난 날짜(새벽 4시 이전에 끝난) 일정 정리
+        let boundary = Schedule.dayBoundary(for: Date())
+        lastBoundary = boundary
+        if schedule.blocks.contains(where: { $0.end <= boundary }) {
+            schedule.removeBlocks(endingBefore: boundary)
+            storage.save(schedule)
+        }
         lastPosition = .empty
         lastPosition = schedule.position(at: Date())
 
@@ -248,7 +256,8 @@ final class AppStore: ObservableObject {
     /// 넣을 블록이 하나도 없으면 기존 일정 유지.
     @discardableResult
     func saveSchedule(text: String, tomorrow: Bool, append: Bool) -> SaveOutcome {
-        let result = Self.parse(text, tomorrow: tomorrow)
+        var result = Self.parse(text, tomorrow: tomorrow)
+        result.blocks = Schedule.markingExpired(result.blocks, now: Date())
         guard !result.blocks.isEmpty else {
             play(.scheduleFailed)
             return SaveOutcome(added: 0, errors: result.errors)
@@ -258,7 +267,7 @@ final class AppStore: ObservableObject {
             return SaveOutcome(added: result.blocks.count, errors: result.errors)
         }
         var merged = schedule
-        merged.removeBlocks(endingBefore: Calendar.current.startOfDay(for: Date()))
+        merged.removeBlocks(endingBefore: Schedule.dayBoundary(for: Date()))
         let (added, conflicts) = merged.merge(result)
         let errors = (result.errors + conflicts).sorted { $0.lineNumber < $1.lineNumber }
         guard added > 0 else {
@@ -344,6 +353,17 @@ final class AppStore: ObservableObject {
         let wokeUp = t.timeIntervalSince(lastTick) > 10 || quietNextTransition
         lastTick = t
         quietNextTransition = false
+
+        // 새벽 4시가 지나면 지난 날짜 일정 정리 (조용히)
+        let boundary = Schedule.dayBoundary(for: t)
+        if boundary != lastBoundary {
+            lastBoundary = boundary
+            if schedule.blocks.contains(where: { $0.end <= boundary }) {
+                schedule.removeBlocks(endingBefore: boundary)
+                storage.save(schedule)
+                lastPosition = schedule.position(at: t)
+            }
+        }
 
         let second = Int(t.timeIntervalSince1970.rounded(.down))
         if second != lastSecond {

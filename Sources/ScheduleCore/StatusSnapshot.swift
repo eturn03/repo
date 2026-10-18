@@ -28,7 +28,7 @@ public struct StatusSnapshot: Equatable {
         let live = blocks.filter { $0.isLive }
 
         completedBlocks = blocks.filter { Self.countsAsDone($0, now: now) }.count
-        mpTotal = blocks.count
+        mpTotal = blocks.filter { $0.status != .expired }.count
         mpRemaining = live.filter { $0.end > now }.count
 
         if let first = live.map(\.start).min(), let last = live.map(\.end).max() {
@@ -83,7 +83,7 @@ public struct StatusSnapshot: Equatable {
         switch block.status {
         case .completed: return true
         case .scheduled: return block.end > block.start && block.end <= now
-        case .skipped, .dropped: return false
+        case .skipped, .dropped, .expired: return false
         }
     }
 
