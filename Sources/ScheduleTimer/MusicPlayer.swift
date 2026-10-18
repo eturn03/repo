@@ -29,8 +29,8 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 
     private static let volumeKey = "musicVolume"
-    private static let audioExtensions = ["mp3", "m4a", "wav", "aiff", "aif"]
-    private static let minimumBgmMs = 30_000
+    nonisolated private static let audioExtensions = ["mp3", "m4a", "wav", "aiff", "aif"]
+    nonisolated private static let minimumBgmMs = 30_000
     private var player: AVAudioPlayer?
     private var queue: [Track] = []
 

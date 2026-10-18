@@ -17,8 +17,8 @@ struct StatusBarView: View {
         HStack(spacing: s(3)) {
             levelSection.frame(width: s(108))
             nameSection.frame(width: s(236))
-            settingsButton
             gaugeSection
+            settingsButton
         }
         .padding(s(4))
         .frame(width: s(Self.baseSize.width), height: s(Self.baseSize.height))
