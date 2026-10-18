@@ -1389,13 +1389,16 @@ function DD_CALC_FACTORY(routeList) {
       var b = bestContinuation(st, [rid, 1], 10, null, ctx);
       if (best === null || b.score > best.score) best = b;
     });
-    return { best: best, tried: tried };
+    return { best: best, tried: tried, deck0: st.deck };
   }
   function solveHandOut(mh, banish, allowNoStarter, toGy) {
     var r = solveHand(mh, banish, allowNoStarter, true, toGy);
     if (!r.best) return null;
     var p = pack(r.best);
-    return { hand: mh, tried: r.tried, plan: planOf(p), score: p.score };
+    // 덱에서 꺼낸 장수(시작 덱 - 끝 덱). 시작 덱은 이미 패·제외·묘지로 간 카드를 뺀 것
+    var pulls = {};
+    for (var c in r.deck0) { var d = r.deck0[c] - g(r.best.state.deck, c); if (d > 0) pulls[c] = d; }
+    return { hand: mh, tried: r.tried, plan: planOf(p), score: p.score, deck_pulls: pulls, deck_start: r.deck0 };
   }
 
   var DECK_ZM_SRC = []; for (var zi = 0; zi < (MAIN['제로마키나'] ? MAIN['제로마키나'][0] : 3); zi++) DECK_ZM_SRC.push('제로마키나');
@@ -1417,8 +1420,10 @@ function DD_CALC_FACTORY(routeList) {
       if (full.indexOf(p.reveal) < 0 || full.indexOf('스몰월드') < 0) return;
       var h2 = full.slice(); h2.splice(h2.indexOf(p.reveal), 1); h2.splice(h2.indexOf('스몰월드'), 1); h2.push(p.target);
       var m2 = h2.filter(function (n) { return MODEL[n]; }).sort();
-      var ban = MODEL[p.bridge] ? [p.bridge] : [];
-      var key = m2.join('+') + '|' + ban.join('');
+      // 다리(덱에서 뒷면 제외)와 보여준 카드(패에서 뒷면 제외) 둘 다 덱에 없는 상태로 시작한다.
+      // 보여준 카드는 바꾼 패 m2 에 없으니, 그대로 두면 initState 가 덱에 있는 것으로 센다 → 덱에서 1장 빼서 제외로
+      var ban = [p.bridge, p.reveal].filter(function (n) { return MODEL[n]; });
+      var key = m2.join('+') + '|' + ban.slice().sort().join('+');
       if (seen[key]) return;
       var sr = solveHandOut(m2, ban);
       seen[key] = { reveal: p.reveal, bridge: p.bridge, target: p.target, planlibScore: p.planlibScore, result: sr && sr.score > 0 ? sr : null };

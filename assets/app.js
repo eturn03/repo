@@ -424,11 +424,13 @@
         if ((d40[t.target] || 0) - (h[t.target] || 0) - (t.target === t.bridge ? 1 : 0) < 1) return;
         var h2 = {}; for (var k in h) h2[k] = h[k];
         h2[t.reveal] -= 1; h2['스몰월드'] -= 1; h2[t.target] = (h2[t.target] || 0) + 1;
-        var ban = {}; ban[t.bridge] = 1;
+        // 다리(bridge)는 덱에서, 보여준 카드(reveal)는 패에서 뒷면 제외 → 둘 다 덱으로 안 돌아오므로 덱 장수에서 1씩 뺀다(dd-smallworld.json rule, 2026-10-18 정정)
+        var ban = {}; ban[t.bridge] = 1; ban[t.reveal] = (ban[t.reveal] || 0) + 1;
         var p = bestPlan(h2, ban);
         if (!p) return;
-        // 계산기에 들어가는 패가 같으면(모델 밖 카드만 다르면) 한 번만
-        var mk = Object.keys(h2).filter(function (n) { return h2[n] > 0 && CALC_MODEL.indexOf(n) >= 0; }).sort().map(function (n) { return n + h2[n]; }).join('+') + '|' + (CALC_MODEL.indexOf(t.bridge) >= 0 ? t.bridge : '');
+        // 계산기에 들어가는 패·제외 카드가 같으면(모델 밖 카드만 다르면) 한 번만
+        var mk = Object.keys(h2).filter(function (n) { return h2[n] > 0 && CALC_MODEL.indexOf(n) >= 0; }).sort().map(function (n) { return n + h2[n]; }).join('+') + '|' +
+          [t.bridge, t.reveal].filter(function (n) { return CALC_MODEL.indexOf(n) >= 0; }).sort().join('+');
         if (seen[mk]) return;
         seen[mk] = 1;
         out.sw.push({ reveal: t.reveal, bridge: t.bridge, target: t.target, plan: p, planlibScore: p.final_score });
@@ -447,7 +449,9 @@
         hd['제로마키나'] = (hd['제로마키나'] || 0) + 1;
         var mk2 = Object.keys(hd).filter(function (n) { return hd[n] > 0 && CALC_MODEL.indexOf(n) >= 0; }).sort().map(function (n) { return n + hd[n]; }).join('+') + '|' + (CALC_MODEL.indexOf(d) >= 0 && d !== '제로마키나' ? d : '');
         if (dseen[mk2]) { dseen[mk2].discards.push(d); return; }
-        var p2 = bestPlan(hd, null);
+        // 버린 카드는 묘지로 가니 덱 장수에서 뺀다(제로마키나를 버리면 묘지에서 회수해 패로 돌아오므로 빼지 않음)
+        var dban = {}; if (d !== '제로마키나') dban[d] = 1;
+        var p2 = bestPlan(hd, dban);
         dseen[mk2] = { discard: d, discards: [d], fromGy: d === '제로마키나', plan: p2, planlibScore: p2 ? p2.final_score : -1 };
         if (p2) out.dark.push(dseen[mk2]);
       });

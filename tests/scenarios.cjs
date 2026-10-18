@@ -104,6 +104,14 @@ async function shot(page, sel, name) {
         const sw2 = (await page.textContent('#recs .solve')).replace(/\s+/g, ' ');
         check(`${tag} 스몰 월드(이니시 있음)도 경로 검사`, /스몰 월드 경로 \d+가지/.test(sw2) || /스몰 월드:/.test(sw2), (sw2.match(/스몰 월드 경로[^.]*/) || sw2.match(/스몰 월드: [^—]*/) || ['없음'])[0]);
         await shot(page, null, `hand-smallworld-${theme}-${vp.name}.png`);
+        // 스몰 월드 reveal 은 덱으로 안 돌아온다: 네크로를 보여주는 경로가 1순위가 되거나, 덱에서 네크로를 꺼내면 안 됨
+        await page.click('button[data-act="hand-clear"]').catch(() => {});
+        for (const c of ['DD 네크로 슬라임', 'DD 마도현자 케플러', 'DD 마도현자 코페르니쿠스', '스몰 월드', '무한포영']) await addCard(page, c);
+        await page.waitForSelector('#recs .solve .calc-src:is(:has-text("실시간 계산"), :has-text("그대로 둠"))', { timeout: 30000 });
+        const t1 = (await page.textContent('#recs .solve .route-item .title')).replace(/\s+/g, ' ');
+        const steps1 = await page.$$eval('#recs .solve .route-item:first-of-type ol.todo li label', (ls) => ls.map((l) => l.textContent));
+        check(`${tag} 스몰 월드 reveal 정정: 네크로 패 → 스몰 월드 없이 A1 수정`, !t1.includes('스몰 월드') && t1.includes('A1 수정(네크로 1장, 코페르 1장 패에 있음)'), t1.slice(0, 70));
+        check(`${tag} 스몰 월드 reveal 정정: 덱에서 네크로 꺼내는 단계 없음`, !steps1.some((x) => /→ 네크로 (묘지로|서치)/.test(x)), steps1.filter((x) => x.includes('네크로')).join(' / ') || '네크로 단계 없음');
         // 다크 오컬티즘: 1장 버리고 제로 마키나 서치한 패로 계산(dd-guide.md 조회표 2단계)
         await page.click('button[data-act="hand-clear"]').catch(() => {});
         for (const c of ['다크 오컬티즘', '하루 우라라', 'DD 그리폰', '무한포영', '도미나스 임펄스']) await addCard(page, c);

@@ -125,8 +125,8 @@
 "def": 0
 }
 },
-"rule": "패에 스몰월드·reveal이 있고, 덱 남은 장수(deck_40 - 패)에서 bridge 1장 이상, target 1장 이상(bridge와 같으면 2장 이상)일 때만 가능. 바꾼 패 = 패 - reveal - 스몰월드 + target. dd-planlib.json 검사 때 bridge는 덱에서 1장 빠진 것으로 계산.",
-"verified": "무작위 패 3,000개 중 스몰 월드로 고른 수순 461건 전부 규칙 체커 통과. 스몰 월드 덕분에 이니시 없는 패 586개 중 568개가 전개 가능해짐(나머지 18개는 경로가 막히거나 수순 없음)."
+"rule": "패에 스몰월드·reveal이 있고, 덱 남은 장수(deck_40 - 원래 패)에서 bridge 1장 이상, target 1장 이상(bridge와 같으면 2장 이상)일 때만 가능. 바꾼 패 = 패 - reveal - 스몰월드 + target. dd-planlib.json 검사 때 덱 남은 장수 = deck_counts - 바꾼 패 - bridge 1장 - reveal 1장 (reveal은 패에서 뒷면 제외되므로 덱으로 돌아가지 않음. 2026-10-18 정정: 이전 판은 reveal을 빼지 않아 덱에 없는 카드를 쓰는 수순이 통과됐음).",
+"verified": "정정 후 무작위 패로 스몰 월드 수순 570건을 고르고, reveal·bridge를 덱에서 뺀 상태로 규칙 체커를 돌려 570건 전부 통과."
 },
 "triples": [
 {

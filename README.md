@@ -31,6 +31,8 @@ Node.js + Playwright가 있으면: `NODE_PATH="$(npm root -g)" node tests/scenar
 
 계산기와 Python fixtures 비교: `node tests/calc_fixtures.cjs` (결과 설명은 `tests/calc-fixtures-report.md`).
 
+추천 1순위가 덱에 없는 카드를 꺼내지 않는지(스몰 월드·다크 오컬티즘 포함, 무작위 패 300개 + 스몰 월드 포함 패 300개): `node tests/deck_pulls_check.cjs` (약 3분, 위반이 있으면 종료 코드 1).
+
 ## GitHub Pages
 
 저장소 설정 → Pages → 브랜치 루트(`/`)를 고르면 그대로 올라간다(`.nojekyll` 포함).
