@@ -414,7 +414,7 @@
       return best;
     }
     var h = count(full);
-    var out = { base: bestPlan(h, null), sw: [] };
+    var out = { base: bestPlan(h, null), sw: [], swAll: [] };
     var SW = window.DD_SW;
     if (SW && h['스몰월드']) {
       var d40 = SW._about.deck_40, seen = {};
@@ -426,16 +426,16 @@
         h2[t.reveal] -= 1; h2['스몰월드'] -= 1; h2[t.target] = (h2[t.target] || 0) + 1;
         // 다리(bridge)는 덱에서, 보여준 카드(reveal)는 패에서 뒷면 제외 → 둘 다 덱으로 안 돌아오므로 덱 장수에서 1씩 뺀다(dd-smallworld.json rule, 2026-10-18 정정)
         var ban = {}; ban[t.bridge] = 1; ban[t.reveal] = (ban[t.reveal] || 0) + 1;
-        var p = bestPlan(h2, ban);
-        if (!p) return;
         // 계산기에 들어가는 패·제외 카드가 같으면(모델 밖 카드만 다르면) 한 번만
         var mk = Object.keys(h2).filter(function (n) { return h2[n] > 0 && CALC_MODEL.indexOf(n) >= 0; }).sort().map(function (n) { return n + h2[n]; }).join('+') + '|' +
           [t.bridge, t.reveal].filter(function (n) { return CALC_MODEL.indexOf(n) >= 0; }).sort().join('+');
-        if (seen[mk]) return;
-        seen[mk] = 1;
-        out.sw.push({ reveal: t.reveal, bridge: t.bridge, target: t.target, plan: p, planlibScore: p.final_score });
+        var p = bestPlan(h2, ban);
+        if (seen[mk]) { if (p && (!seen[mk].plan || p.final_score > seen[mk].plan.final_score)) { seen[mk].plan = p; seen[mk].planlibScore = p.final_score; } return; }
+        seen[mk] = { reveal: t.reveal, bridge: t.bridge, target: t.target, plan: p, planlibScore: p ? p.final_score : -1 };
+        out.swAll.push(seen[mk]);
       });
-      out.sw = stableSort(out.sw, function (x) { return -x.planlibScore; });
+      out.swAll = stableSort(out.swAll, function (x) { return -x.planlibScore; });
+      out.sw = out.swAll.filter(function (x) { return x.plan; });
     }
     // 다크 오컬티즘: 패 1장 버리고 제로 마키나 서치(dd-guide.md 조회표 2단계). 버린 게 제로 마키나면 묘지에서 회수
     out.dark = [];
@@ -474,12 +474,11 @@
   function darkTitle(w) { return '다크 오컬티즘: ' + (w.discards || [w.discard]).join('/') + ' 버림 → 제로마키나 ' + (w.fromGy ? '묘지에서 회수' : '덱에서 서치'); }
   function swTitle(w) { return '스몰 월드: ' + w.reveal + ' 보여줌 → 다리 ' + w.bridge + ' → ' + w.target + ' 서치'; }
   function stableSort(list, key) { return list.map(function (x, i) { return [key(x), i, x]; }).sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }).map(function (x) { return x[2]; }); }
-  // 계산기로 확인할 스몰 월드 후보: 장수 검사 점수가 패 그대로보다 낮지 않은 것 중 위에서 2개
+  // 계산기로 확인할 스몰 월드 후보: 갈 수 있는 경로 전부(계산기에 들어가는 패가 같은 경로는 하나로).
+  // 미리 만든 수순이 없거나 점수가 낮은 경로도 계산기는 더 좋은 수순을 찾을 수 있어서 거르지 않는다. 장수 검사 점수 높은 순으로 보낸다
   function swCandidates(pk) {
     if (!pk) return [];
-    var floor = pk.base ? pk.base.final_score : -Infinity;
-    return pk.sw.filter(function (w) { return w.planlibScore >= floor; }).slice(0, 2)
-      .map(function (w) { return { reveal: w.reveal, bridge: w.bridge, target: w.target, planlibScore: w.planlibScore }; });
+    return pk.swAll.map(function (w) { return { reveal: w.reveal, bridge: w.bridge, target: w.target, planlibScore: w.planlibScore }; });
   }
 
   function htAt(id, step) { return (htData(id) || []).filter(function (x) { return x.step === step; }); }
@@ -654,7 +653,7 @@
         h += planlibHtml(pb, 'pl');
         if (opts.length) h += '<details class="inner"><summary>계산기 결과 보기(' + top.res.score + '점)</summary>' + calcOptsHtml(opts, key) + '</details>';
       }
-      if (r.smallWorld.length) h += '<p class="small muted">스몰 월드 경로 ' + pk.sw.length + '가지를 장수 검사로 거른 뒤 ' + r.smallWorld.length + '가지만 계산기로 확인했다.</p>';
+      if (r.smallWorld.length) h += '<p class="small muted">스몰 월드로 갈 수 있는 경로 ' + r.smallWorld.length + '가지(바뀐 패가 같은 경로는 하나로)를 전부 계산기로 확인했다.</p>';
     } else {
       var why = ent.status === 'running' || ent.status === 'slow' ? '계산기 계산 중… 끝나면 더 좋을 때만 바뀐다' : ent.status === 'timeout' ? '계산이 너무 오래 걸려 멈췄다' : '계산 실패: ' + (ent.error || '');
       h += '<div class="box ' + (ent.status === 'running' || ent.status === 'slow' ? '' : 'warn ') + 'small calc-src"><strong>미리 만든 수순</strong>(dd-planlib.json 장수 검사) · ' + esc(why) + '</div>';
