@@ -263,6 +263,17 @@ struct ContentView: View {
                     Text(music.message)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                    if !music.skippedDuplicates.isEmpty {
+                        DisclosureGroup("겹쳐서 뺀 파일 \(music.skippedDuplicates.count)개") {
+                            ForEach(Array(music.skippedDuplicates.enumerated()), id: \.offset) { _, item in
+                                Text("\(item.file) → \(item.matched)")
+                                    .font(.caption)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                            }
+                        }
+                        .font(.caption)
+                    }
                     volumeSlider("음악 볼륨", value: $music.volume)
                     volumeSlider("효과음 볼륨", value: $store.effectVolume)
                     volumeSlider("작은 효과음 볼륨", value: $store.quietVolume)
