@@ -12,7 +12,10 @@ public struct StatusBarSkin {
 
     /// 이름 칸·LV 칸 위치 (합성 결과 좌표) — 글자는 앱에서 겹쳐 그림
     public static let nameOrigin = (x: 82, y: 5)
-    public static let levelSlot = (x: 39, y: 14, width: 38, height: 21)
+    /// LV 숫자 시작 위치 ("LV." 바로 오른쪽, 높이 맞춤)
+    public static let levelOrigin = (x: 41, y: 14)
+    /// 이름 칸 오른쪽 끝 (글자가 넘치면 여기서 자름)
+    public static let nameMaxX = 205
     public static let buttonSlot = (x: 571, y: 6, width: 27, height: 27)
 
     let background: Bitmap
@@ -115,14 +118,12 @@ public struct StatusBarSkin {
         }
 
         do {
-            // LV 칸 가운데 정렬. Basic.img 숫자가 없으면 주황 블록 + 흰 숫자로 대신 그림
+            // Basic.img 숫자가 없으면 주황 블록 + 흰 숫자로 대신 그림
             let chars = Array(String(max(0, level)))
             let images = chars.compactMap { hasLevelDigits ? levelDigits[$0] : orangeTile($0) }
-            let total = images.reduce(0) { $0 + $1.width } + max(0, images.count - 1)
-            let slot = Self.levelSlot
-            var x = slot.x + (slot.width - total) / 2
+            var x = Self.levelOrigin.x
             for image in images {
-                out.draw(image, x: x, y: slot.y + (slot.height - image.height) / 2)
+                out.draw(image, x: x, y: Self.levelOrigin.y)
                 x += image.width + 1
             }
         }

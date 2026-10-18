@@ -20,19 +20,6 @@ struct SkinStatusBarView: View {
             barImage
                 .frame(width: s(size.width), height: s(size.height))
 
-            // 지금 할 일 / 닉네임
-            VStack(alignment: .leading, spacing: 1 * scale) {
-                Text(snapshot.title)
-                    .foregroundStyle(snapshot.phase == .inBlock ? Color.white : Color(white: 0.75))
-                Text(nickname)
-                    .foregroundStyle(.white)
-            }
-            .font(fontName.map { .custom($0, fixedSize: 12 * scale) } ?? .system(size: 12 * scale, weight: .medium))
-            .lineLimit(1)
-            .truncationMode(.tail)
-            .frame(width: s(205 - StatusBarSkin.nameOrigin.x), alignment: .leading)
-            .offset(x: s(StatusBarSkin.nameOrigin.x), y: s(StatusBarSkin.nameOrigin.y))
-
             settingsButton
                 .offset(x: s(StatusBarSkin.buttonSlot.x), y: s(StatusBarSkin.buttonSlot.y))
         }
@@ -52,6 +39,7 @@ struct SkinStatusBarView: View {
             hp: snapshot.hpFraction, mp: snapshot.mpFraction, exp: snapshot.expProgress,
             hpText: snapshot.hpText, mpText: snapshot.mpText, expText: snapshot.expText
         )
+        let bitmap = withNames(bitmap)
         if let cgImage = bitmap.cgImage() {
             Image(decorative: cgImage, scale: 1)
                 .interpolation(.none)
@@ -59,6 +47,19 @@ struct SkinStatusBarView: View {
         } else {
             Color.black
         }
+    }
+
+    /// 지금 할 일 / 닉네임을 원본처럼 12px 각진 글자로 이미지 안에 그림
+    private func withNames(_ base: Bitmap) -> Bitmap {
+        var out = base
+        let origin = StatusBarSkin.nameOrigin
+        let maxWidth = StatusBarSkin.nameMaxX - origin.x
+        let titleColor: (r: UInt8, g: UInt8, b: UInt8) = snapshot.phase == .inBlock ? (255, 255, 255) : (190, 190, 190)
+        let title = PixelText.render(snapshot.title, fontName: fontName, color: titleColor, maxWidth: maxWidth)
+        let name = PixelText.render(nickname, fontName: fontName, maxWidth: maxWidth)
+        out.draw(title, x: origin.x, y: origin.y)
+        out.draw(name, x: origin.x, y: origin.y + 14)
+        return out
     }
 
     private var settingsButton: some View {
