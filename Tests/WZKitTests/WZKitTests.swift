@@ -2,10 +2,10 @@ import XCTest
 @testable import WZKit
 
 final class WZKitTests: XCTestCase {
-    /// 직접 만든 가짜 WZ 파일 (KMS 키, 게임 데이터 아님):
+    /// 직접 만든 가짜 WZ 파일 (KMS 키, 게임 데이터 아님). 실제 WZ처럼 deflate 끝 표시 없음:
     /// answer=42, title="임진택", plain=4x3 캔버스(zlib), group/secret=같은 캔버스(암호화 블록, 형식 문자열은 위치 참조),
     /// Beep=소리(1234ms, "\xff\xf3TEST")
-    private let fixture = "c/hRvIrYrBCTwgAABQD6YKCW36wQAyoA+3WnkcSsCAADhQgmZha3APtxooTBpwkqAAAAc/pCr4veqBEAAAQDAQAAAAAAFAAAAAB4nGP4/+ED/4f//QxoNADG3hBFAPtmvIrduQlJAAAAc/hRvIrYrBCTwgAAAQD6cquG2qwWCS8AAAAbNAAAAAAABAMBAAAAAAAcAAAAAAkAAADT+Sr9mCxU9R8KAAAAVJhFbVPNkdSIPgD8Q6uA2AlOAAAAc/dSoZDGrT2j4xIABoDSBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgEC//NURVNU"
+    private let fixture = "c/hRvIrYrBCTwgAABQD6YKCW36wQAyoA+3WnkcSsCAADhQgmZha3APtxooTBpwkqAAAAc/pCr4veqBEAAAQDAQAAAAAAFAAAAAB4nGL4/+ED/4f//QxoNAAAAP//APtmvIrduQlJAAAAc/hRvIrYrBCTwgAAAQD6cquG2qwWCS8AAAAbNAAAAAAABAMBAAAAAAAcAAAAAAkAAADT+Sv9mCxU9R8KAAAAVJhFbVPNVwpnhAD8Q6uA2AlOAAAAc/dSoZDGrT2j4xIABoDSBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgEC//NURVNU"
 
     private func root() throws -> WZNode {
         try WZImage.load([UInt8](Data(base64Encoded: fixture)!))

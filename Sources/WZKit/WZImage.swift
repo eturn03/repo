@@ -137,16 +137,46 @@ public struct WZCanvas {
             }
         }
         // Compression의 ZLIB는 헤더 없는 deflate → 앞 2바이트(zlib 헤더) 건너뜀
-        guard zlibStream.count > 2 else { throw WZError.decompressFailed }
+        guard zlibStream.count > 2, expected > 0 else { throw WZError.decompressFailed }
         let body = Array(zlibStream[2...])
+        guard let out = Self.inflateUnterminated(body, expected: expected) else { throw WZError.decompressFailed }
+        return out
+    }
+
+    /// WZ 이미지의 deflate 스트림은 끝 표시(최종 블록)가 없는 경우가 많아서
+    /// 한 번에 푸는 함수는 실패함 → 스트림 방식으로 필요한 만큼만 풂
+    static func inflateUnterminated(_ body: [UInt8], expected: Int) -> [UInt8]? {
         var out = [UInt8](repeating: 0, count: expected)
-        let written = out.withUnsafeMutableBufferPointer { dst in
-            body.withUnsafeBufferPointer { src in
-                compression_decode_buffer(dst.baseAddress!, expected, src.baseAddress!, body.count, nil, COMPRESSION_ZLIB)
+        let placeholder = UnsafeMutablePointer<UInt8>.allocate(capacity: 1)
+        defer { placeholder.deallocate() }
+        var stream = compression_stream(dst_ptr: placeholder, dst_size: 0,
+                                        src_ptr: UnsafePointer(placeholder), src_size: 0, state: nil)
+        guard compression_stream_init(&stream, COMPRESSION_STREAM_DECODE, COMPRESSION_ZLIB) == COMPRESSION_STATUS_OK else {
+            return nil
+        }
+        defer { compression_stream_destroy(&stream) }
+
+        let produced: Int = body.withUnsafeBufferPointer { src in
+            out.withUnsafeMutableBufferPointer { dst in
+                stream.src_ptr = src.baseAddress!
+                stream.src_size = src.count
+                stream.dst_ptr = dst.baseAddress!
+                stream.dst_size = dst.count
+                var status = COMPRESSION_STATUS_OK
+                // 입력을 다 먹거나 출력이 다 찰 때까지 (마무리 신호 없이)
+                while status == COMPRESSION_STATUS_OK, stream.dst_size > 0 {
+                    let before = (stream.src_size, stream.dst_size)
+                    status = compression_stream_process(&stream, 0)
+                    if (stream.src_size, stream.dst_size) == before { break }
+                }
+                // 아직 덜 찼으면 마무리 신호로 남은 출력을 받아봄 (끝 표시가 없어 오류여도 받은 만큼은 씀)
+                if stream.dst_size > 0, status != COMPRESSION_STATUS_ERROR {
+                    _ = compression_stream_process(&stream, Int32(COMPRESSION_STREAM_FINALIZE.rawValue))
+                }
+                return dst.count - stream.dst_size
             }
         }
-        guard written == expected else { throw WZError.decompressFailed }
-        return out
+        return produced == expected ? out : nil
     }
 }
 

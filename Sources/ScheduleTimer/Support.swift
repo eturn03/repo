@@ -242,7 +242,9 @@ enum FontLoader {
             }
             let descriptors = (CTFontManagerCreateFontDescriptorsFromURL(url as CFURL) as? [CTFontDescriptor]) ?? []
             for descriptor in descriptors {
-                guard let name = CTFontDescriptorCopyAttribute(descriptor, kCTFontNameAttribute) as? String else { continue }
+                guard let name = CTFontDescriptorCopyAttribute(descriptor, kCTFontNameAttribute) as? String,
+                      !faces.contains(where: { $0.postScriptName == name })   // 같은 글꼴 파일이 여러 개여도 한 번만
+                else { continue }
                 let display = (CTFontDescriptorCopyAttribute(descriptor, kCTFontDisplayNameAttribute) as? String) ?? name
                 faces.append(Face(postScriptName: name, displayName: display))
             }
