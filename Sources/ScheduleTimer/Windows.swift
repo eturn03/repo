@@ -110,6 +110,7 @@ final class WindowManager {
 
     private func handleDrag(_ value: DragGesture.Value?) {
         guard value != nil else {
+            if dragStart != nil { store.play(.dragEnd) }
             dragStart = nil
             savePosition()
             return
@@ -117,6 +118,7 @@ final class WindowManager {
         let mouse = NSEvent.mouseLocation
         if dragStart == nil {
             dragStart = (mouse, statusPanel.frame.origin)
+            store.play(.dragStart)
         }
         guard let start = dragStart else { return }
         statusPanel.setFrameOrigin(NSPoint(
@@ -159,6 +161,7 @@ final class WindowManager {
     // MARK: - 설정 창
 
     func showSettings() {
+        store.play(.openSettings)
         if settingsWindow == nil {
             let window = NSWindow(
                 contentRect: CGRect(x: 0, y: 0, width: 420, height: 760),

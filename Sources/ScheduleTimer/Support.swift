@@ -64,52 +64,104 @@ struct Storage {
     }
 }
 
-/// 효과음 종류
-enum SoundEffect: String {
-    case levelUp = "levelup"
-    case blockStart = "blockstart"
+/// 효과음이 나는 상황. 소리는 설정 창에서 바꿀 수 있고, quiet는 "작은 효과음" 볼륨을 씀.
+enum SoundEvent: String, CaseIterable, Identifiable {
+    case levelUp, allDone, blockStart, skip, scheduleSaved, scheduleFailed
+    case extend, reset, click, openSettings, dragStart, dragEnd
 
-    /// 게임 파일·직접 넣은 파일이 없을 때 쓰는 macOS 기본음
-    var fallbackName: String {
+    var id: String { rawValue }
+
+    var title: String {
         switch self {
-        case .levelUp: return "Hero"
+        case .levelUp: return "블록 끝 (레벨업)"
+        case .allDone: return "오늘 일정 모두 끝"
+        case .blockStart: return "빈 시간 → 블록 시작"
+        case .skip: return "건너뛰기"
+        case .scheduleSaved: return "일정 저장 성공"
+        case .scheduleFailed: return "일정 저장 실패"
+        case .extend: return "연장 (+5/+10분)"
+        case .reset: return "원래 일정으로 되돌리기"
+        case .click: return "버튼 클릭"
+        case .openSettings: return "설정 창 열기"
+        case .dragStart: return "상태바 끌기 시작"
+        case .dragEnd: return "상태바 놓기"
+        }
+    }
+
+    /// 기본으로 쓸 소리 ("" = macOS 기본음 또는 무음)
+    var defaultSound: String {
+        switch self {
+        case .levelUp: return "Game/LevelUp"
+        case .allDone: return "Game/JobChanged"
+        case .blockStart: return ""
+        case .skip: return "Game/Tombstone"
+        case .scheduleSaved: return "Game/EnchantSuccess"
+        case .scheduleFailed: return "Game/EnchantFailure"
+        case .extend: return "Game/DropItem"
+        case .reset: return "Game/Transform"
+        case .click: return "UI/BtMouseClick"
+        case .openSettings: return "UI/MenuUp"
+        case .dragStart: return "UI/DragStart"
+        case .dragEnd: return "UI/DragEnd"
+        }
+    }
+
+    /// 일반 효과음보다 작게 나는 소리
+    var isQuiet: Bool {
+        switch self {
+        case .levelUp, .allDone, .blockStart: return false
+        default: return true
+        }
+    }
+
+    /// 게임 파일이 없을 때 macOS 기본음 (없으면 무음)
+    var systemFallback: String? {
+        switch self {
+        case .levelUp, .allDone: return "Hero"
         case .blockStart: return "Glass"
+        default: return nil
+        }
+    }
+
+    /// Skin 폴더에 이 이름의 소리 파일이 있으면 최우선 (levelup.mp3, blockstart.mp3)
+    var customFileName: String? {
+        switch self {
+        case .levelUp: return "levelup"
+        case .blockStart: return "blockstart"
+        default: return nil
         }
     }
 }
 
-/// 효과음 재생. 우선순위: Skin 폴더의 levelup.mp3 등 → Game.img 소리 → macOS 기본음
+/// 효과음 재생. 여러 소리가 겹쳐도 서로 끊지 않음.
 final class SoundPlayer {
-    private var player: AVAudioPlayer?
-    private var systemSound: NSSound?
+    private var active: [AVAudioPlayer] = []
+    private var systemSounds: [NSSound] = []
 
-    func play(_ effect: SoundEffect, bank: SoundBank?, bankName: String?, volume: Double) {
-        player?.stop()
-        systemSound?.stop()
-        let audio: AVAudioPlayer?
-        if let data = customFile(effect) {
-            audio = try? AVAudioPlayer(data: data)
-        } else if let name = bankName, let data = bank?.sounds[name]?.data {
-            // Game.img 소리는 MP3 스트림 그대로라 형식을 알려줌
-            audio = try? AVAudioPlayer(data: data, fileTypeHint: AVFileType.mp3.rawValue)
-        } else {
-            audio = nil
+    func play(data: Data?, isRawMP3: Bool, systemFallback: String?, volume: Double) {
+        active.removeAll { !$0.isPlaying }
+        systemSounds.removeAll { !$0.isPlaying }
+        if let data {
+            // .img 소리는 MP3 스트림 그대로라 형식을 알려줌
+            let audio = isRawMP3
+                ? ((try? AVAudioPlayer(data: data, fileTypeHint: AVFileType.mp3.rawValue)) ?? (try? AVAudioPlayer(data: data)))
+                : (try? AVAudioPlayer(data: data))
+            if let audio {
+                audio.volume = Float(volume)
+                audio.play()
+                active.append(audio)
+                return
+            }
         }
-        if let audio {
-            audio.volume = Float(volume)
-            audio.play()
-            player = audio
-            return
-        }
-        let sound = NSSound(named: NSSound.Name(effect.fallbackName))
-        sound?.volume = Float(volume)
-        sound?.play()
-        systemSound = sound
+        guard let name = systemFallback, let sound = NSSound(named: NSSound.Name(name))?.copy() as? NSSound else { return }
+        sound.volume = Float(volume)
+        sound.play()
+        systemSounds.append(sound)
     }
 
-    private func customFile(_ effect: SoundEffect) -> Data? {
+    static func customFile(named name: String) -> Data? {
         for ext in ["mp3", "wav", "m4a", "aiff", "aif"] {
-            let url = AppFolder.skin.appendingPathComponent("\(effect.rawValue).\(ext)")
+            let url = AppFolder.skin.appendingPathComponent("\(name).\(ext)")
             if let data = try? Data(contentsOf: url) { return data }
         }
         return nil

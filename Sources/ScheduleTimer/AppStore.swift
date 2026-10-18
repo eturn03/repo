@@ -17,13 +17,17 @@ final class AppStore: ObservableObject {
     @Published var showStatusBar: Bool {
         didSet { UserDefaults.standard.set(showStatusBar, forKey: Keys.showStatusBar) }
     }
-    /// 블록 시작 소리로 쓸 Game.img 안의 소리 이름 (빈 문자열이면 기본음)
-    @Published var blockStartSoundName: String {
-        didSet { UserDefaults.standard.set(blockStartSoundName, forKey: Keys.blockStartSound) }
+    /// 상황별 효과음 배정 (SoundEvent.rawValue → "Game/LevelUp" 등, "" = 기본음, "-" = 없음)
+    @Published private(set) var soundAssignments: [String: String] {
+        didSet { UserDefaults.standard.set(soundAssignments, forKey: Keys.soundAssignments) }
     }
-    /// 효과음 볼륨 0...1
+    /// 효과음 볼륨 0...1 (레벨업·블록 시작)
     @Published var effectVolume: Double {
         didSet { UserDefaults.standard.set(effectVolume, forKey: Keys.effectVolume) }
+    }
+    /// 작은 효과음 볼륨 0...1 (클릭·건너뛰기·저장 등)
+    @Published var quietVolume: Double {
+        didSet { UserDefaults.standard.set(quietVolume, forKey: Keys.quietVolume) }
     }
     /// Skin 폴더의 StatusBar.img / Game.img에서 읽은 것 (없으면 nil → 코드로 그린 모양·기본음)
     @Published private(set) var skin: StatusBarSkin?
@@ -44,7 +48,9 @@ final class AppStore: ObservableObject {
         static let barScale = "barScale"
         static let showStatusBar = "showStatusBar"
         static let blockStartSound = "blockStartSound"
+        static let soundAssignments = "soundAssignments"
         static let effectVolume = "effectVolume"
+        static let quietVolume = "quietVolume"
         static let didSetupLoginItem = "didSetupLoginItem"
     }
 
@@ -65,8 +71,15 @@ final class AppStore: ObservableObject {
         let savedScale = defaults.double(forKey: Keys.barScale)
         barScale = savedScale > 0 ? savedScale : 1.5
         showStatusBar = defaults.object(forKey: Keys.showStatusBar) as? Bool ?? true
-        blockStartSoundName = defaults.string(forKey: Keys.blockStartSound) ?? ""
+        var assignments = defaults.dictionary(forKey: Keys.soundAssignments) as? [String: String] ?? [:]
+        // 예전 버전의 "블록 시작 소리" 설정 옮기기
+        if assignments[SoundEvent.blockStart.rawValue] == nil,
+           let old = defaults.string(forKey: Keys.blockStartSound), !old.isEmpty {
+            assignments[SoundEvent.blockStart.rawValue] = "Game/\(old)"
+        }
+        soundAssignments = assignments
         effectVolume = defaults.object(forKey: Keys.effectVolume) as? Double ?? 0.5
+        quietVolume = defaults.object(forKey: Keys.quietVolume) as? Double ?? 0.2
         schedule = storage.load()
         lastPosition = .empty
         lastPosition = schedule.position(at: Date())
@@ -132,31 +145,46 @@ final class AppStore: ObservableObject {
             skin = nil
             messages.append("상태바: 기본 모양 (StatusBar.img 없음)")
         }
-        if let url = AppFolder.skinFile(named: "Game.img") {
-            do {
-                let bank = SoundBank(gameImage: try WZImage.load(contentsOf: url))
-                soundBank = bank
-                messages.append("효과음: Game.img 소리 \(bank.names.count)개" + (bank.sounds["LevelUp"] == nil ? " (LevelUp 없음)" : ""))
-            } catch {
-                soundBank = nil
-                messages.append("효과음: Game.img 읽기 실패 (\(error))")
+        // Sound.wz의 Game.img(게임 효과음), UI.img(클릭 등)
+        var bank = SoundBank()
+        for (file, prefix) in [("Game.img", "Game"), ("UI.img", "UI")] {
+            guard let url = AppFolder.skinFile(named: file) else {
+                messages.append("효과음: \(file) 없음")
+                continue
             }
-        } else {
-            soundBank = nil
-            messages.append("효과음: 기본음 (Game.img 없음)")
+            do {
+                let before = bank.sounds.count
+                bank.add(try WZImage.load(contentsOf: url), prefix: prefix)
+                messages.append("효과음: \(file) 소리 \(bank.sounds.count - before)개")
+            } catch {
+                messages.append("효과음: \(file) 읽기 실패 (\(error))")
+            }
         }
+        soundBank = bank.sounds.isEmpty ? nil : bank
         customFontName = FontLoader.registerFirstFont(in: AppFolder.skin)
         messages.append(customFontName.map { "글꼴: \($0)" } ?? "글꼴: 시스템 글꼴 (ttf/otf/ttc 없음)")
         skinMessage = messages.joined(separator: "\n")
     }
 
-    func play(_ effect: SoundEffect) {
-        let name: String?
-        switch effect {
-        case .levelUp: name = "LevelUp"
-        case .blockStart: name = blockStartSoundName.isEmpty ? nil : blockStartSoundName
-        }
-        soundPlayer.play(effect, bank: soundBank, bankName: name, volume: effectVolume)
+    func sound(for event: SoundEvent) -> String {
+        soundAssignments[event.rawValue] ?? event.defaultSound
+    }
+
+    func setSound(_ sound: String, for event: SoundEvent) {
+        soundAssignments[event.rawValue] = sound
+    }
+
+    func play(_ event: SoundEvent) {
+        let assigned = sound(for: event)
+        guard assigned != "-" else { return }
+        let custom = event.customFileName.flatMap { SoundPlayer.customFile(named: $0) }
+        let data = custom ?? (assigned.isEmpty ? nil : soundBank?.sounds[assigned]?.data)
+        soundPlayer.play(
+            data: data,
+            isRawMP3: custom == nil,
+            systemFallback: event.systemFallback,
+            volume: event.isQuiet ? quietVolume : effectVolume
+        )
     }
 
     // MARK: - 일정 조작
@@ -164,24 +192,28 @@ final class AppStore: ObservableObject {
     /// 새 일정으로 교체
     func replaceSchedule(with blocks: [Block]) {
         schedule = Schedule(blocks: blocks)
-        // 저장 직후 현재 블록은 효과음 없이 표시만
+        // 저장 직후 현재 블록은 레벨업·블록 시작음 없이 표시만
         lastPosition = schedule.position(at: Date())
         persistAndRefresh()
+        play(.scheduleSaved)
     }
 
     func endCurrent(mode: EndMode, status: BlockStatus) {
         schedule.endCurrent(at: Date(), mode: mode, status: status)
+        if status == .skipped { play(.skip) }
         persistAndRefresh()
     }
 
     func extendCurrent(minutes: Int, mode: ExtendMode) {
         schedule.extendCurrent(by: TimeInterval(minutes * 60), at: Date(), mode: mode)
+        play(.extend)
         persistAndRefresh()
     }
 
     func resetToOriginal() {
         schedule.resetToOriginal()
         lastPosition = schedule.position(at: Date())
+        play(.reset)
         persistAndRefresh()
     }
 
@@ -232,7 +264,8 @@ final class AppStore: ObservableObject {
         // 직전 블록을 끝까지 했거나 "완료"로 끝냈으면 레벨업 (건너뜀은 제외)
         if case .inBlock(let i) = previous, i < schedule.blocks.count,
            StatusSnapshot.countsAsDone(schedule.blocks[i], now: t) {
-            play(.levelUp)
+            // 마지막 블록이면 "오늘 일정 모두 끝" 소리
+            play(position == .finished ? .allDone : .levelUp)
             onLevelUp?()
         } else if case .inBlock = position {
             play(.blockStart)

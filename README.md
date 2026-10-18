@@ -108,10 +108,26 @@ bash build.sh
 | 파일 | 가져온 곳 | 쓰임 |
 |---|---|---|
 | `StatusBar.img` | UI.wz | 상태바 바탕·HP/MP/EXP 게이지·숫자를 게임 원본 이미지로 |
-| `Game.img` | Sound.wz | 레벨업 소리(`LevelUp`), 블록 시작 소리(설정 창에서 고르기) |
+| `Game.img` | Sound.wz | 레벨업·건너뛰기·저장 성공 등 게임 효과음 |
+| `UI.img` | Sound.wz | 클릭·창 열기·끌기 같은 UI 효과음 |
 
 - 파일이 없으면 코드로 그린 모양과 macOS 기본음을 씀.
 - 이 폴더의 파일은 내 맥에만 있고 GitHub 저장소에는 올라가지 않음.
+
+### 상황별 효과음
+설정 창의 **상황별 효과음 바꾸기**에서 상황마다 소리를 고르거나 끌 수 있음 (🔈 버튼으로 들어보기).
+
+| 상황 | 기본 소리 | 크기 |
+|---|---|---|
+| 블록 끝 (레벨업) | Game/LevelUp | 효과음 볼륨 |
+| 오늘 일정 모두 끝 | Game/JobChanged | 효과음 볼륨 |
+| 빈 시간 → 블록 시작 | macOS 기본음 | 효과음 볼륨 |
+| 건너뛰기 | Game/Tombstone | 작은 효과음 볼륨 |
+| 일정 저장 성공 / 실패 | Game/EnchantSuccess / EnchantFailure | 작은 효과음 볼륨 |
+| 연장 | Game/DropItem | 작은 효과음 볼륨 |
+| 원래 일정으로 되돌리기 | Game/Transform | 작은 효과음 볼륨 |
+| 버튼 클릭 / 설정 창 열기 | UI/BtMouseClick / UI/MenuUp | 작은 효과음 볼륨 |
+| 상태바 끌기 / 놓기 | UI/DragStart / UI/DragEnd | 작은 효과음 볼륨 |
 
 ### 음악 (메이플 BGM 셔플)
 설정 창의 **음악 폴더 열기** → 열린 폴더(`~/Library/Application Support/ScheduleTimer/Music`)에 파일을 넣고 → **다시 불러오기** → **재생**.

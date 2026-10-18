@@ -158,16 +158,16 @@ public struct StatusBarSkin {
     }
 }
 
-/// Game.img(Sound.wz)에서 효과음 꺼내기
+/// Sound.wz의 .img(Game.img, UI.img 등)에서 효과음 모으기. 이름은 "Game/LevelUp"처럼 접두어/경로.
 public struct SoundBank {
-    public let sounds: [String: WZSound]
+    public private(set) var sounds: [String: WZSound] = [:]
 
-    public init(gameImage root: WZNode) {
-        var sounds: [String: WZSound] = [:]
-        for name in root.childNames {
-            if let sound = root[name]?.sound { sounds[name] = sound }
+    public init() {}
+
+    public mutating func add(_ root: WZNode, prefix: String) {
+        for path in root.soundPaths {
+            if let sound = root[path]?.sound { sounds["\(prefix)/\(path)"] = sound }
         }
-        self.sounds = sounds
     }
 
     public var names: [String] { sounds.keys.sorted() }

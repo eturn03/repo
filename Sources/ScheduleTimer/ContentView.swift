@@ -44,6 +44,8 @@ struct ContentView: View {
         }
         .padding(14)
         .frame(minWidth: 380, maxWidth: .infinity, alignment: .topLeading)
+        // 이 창의 모든 버튼에 작은 클릭음
+        .buttonStyle(ClickSoundButtonStyle { store.play(.click) })
         }
     }
 
@@ -176,6 +178,7 @@ struct ContentView: View {
             resultMessage = result.errors.isEmpty
                 ? "입력된 일정이 없음"
                 : "등록된 블록 없음 (기존 일정 유지)"
+            store.play(.scheduleFailed)
             return
         }
         store.replaceSchedule(with: result.blocks)
@@ -190,6 +193,14 @@ struct ContentView: View {
     }
 
     // MARK: - 하단
+
+    /// 불러온 소리 목록 + 지금 배정된 소리(파일이 아직 없어도 목록에 보이게)
+    private func soundChoices(for event: SoundEvent) -> [String] {
+        var names = store.soundBank?.names ?? []
+        let current = store.sound(for: event)
+        if !current.isEmpty, current != "-", !names.contains(current) { names.insert(current, at: 0) }
+        return names
+    }
 
     private func volumeSlider(_ label: String, value: Binding<Double>) -> some View {
         HStack {
@@ -239,6 +250,7 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                     volumeSlider("음악 볼륨", value: $music.volume)
                     volumeSlider("효과음 볼륨", value: $store.effectVolume)
+                    volumeSlider("작은 효과음 볼륨", value: $store.quietVolume)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -252,15 +264,28 @@ struct ContentView: View {
                         Button("스킨 폴더 열기") { NSWorkspace.shared.open(AppFolder.skin) }
                         Button("스킨 다시 불러오기") { store.reloadSkin() }
                     }
-                    Picker("블록 시작 소리", selection: $store.blockStartSoundName) {
-                        Text("기본음").tag("")
-                        ForEach(store.soundBank?.names ?? [], id: \.self) { name in
-                            Text(name).tag(name)
+                    Button("레벨업 미리보기") { onTestLevelUp() }
+                    DisclosureGroup("상황별 효과음 바꾸기") {
+                        ForEach(SoundEvent.allCases) { event in
+                            HStack {
+                                Picker(event.title, selection: Binding(
+                                    get: { store.sound(for: event) },
+                                    set: { store.setSound($0, for: event) }
+                                )) {
+                                    Text(event.systemFallback == nil ? "기본 (없음)" : "기본음").tag("")
+                                    Text("없음").tag("-")
+                                    ForEach(soundChoices(for: event), id: \.self) { name in
+                                        Text(name).tag(name)
+                                    }
+                                }
+                                Button {
+                                    store.play(event)
+                                } label: {
+                                    Image(systemName: "speaker.wave.2")
+                                }
+                                .help("들어보기")
+                            }
                         }
-                    }
-                    HStack {
-                        Button("레벨업 미리보기") { onTestLevelUp() }
-                        Button("블록 시작 소리 듣기") { store.play(.blockStart) }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -273,6 +298,21 @@ struct ContentView: View {
                 Text(message).font(.caption).foregroundStyle(.orange)
             }
         }
+    }
+}
+
+/// 버튼을 누를 때 클릭음을 내는 스타일 (모양은 기본 버튼 그대로)
+private struct ClickSoundButtonStyle: PrimitiveButtonStyle {
+    let onClick: () -> Void
+
+    func makeBody(configuration: Configuration) -> some View {
+        Button(role: configuration.role) {
+            onClick()
+            configuration.trigger()
+        } label: {
+            configuration.label
+        }
+        .buttonStyle(.automatic)
     }
 }
 

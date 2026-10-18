@@ -39,6 +39,9 @@ final class WZKitTests: XCTestCase {
         let sound = try XCTUnwrap(try root()["Beep"]?.sound)
         XCTAssertEqual(sound.durationMs, 1234)
         XCTAssertEqual(try root().soundPaths, ["Beep"])
+        var bank = SoundBank()
+        bank.add(try root(), prefix: "Game")
+        XCTAssertEqual(bank.names, ["Game/Beep"])
         XCTAssertEqual(sound.data, Data([0xff, 0xf3]) + Data("TEST".utf8))
     }
 
