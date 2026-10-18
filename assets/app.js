@@ -58,6 +58,18 @@
   }
   var MARK_RE = /(원문 생략|미검증|미확인|추정|해석|보완|생략)/g;
   function hl(s) { return esc(s).replace(MARK_RE, '<mark class="m">$1</mark>'); }
+  // 단계 문장 표기: 데이터는 "지옥문 서치(케플러 효과)"(하는 일(누구 효과)) 그대로 두고, 화면에는 "케플러 효과 → 지옥문 서치"로 보여준다.
+  // 끝에 붙은 (대체)·(추가)·(원문 생략, 보완…) 표시는 그대로 뒤에 남긴다. 효과가 없는 단계(소환·세팅 등)는 원문 그대로.
+  function fmtStep(t) {
+    if (!t) return t;
+    var tail = '', m;
+    while ((m = t.match(/^(.*\S)(\s+\((?:대체|추가|원문 생략[^()]*)\))$/))) { tail = m[2] + tail; t = m[1]; }
+    if (/^\[/.test(t)) return t + tail;
+    if ((m = t.match(/^(.+?)\(([^():]+?) 효과(?:: ([^()]+))?\)$/))) return m[2] + ' 효과' + (m[3] ? '(' + m[3] + ')' : '') + ' → ' + m[1] + tail;
+    if ((m = t.match(/^(.+?)\(([^()]+): ([^()]+?) 효과\)$/))) return m[3] + ' 효과(' + m[2] + ') → ' + m[1] + tail;
+    if ((m = t.match(/^(.+?): ([^():]+?) 효과$/))) return m[2] + ' 효과 → ' + m[1] + tail;
+    return t + tail;
+  }
   function ridLink(id) { return '<a href="#" class="rid" data-act="open-route" data-id="' + id + '">' + id + '</a>'; }
   function ridBtn(id) { return '<button class="rid" data-act="open-route" data-id="' + id + '">' + id + '</button>'; }
   // 문장 속 루트 ID를 누르면 그 루트를 여는 링크로 바꾼다
@@ -591,7 +603,7 @@
     var sk = plan.skipped_original_steps || [];
     return '<p class="small muted">바탕 루트: ' + ridLink(plan.base_route) + ' ' + plan.resume_from_step + '단계부터 · 점수 ' + plan.final.score + '</p>' +
       todoHtml(plan.steps, key, idp) +
-      (sk.length ? '<details class="inner"><summary>건너뛴 원래 단계 ' + sk.length + '개</summary><ul class="small">' + sk.map(function (x) { return '<li>' + x.step + '. ' + esc(x.text) + ' <span class="muted">— ' + esc(x.why) + '</span></li>'; }).join('') + '</ul></details>' : '') +
+      (sk.length ? '<details class="inner"><summary>건너뛴 원래 단계 ' + sk.length + '개</summary><ul class="small">' + sk.map(function (x) { return '<li>' + x.step + '. ' + esc(fmtStep(x.text)) + ' <span class="muted">— ' + esc(x.why) + '</span></li>'; }).join('') + '</ul></details>' : '') +
       '<h4>결과 필드</h4>' + fieldHtml(plan.final);
   }
   // 패를 넣으면 dd-planlib.json 장수 검사 결과를 바로 보여주고, 계산기 결과가 더 좋을 때만 바꾼다(PORTING.md 속도 대책 1)
@@ -676,7 +688,7 @@
       var keys = stepTrapKeys(r.id, s.n).filter(function (k) { return k !== 'nibiru'; });
       var cls = (isDone ? 'done ' : '') + (!allDone && s.n === cur ? 'current ' : '') + (s.opponent ? 'opp ' : '') + (picked === s.n ? 'picked' : '');
       h += '<li class="' + cls + '" id="step-' + s.n + '"><input type="checkbox" id="cb-' + s.n + '" data-act="toggle-step" data-n="' + s.n + '"' + (isDone ? ' checked' : '') + ' aria-label="' + s.n + '단계 완료">' +
-        '<span class="num">' + s.n + '</span><label class="txt" for="cb-' + s.n + '">' + hl(s.text) + '<span class="meta">' +
+        '<span class="num">' + s.n + '</span><label class="txt" for="cb-' + s.n + '">' + hl(fmtStep(s.text)) + '<span class="meta">' +
         (s.opponent ? '<span class="tag bad">상대 행동</span>' : '') +
         (s.isSummon ? '<span class="tag">소환 ' + s.summonIndex + '번째</span>' : '') +
         (keys.length ? '<span class="tag">패트랩 데이터 ' + keys.length + '종</span>' : '') +
@@ -706,7 +718,7 @@
       h += '<label class="lbl" for="htStep">맞은 단계</label><select class="full" id="htStep" data-act="ht-step">';
       r.steps.forEach(function (s) {
         var n = stepTrapKeys(r.id, s.n).filter(function (k) { return k !== 'nibiru'; }).length;
-        h += '<option value="' + s.n + '"' + (s.n === step ? ' selected' : '') + '>' + s.n + '. ' + esc(s.text) + (n ? ' · 데이터 ' + n + '종' : ' · 데이터 없음') + '</option>';
+        h += '<option value="' + s.n + '"' + (s.n === step ? ' selected' : '') + '>' + s.n + '. ' + esc(fmtStep(s.text)) + (n ? ' · 데이터 ' + n + '종' : ' · 데이터 없음') + '</option>';
       });
       h += '</select>';
       var keys = stepTrapKeys(r.id, step).filter(function (k) { return k !== 'nibiru'; });
@@ -799,7 +811,7 @@
     var key = r.id + '|' + rec.step + '|' + rec.trap + '|' + v + '|' + (src || 'json');
     var mdStep = r.steps[rec.step - 1];
     var h = '<h3 style="margin-top:14px">' + esc(rec.trap_name) + ' · ' + rec.step + '단계</h3>' +
-      '<p class="small">"' + hl(rec.step_text || (mdStep && mdStep.text)) + '"' +
+      '<p class="small">"' + hl(fmtStep(rec.step_text || (mdStep && mdStep.text))) + '"' +
       ' · 여기까지 소환한 몬스터 ' + rec.monsters_summoned_so_far + '장 <span class="muted">(' + (src === 'live' ? '계산' : '데이터') + ')</span></p>';
     // 문서 루트
     if (rec.documented) {
@@ -857,7 +869,7 @@
     h += sec('3', label, '<p class="small muted">이어 붙인 수순: ' + ridLink(plan.base_route) + ' ' + plan.resume_from_step + '단계부터</p>' + todoHtml(plan.steps, key, 'td'));
     var sk = plan.skipped_original_steps || [];
     h += sec('4', '건너뛴 원래 단계', sk.length ? '<details class="inner"><summary>' + sk.length + '개 펼치기</summary><ul class="small">' +
-      sk.map(function (s) { return '<li>' + s.step + '. ' + esc(s.text) + ' <span class="muted">— ' + esc(s.why) + '</span></li>'; }).join('') + '</ul></details>' : '<p class="muted small">없음</p>');
+      sk.map(function (s) { return '<li>' + s.step + '. ' + esc(fmtStep(s.text)) + ' <span class="muted">— ' + esc(s.why) + '</span></li>'; }).join('') + '</ul></details>' : '<p class="muted small">없음</p>');
     h += sec('5', '결과 필드', fieldHtml(plan.final));
     return h;
   }
@@ -870,7 +882,7 @@
       var on = checks.indexOf(i) >= 0, sub = s.indexOf('(대체)') >= 0, add = s.indexOf('(추가)') >= 0;
       var id = idp + '-' + i;
       return '<li class="' + (on ? 'done' : '') + '"><input type="checkbox" id="' + id + '" data-act="ht-check" data-key="' + esc(key) + '" data-i="' + i + '"' + (on ? ' checked' : '') + '>' +
-        '<span class="num">' + (i + 1) + '</span><label class="txt" for="' + id + '">' + esc(s) +
+        '<span class="num">' + (i + 1) + '</span><label class="txt" for="' + id + '">' + hl(fmtStep(s)) +
         (sub ? ' <span class="tag sub">대체: 원래 루트와 소재·대상이 다름</span>' : '') +
         (add ? ' <span class="tag addx">추가: 원래 루트에 없던 트리거를 끼워 넣음</span>' : '') + '</label></li>';
     }).join('') + '</ol>';
