@@ -6,20 +6,27 @@ import WZKit
 enum PixelText {
     static let defaultFontName = "AppleSDGothicNeo-Regular"
 
+    /// 원본 상태바처럼 `[`, `]`는 초록색
+    static let bracketColor: (r: UInt8, g: UInt8, b: UInt8) = (0x99, 0xcc, 0x33)
+
     /// 글자 한 줄을 비트맵으로. maxWidth를 넘으면 뒤를 자르고 `…`.
     static func render(_ text: String, fontName: String?, size: CGFloat = 12,
                        color: (r: UInt8, g: UInt8, b: UInt8) = (255, 255, 255),
                        maxWidth: Int) -> Bitmap {
         let font = CTFontCreateWithName((fontName ?? defaultFontName) as CFString, size, nil)
-        let cgColor = CGColor(srgbRed: CGFloat(color.r) / 255, green: CGFloat(color.g) / 255,
-                              blue: CGFloat(color.b) / 255, alpha: 1)
+        func cgColor(_ c: (r: UInt8, g: UInt8, b: UInt8)) -> CGColor {
+            CGColor(srgbRed: CGFloat(c.r) / 255, green: CGFloat(c.g) / 255, blue: CGFloat(c.b) / 255, alpha: 1)
+        }
+        let fontKey = NSAttributedString.Key(kCTFontAttributeName as String)
+        let colorKey = NSAttributedString.Key(kCTForegroundColorAttributeName as String)
 
         func makeLine(_ s: String) -> CTLine {
-            let attributes: [NSAttributedString.Key: Any] = [
-                NSAttributedString.Key(kCTFontAttributeName as String): font,
-                NSAttributedString.Key(kCTForegroundColorAttributeName as String): cgColor,
-            ]
-            return CTLineCreateWithAttributedString(NSAttributedString(string: s, attributes: attributes))
+            let attributed = NSMutableAttributedString()
+            for ch in s {
+                let c = (ch == "[" || ch == "]") ? bracketColor : color
+                attributed.append(NSAttributedString(string: String(ch), attributes: [fontKey: font, colorKey: cgColor(c)]))
+            }
+            return CTLineCreateWithAttributedString(attributed)
         }
         func width(_ line: CTLine) -> Double {
             CTLineGetTypographicBounds(line, nil, nil, nil)

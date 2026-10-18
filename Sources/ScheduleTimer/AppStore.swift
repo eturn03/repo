@@ -54,7 +54,7 @@ final class AppStore: ObservableObject {
 
     init() {
         let defaults = UserDefaults.standard
-        nickname = defaults.string(forKey: Keys.nickname) ?? "임진택"
+        nickname = defaults.string(forKey: Keys.nickname) ?? "임진택[무직백수]"
         let savedScale = defaults.double(forKey: Keys.barScale)
         barScale = savedScale > 0 ? savedScale : 1.5
         showStatusBar = defaults.object(forKey: Keys.showStatusBar) as? Bool ?? true
