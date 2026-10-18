@@ -115,12 +115,12 @@ public enum JobTitle {
 
     /// (이 레벨부터, 칭호) — 낮은 레벨부터
     public static let ranks: [(minLevel: Int, title: String)] = [
-        (0, "이불 속 백수"),
-        (10, "기지개 켠 자"),
-        (30, "열일 꿈나무"),
-        (70, "현생 생존자"),
-        (120, "광기의 일꾼"),
-        (200, "갓생 그 자체"),
+        (0, "게으른 백수"),
+        (10, "일을 시작한 자"),
+        (30, "일을 하는 자"),
+        (70, "현생 사는 자"),
+        (120, "일에 미친 자"),
+        (200, "갓생 사는 자"),
     ]
 
     public static func level(forCompletedBlocks count: Int) -> Int {

@@ -11,11 +11,11 @@ public struct StatusBarSkin {
     static let valueX = [20, 131, 248]
 
     /// 이름 칸·LV 칸 위치 (합성 결과 좌표) — 글자는 앱에서 겹쳐 그림
-    public static let nameOrigin = (x: 82, y: 5)
+    public static let nameOrigin = (x: 79, y: 5)
     /// LV 숫자 시작 위치 ("LV." 바로 오른쪽, 높이 맞춤)
     public static let levelOrigin = (x: 41, y: 14)
     /// 이름 칸 오른쪽 끝 (글자가 넘치면 여기서 자름)
-    public static let nameMaxX = 205
+    public static let nameMaxX = 207
 
     let background: Bitmap
     let background2: Bitmap
