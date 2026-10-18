@@ -1,4 +1,5 @@
 import SwiftUI
+import WZKit
 
 /// 레벨업 이펙트 (임시: 코드로 그린 금색 LEVEL UP + 빛기둥 + 반짝이)
 struct LevelUpView: View {
@@ -81,5 +82,52 @@ struct LevelUpView: View {
             .foregroundStyle(i % 2 == 0 ? Color.yellow : Color.white)
             .offset(x: CGFloat(cos(angle)) * distance, y: CGFloat(sin(angle)) * distance * 0.6 + size.height * 0.08)
             .opacity(alpha)
+    }
+}
+
+/// 화면에 그리기 좋게 프레임을 CGImage로 바꿔둔 애니메이션
+struct PreparedAnimation {
+    let images: [CGImage]
+    let animation: FrameAnimation
+
+    init?(_ animation: FrameAnimation) {
+        let images = animation.frames.compactMap { $0.image.cgImage() }
+        guard images.count == animation.frames.count else { return nil }
+        self.images = images
+        self.animation = animation
+    }
+
+    /// 기준점 기준 전체 영역 (원본 픽셀)
+    var size: CGSize {
+        let b = animation.bounds
+        return CGSize(width: b.maxX - b.minX, height: b.maxY - b.minY)
+    }
+
+    var duration: TimeInterval { Double(animation.durationMs) / 1000 }
+}
+
+/// BasicEff.img의 LevelUp 프레임을 원본 그대로 재생 (기준점 고정, 픽셀 그대로 확대)
+struct MapleLevelUpView: View {
+    let prepared: PreparedAnimation
+    let scale: CGFloat
+    var startDate = Date()
+
+    var body: some View {
+        let b = prepared.animation.bounds
+        TimelineView(.animation) { context in
+            let ms = Int(context.date.timeIntervalSince(startDate) * 1000)
+            ZStack(alignment: .topLeading) {
+                if let i = prepared.animation.frameIndex(atMs: ms) {
+                    let frame = prepared.animation.frames[i]
+                    Image(decorative: prepared.images[i], scale: 1)
+                        .interpolation(.none)
+                        .resizable()
+                        .frame(width: CGFloat(frame.image.width) * scale, height: CGFloat(frame.image.height) * scale)
+                        .offset(x: CGFloat(-b.minX - frame.originX) * scale,
+                                y: CGFloat(-b.minY - frame.originY) * scale)
+                }
+            }
+            .frame(width: prepared.size.width * scale, height: prepared.size.height * scale, alignment: .topLeading)
+        }
     }
 }

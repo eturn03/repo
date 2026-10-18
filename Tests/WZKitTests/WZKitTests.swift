@@ -5,10 +5,10 @@ final class WZKitTests: XCTestCase {
     /// 직접 만든 가짜 WZ 파일 (KMS 키, 게임 데이터 아님). 실제 WZ처럼 deflate 끝 표시 없음:
     /// answer=42, title="임진택", plain=4x3 캔버스(zlib), group/secret=같은 캔버스(암호화 블록, 형식 문자열은 위치 참조),
     /// Beep=소리(1234ms, "\xff\xf3TEST")
-    private let fixture = "c/hRvIrYrBCTwgAABQD6YKCW36wQAyoA+3WnkcSsCAADhQgmZha3APtxooTBpwkqAAAAc/pCr4veqBEAAAQDAQAAAAAAFAAAAAB4nGL4/+ED/4f//QxoNAAAAP//APtmvIrduQlJAAAAc/hRvIrYrBCTwgAAAQD6cquG2qwWCS8AAAAbNAAAAAAABAMBAAAAAAAcAAAAAAkAAADT+Sv9mCxU9R8KAAAAVJhFbVPNVwpnhAD8Q6uA2AlOAAAAc/dSoZDGrT2j4xIABoDSBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgEC//NURVNU"
+    static let fixtureBase64 = "c/hRvIrYrBCTwgAABQD6YKCW36wQAyoA+3WnkcSsCAADhQgmZha3APtxooTBpwkqAAAAc/pCr4veqBEAAAQDAQAAAAAAFAAAAAB4nGL4/+ED/4f//QxoNAAAAP//APtmvIrduQlJAAAAc/hRvIrYrBCTwgAAAQD6cquG2qwWCS8AAAAbNAAAAAAABAMBAAAAAAAcAAAAAAkAAADT+Sv9mCxU9R8KAAAAVJhFbVPNVwpnhAD8Q6uA2AlOAAAAc/dSoZDGrT2j4xIABoDSBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgEC//NURVNU"
 
     private func root() throws -> WZNode {
-        try WZImage.load([UInt8](Data(base64Encoded: fixture)!))
+        try WZImage.load([UInt8](Data(base64Encoded: Self.fixtureBase64)!))
     }
 
     func testKeyMatchesKnownKMSBytes() {
@@ -84,5 +84,33 @@ final class WZKitTests: XCTestCase {
         XCTAssertTrue(out.pixel(x: 216 + 213, y: 4 + 20) == (200, 200, 200, 255))
         // 오른쪽 끝은 backgrnd2 판
         XCTAssertTrue(out.pixel(x: 560, y: 20) == (20, 20, 20, 255))
+    }
+}
+
+final class FrameAnimationTests: XCTestCase {
+    private func frame(_ w: Int, _ h: Int, origin: (Int, Int), delay: Int) -> FrameAnimation.Frame {
+        FrameAnimation.Frame(image: Bitmap(width: w, height: h), originX: origin.0, originY: origin.1, delayMs: delay)
+    }
+
+    func testBoundsAndTiming() {
+        let anim = FrameAnimation(frames: [
+            frame(10, 20, origin: (5, 20), delay: 100),
+            frame(30, 40, origin: (10, 35), delay: 50),
+        ])
+        XCTAssertEqual(anim.durationMs, 150)
+        let b = anim.bounds
+        XCTAssertEqual(b.minX, -10)
+        XCTAssertEqual(b.minY, -35)
+        XCTAssertEqual(b.maxX, 20)
+        XCTAssertEqual(b.maxY, 5)
+        XCTAssertEqual(anim.frameIndex(atMs: 0), 0)
+        XCTAssertEqual(anim.frameIndex(atMs: 99), 0)
+        XCTAssertEqual(anim.frameIndex(atMs: 100), 1)
+        XCTAssertNil(anim.frameIndex(atMs: 150))
+    }
+
+    func testNoFramesInNode() throws {
+        let root = try WZImage.load([UInt8](Data(base64Encoded: WZKitTests.fixtureBase64)!))
+        XCTAssertNil(FrameAnimation(node: root))
     }
 }

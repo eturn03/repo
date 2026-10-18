@@ -32,6 +32,8 @@ final class AppStore: ObservableObject {
     /// Skin 폴더의 StatusBar.img / Game.img에서 읽은 것 (없으면 nil → 코드로 그린 모양·기본음)
     @Published private(set) var skin: StatusBarSkin?
     @Published private(set) var soundBank: SoundBank?
+    /// BasicEff.img의 LevelUp 애니메이션 (있으면 코드로 그린 이펙트 대신)
+    @Published private(set) var levelUpAnimation: PreparedAnimation?
     /// UIWindow.img의 메신저 창 (있으면 일정 입력을 메이플 창으로)
     @Published private(set) var messengerSkin: MessengerSkin?
     @Published private(set) var skinMessage = ""
@@ -161,6 +163,15 @@ final class AppStore: ObservableObject {
         } else {
             skin = nil
             messages.append("상태바: 기본 모양 (StatusBar.img 없음)")
+        }
+        if let url = AppFolder.skinFile(named: "BasicEff.img"),
+           let node = (try? WZImage.load(contentsOf: url))?["LevelUp"],
+           let animation = FrameAnimation(node: node) {
+            levelUpAnimation = PreparedAnimation(animation)
+            messages.append("레벨업 이펙트: BasicEff.img (\(animation.frames.count)프레임)")
+        } else {
+            levelUpAnimation = nil
+            messages.append("레벨업 이펙트: 기본 (BasicEff.img 없음)")
         }
         if let url = AppFolder.skinFile(named: "UIWindow.img") {
             do {

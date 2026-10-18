@@ -170,7 +170,7 @@ final class SoundPlayer {
 
 /// 고른 파일·폴더에서 메이플 .img를 찾아 이름에 맞는 폴더로 복사
 enum MapleFileImporter {
-    static let skinFiles = ["statusbar.img", "basic.img", "game.img", "ui.img", "uiwindow.img"]
+    static let skinFiles = ["statusbar.img", "basic.img", "game.img", "ui.img", "uiwindow.img", "basiceff.img"]
     static let fontExtensions = ["ttf", "otf", "ttc"]
 
     static func importFiles(_ urls: [URL]) -> String {

@@ -135,6 +135,10 @@ final class WindowManager {
     func showLevelUpEffect() {
         guard store.showStatusBar else { return }
         effectPanel?.orderOut(nil)
+        if let prepared = store.levelUpAnimation {
+            showMapleLevelUp(prepared)
+            return
+        }
 
         let scale = store.barScale
         let size = CGSize(width: LevelUpView.baseSize.width * scale, height: LevelUpView.baseSize.height * scale)
@@ -155,6 +159,34 @@ final class WindowManager {
         effectID = id
         Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: UInt64(LevelUpView.duration * 1_000_000_000))
+            guard let self, self.effectID == id else { return }
+            self.effectPanel?.orderOut(nil)
+            self.effectPanel = nil
+        }
+    }
+
+    /// 원본 레벨업 이펙트: 기준점(발밑)을 상태바 윗변, EXP 막대 위에 맞춤
+    private func showMapleLevelUp(_ prepared: PreparedAnimation) {
+        let scale = CGFloat(store.barScale)
+        let bounds = prepared.animation.bounds
+        let size = CGSize(width: prepared.size.width * scale, height: prepared.size.height * scale)
+        let bar = statusPanel.frame
+        // 스킨 상태바면 EXP 막대 가운데, 아니면 상태바 가운데
+        let anchorX = store.skin != nil ? bar.minX + 496 * scale : bar.midX
+        let anchorY = bar.maxY - 6 * scale
+        let panel = FloatingPanel(size: size, clickThrough: true)
+        panel.level = NSWindow.Level(rawValue: NSWindow.Level.floating.rawValue + 1)
+        panel.hasShadow = false
+        panel.contentView = NSHostingView(rootView: MapleLevelUpView(prepared: prepared, scale: scale, startDate: Date()))
+        panel.setFrameOrigin(NSPoint(x: anchorX + CGFloat(bounds.minX) * scale,
+                                     y: anchorY - CGFloat(bounds.maxY) * scale))
+        panel.orderFrontRegardless()
+        effectPanel = panel
+
+        let id = UUID()
+        effectID = id
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64((prepared.duration + 0.1) * 1_000_000_000))
             guard let self, self.effectID == id else { return }
             self.effectPanel?.orderOut(nil)
             self.effectPanel = nil
