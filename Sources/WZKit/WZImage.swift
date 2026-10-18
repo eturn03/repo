@@ -315,7 +315,7 @@ struct WZReader {
             case 9:
                 let size = Int(try i32())
                 let end = pos + size
-                value = try extended()
+                value = try extended(end: end)
                 pos = end
             default:
                 throw WZError.badFormat("속성 형식 \(type) (\(name))")
@@ -325,7 +325,8 @@ struct WZReader {
         return result
     }
 
-    mutating func extended() throws -> WZNode {
+    /// end: 이 항목이 끝나는 위치 (알면 소리 데이터를 끝에서부터 정확히 자름)
+    mutating func extended(end: Int? = nil) throws -> WZNode {
         let kind = try stringBlock()
         switch kind {
         case "Property":
@@ -358,6 +359,12 @@ struct WZReader {
             let dataLength = try compressedInt()
             let durationMs = try compressedInt()
             // 51바이트 머리 + 형식 길이(1) + 형식 정보
+            // 머리 정보 구조가 곡마다 다를 수 있어서(ID3 붙은 MP3 등) 데이터는 항목 끝에서 길이만큼 자름
+            if let end, dataLength >= 0, end - dataLength >= pos, end <= bytes.count {
+                let data = Data(bytes[(end - dataLength)..<end])
+                pos = end
+                return .sound(WZSound(durationMs: durationMs, data: data))
+            }
             let headerStart = pos
             try skip(51)
             let formatLength = Int(try u8())

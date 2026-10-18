@@ -3,6 +3,7 @@ import Foundation
 import WZKit
 
 /// Music 폴더의 BGM을 셔플 재생. Bgm*.img(Sound.wz) 안의 곡과 mp3/m4a/wav/aiff 파일을 모두 모음.
+/// .img 안의 30초 미만 소리(로고음 등)는 뺌.
 @MainActor
 final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     struct Track: Hashable {
@@ -29,6 +30,7 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
     private static let volumeKey = "musicVolume"
     private static let audioExtensions = ["mp3", "m4a", "wav", "aiff", "aif"]
+    private static let minimumBgmMs = 30_000
     private var player: AVAudioPlayer?
     private var queue: [Track] = []
 
@@ -39,8 +41,22 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
         reload()
     }
 
-    /// Music 폴더 다시 읽기
+    /// Music 폴더 다시 읽기 (파일이 커서 백그라운드에서)
     func reload() {
+        message = "곡 목록 읽는 중…"
+        Task.detached(priority: .utility) {
+            let (found, failed) = MusicPlayer.scan()
+            await MainActor.run {
+                self.tracks = found
+                self.queue = self.queue.filter { found.contains($0) }
+                self.message = found.isEmpty
+                    ? "곡 없음 — Music 폴더에 Bgm*.img나 mp3를 넣어줘"
+                    : "곡 \(found.count)개" + (failed.isEmpty ? "" : " (읽기 실패: \(failed.joined(separator: ", ")))")
+            }
+        }
+    }
+
+    nonisolated private static func scan() -> (tracks: [Track], failed: [String]) {
         try? FileManager.default.createDirectory(at: AppFolder.music, withIntermediateDirectories: true)
         let files = ((try? FileManager.default.contentsOfDirectory(at: AppFolder.music, includingPropertiesForKeys: nil)) ?? [])
             .sorted { $0.lastPathComponent < $1.lastPathComponent }
@@ -51,19 +67,17 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
             if ext == "img" {
                 do {
                     let root = try WZImage.load(contentsOf: url)
-                    found += root.soundPaths.map { Track(url: url, soundPath: $0) }
+                    for path in root.soundPaths where (root[path]?.sound?.durationMs ?? 0) >= minimumBgmMs {
+                        found.append(Track(url: url, soundPath: path))
+                    }
                 } catch {
                     failed.append(url.lastPathComponent)
                 }
-            } else if Self.audioExtensions.contains(ext) {
+            } else if audioExtensions.contains(ext) {
                 found.append(Track(url: url, soundPath: nil))
             }
         }
-        tracks = found
-        queue = queue.filter { found.contains($0) }
-        message = found.isEmpty
-            ? "곡 없음 — Music 폴더에 Bgm*.img나 mp3를 넣어줘"
-            : "곡 \(found.count)개" + (failed.isEmpty ? "" : " (읽기 실패: \(failed.joined(separator: ", ")))")
+        return (found, failed)
     }
 
     func togglePlay() {
