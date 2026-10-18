@@ -9,6 +9,8 @@ public struct ParseError: Equatable {
 public struct ParseResult {
     public var blocks: [Block]
     public var errors: [ParseError]
+    /// blocks[i]가 나온 줄 (번호, 내용)
+    public var sources: [(lineNumber: Int, line: String)] = []
 }
 
 /// 한 줄에 한 블록: `09:00-10:30 영어공부`
@@ -26,6 +28,7 @@ public enum ScheduleParser {
         let dayStart = calendar.startOfDay(for: day)
         var blocks: [Block] = []
         var errors: [ParseError] = []
+        var sources: [(lineNumber: Int, line: String)] = []
         var previous: (end: Date, lineNumber: Int)?
 
         let lines = text.replacingOccurrences(of: "\r\n", with: "\n").components(separatedBy: "\n")
@@ -78,8 +81,9 @@ public enum ScheduleParser {
             }
 
             blocks.append(Block(title: title, start: start, end: end))
+            sources.append((lineNumber, line))
             previous = (end, lineNumber)
         }
-        return ParseResult(blocks: blocks, errors: errors)
+        return ParseResult(blocks: blocks, errors: errors, sources: sources)
     }
 }

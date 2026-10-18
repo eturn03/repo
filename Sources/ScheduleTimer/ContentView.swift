@@ -18,6 +18,7 @@ struct ContentView: View {
     @State private var showInput = false
     @State private var inputText = ""
     @State private var forTomorrow = false
+    @State private var appendMode = true
     @State private var resultMessage: String?
     @State private var parseErrors: [ParseError] = []
     @State private var importMessage: String?
@@ -39,7 +40,7 @@ struct ContentView: View {
 
             Divider()
             if store.messengerSkin != nil {
-                Button("새 일정 입력 (메신저 창)") { onOpenInput() }
+                Button("일정 입력 (메신저 창)") { onOpenInput() }
             } else if showInput || store.schedule.blocks.isEmpty {
                 inputSection
             } else {
@@ -182,9 +183,16 @@ struct ContentView: View {
                 .pickerStyle(.segmented)
                 .frame(width: 110)
                 .labelsHidden()
+                Picker("", selection: $appendMode) {
+                    Text("추가").tag(true)
+                    Text("교체").tag(false)
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 110)
+                .labelsHidden()
             }
             HStack {
-                Button("저장 (기존 일정 교체)") { save() }
+                Button(appendMode ? "저장 (기존 일정에 추가)" : "저장 (기존 일정 교체)") { save() }
                     .keyboardShortcut(.defaultAction)
                 if !store.schedule.blocks.isEmpty {
                     Button("닫기") { showInput = false; resultMessage = nil; parseErrors = [] }
@@ -202,12 +210,12 @@ struct ContentView: View {
     }
 
     private func save() {
-        let result = store.saveSchedule(text: inputText, tomorrow: forTomorrow)
+        let result = store.saveSchedule(text: inputText, tomorrow: forTomorrow, append: appendMode)
         parseErrors = result.errors
-        if result.blocks.isEmpty {
+        if result.added == 0 {
             resultMessage = result.errors.isEmpty
                 ? "입력된 일정이 없음"
-                : "등록된 블록 없음 (기존 일정 유지)"
+                : "넣은 블록 없음 (기존 일정 유지)"
             return
         }
         pending = nil
@@ -216,7 +224,7 @@ struct ContentView: View {
             inputText = ""
             showInput = false
         } else {
-            resultMessage = "\(result.blocks.count)개 등록, \(result.errors.count)줄은 형식 오류로 제외:"
+            resultMessage = "\(result.added)개 저장, \(result.errors.count)줄은 제외:"
         }
     }
 

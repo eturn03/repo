@@ -232,16 +232,36 @@ final class AppStore: ObservableObject {
 
     // MARK: - 일정 조작
 
-    /// 입력한 글을 해석해서 저장. 블록이 하나도 없으면 기존 일정 유지.
+    /// 저장 결과: 넣은 블록 수 + 형식 오류·겹침 오류
+    struct SaveOutcome {
+        let added: Int
+        let errors: [ParseError]
+    }
+
+    /// 입력한 글을 해석해서 저장.
+    /// append: 기존 일정에 끼워 넣음 (어제 이전에 끝난 블록은 정리), false면 전부 교체.
+    /// 넣을 블록이 하나도 없으면 기존 일정 유지.
     @discardableResult
-    func saveSchedule(text: String, tomorrow: Bool) -> ParseResult {
+    func saveSchedule(text: String, tomorrow: Bool, append: Bool) -> SaveOutcome {
         let result = Self.parse(text, tomorrow: tomorrow)
-        if result.blocks.isEmpty {
+        guard !result.blocks.isEmpty else {
             play(.scheduleFailed)
-        } else {
-            replaceSchedule(with: result.blocks)
+            return SaveOutcome(added: 0, errors: result.errors)
         }
-        return result
+        if !append {
+            replaceSchedule(with: result.blocks)
+            return SaveOutcome(added: result.blocks.count, errors: result.errors)
+        }
+        var merged = schedule
+        merged.removeBlocks(endingBefore: Calendar.current.startOfDay(for: Date()))
+        let (added, conflicts) = merged.merge(result)
+        let errors = (result.errors + conflicts).sorted { $0.lineNumber < $1.lineNumber }
+        guard added > 0 else {
+            play(.scheduleFailed)
+            return SaveOutcome(added: 0, errors: errors)
+        }
+        replaceSchedule(with: merged.blocks)
+        return SaveOutcome(added: added, errors: errors)
     }
 
     static func parse(_ text: String, tomorrow: Bool) -> ParseResult {

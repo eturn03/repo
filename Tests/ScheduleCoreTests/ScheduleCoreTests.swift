@@ -166,6 +166,26 @@ final class ScheduleCoreTests: XCTestCase {
         XCTAssertEqual(s.position(at: at(10, 10)), .inBlock(index: 2))
     }
 
+    func testMergeAddsInOrderAndRejectsOverlaps() {
+        var s = sample()   // A 09:00-10:00, B 10:00-10:30, C 10:45-11:00
+        let added = parse("""
+        08:00-09:00 아침
+        10:15-10:40 겹침
+        11:00-12:00 점심
+        """)
+        let (count, conflicts) = s.merge(added, calendar: cal)
+        XCTAssertEqual(count, 2)
+        XCTAssertEqual(s.blocks.map(\.title), ["아침", "A", "B", "C", "점심"])
+        XCTAssertEqual(conflicts.map(\.lineNumber), [2])
+        XCTAssertEqual(conflicts.first?.reason, "기존 'B'(10:00–10:30)과 겹침")
+    }
+
+    func testRemoveBlocksEndingBefore() {
+        var s = sample()
+        s.removeBlocks(endingBefore: at(10, 30))
+        XCTAssertEqual(s.blocks.map(\.title), ["C"])
+    }
+
     func testRemoveBlockLeavesGap() {
         var s = sample()
         s.removeBlock(id: s.blocks[1].id)   // B 삭제

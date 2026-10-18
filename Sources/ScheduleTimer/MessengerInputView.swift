@@ -83,6 +83,8 @@ struct MessengerInputView: View {
 
     @State private var text = ""
     @State private var tomorrow = false
+    /// true: 기존 일정에 추가 (기본), false: 전부 교체
+    @State private var append = true
     @State private var saved: String?
     @State private var savedIsError = false
     @State private var keepSavedMessage = false
@@ -148,19 +150,23 @@ struct MessengerInputView: View {
         .frame(width: MessengerSkin.size.width * scale, height: MessengerSkin.size.height * scale, alignment: .topLeading)
     }
 
-    /// 베이지 칸: 오늘/내일, 붙여넣기
+    /// 베이지 칸: 오늘/내일, 추가/교체, 붙여넣기, 지우기
     private var optionBar: some View {
         let bar = rect(MessengerSkin.optionBar)
-        return HStack(spacing: 10 * scale) {
+        return HStack(spacing: 6 * scale) {
             dayChoice("오늘", selected: !tomorrow) { tomorrow = false }
             dayChoice("내일", selected: tomorrow) { tomorrow = true }
-            Spacer()
+            Text("|").foregroundStyle(Color(white: 0.55))
+            dayChoice("추가", selected: append) { append = true }
+            dayChoice("교체", selected: !append) { append = false }
+            Spacer(minLength: 2 * scale)
             textButton("붙여넣기") {
                 text = NSPasteboard.general.string(forType: .string) ?? text
             }
             textButton("지우기") { text = "" }
         }
-        .font(font(12))
+        .font(font(11))
+        .lineLimit(1)
         .padding(.horizontal, 4 * scale)
         .frame(width: bar.width, height: bar.height)
         .offset(x: bar.minX, y: bar.minY)
@@ -183,17 +189,30 @@ struct MessengerInputView: View {
 
     // MARK: - 검사·저장
 
-    private var preview: ParseResult { AppStore.parse(text, tomorrow: tomorrow) }
+    /// 저장하면 어떻게 될지 미리 계산 (추가 모드면 기존 일정과 겹침까지)
+    private var preview: (count: Int, errors: [ParseError]) {
+        let result = AppStore.parse(text, tomorrow: tomorrow)
+        guard append else { return (result.blocks.count, result.errors) }
+        var copy = store.schedule
+        copy.removeBlocks(endingBefore: Calendar.current.startOfDay(for: Date()))
+        let (added, conflicts) = copy.merge(result)
+        return (added, (result.errors + conflicts).sorted { $0.lineNumber < $1.lineNumber })
+    }
+
+    private static func describe(_ errors: [ParseError]) -> String {
+        if errors.count == 1, let e = errors.first { return "\(e.lineNumber)번째 줄: \(e.reason)" }
+        return "오류 " + errors.map { String($0.lineNumber) }.joined(separator: ", ") + "번째 줄"
+    }
 
     private var statusText: String {
         if let saved { return saved }
         if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return "예) 09:00-10:30 영어공부"
+            return append ? "예) 09:00-10:30 영어공부 (기존 일정에 추가)" : "예) 09:00-10:30 영어공부 (전부 교체)"
         }
-        let result = preview
-        if result.errors.isEmpty { return "블록 \(result.blocks.count)개 인식 · 오류 없음" }
-        let lines = result.errors.map { String($0.lineNumber) }.joined(separator: ", ")
-        return "블록 \(result.blocks.count)개 · 오류 \(lines)번째 줄"
+        let p = preview
+        let verb = append ? "추가" : "교체"
+        if p.errors.isEmpty { return "\(verb) \(p.count)개 · 오류 없음" }
+        return "\(verb) \(p.count)개 · " + Self.describe(p.errors)
     }
 
     private var statusIsError: Bool {
@@ -202,12 +221,12 @@ struct MessengerInputView: View {
     }
 
     private func save() {
-        let result = store.saveSchedule(text: text, tomorrow: tomorrow)
-        if result.blocks.isEmpty {
-            saved = result.errors.isEmpty ? "입력된 일정이 없음" : "등록된 블록 없음 (기존 일정 유지)"
+        let result = store.saveSchedule(text: text, tomorrow: tomorrow, append: append)
+        if result.added == 0 {
+            saved = result.errors.isEmpty ? "입력된 일정이 없음" : "넣은 블록 없음 · " + Self.describe(result.errors)
             savedIsError = true
         } else if result.errors.isEmpty {
-            saved = "저장 완료! 블록 \(result.blocks.count)개"
+            saved = (append ? "추가 완료! " : "교체 완료! ") + "블록 \(result.added)개"
             savedIsError = false
             keepSavedMessage = true
             text = ""
@@ -216,8 +235,7 @@ struct MessengerInputView: View {
                 onClose()
             }
         } else {
-            let lines = result.errors.map { String($0.lineNumber) }.joined(separator: ", ")
-            saved = "\(result.blocks.count)개 저장 · \(lines)번째 줄 제외"
+            saved = "\(result.added)개 저장 · 제외: " + Self.describe(result.errors)
             savedIsError = true
         }
     }
