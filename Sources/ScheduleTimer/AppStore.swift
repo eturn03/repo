@@ -32,9 +32,22 @@ final class AppStore: ObservableObject {
     /// Skin 폴더의 StatusBar.img / Game.img에서 읽은 것 (없으면 nil → 코드로 그린 모양·기본음)
     @Published private(set) var skin: StatusBarSkin?
     @Published private(set) var soundBank: SoundBank?
+    /// UIWindow.img의 메신저 창 (있으면 일정 입력을 메이플 창으로)
+    @Published private(set) var messengerSkin: MessengerSkin?
     @Published private(set) var skinMessage = ""
-    /// Skin 폴더에 넣은 글꼴 (이름·할 일 글자용). nil이면 시스템 글꼴.
-    @Published private(set) var customFontName: String?
+    /// Skin 폴더에 넣은 글꼴들
+    @Published private(set) var fontChoices: [FontLoader.Face] = []
+    /// 고른 글꼴 (PostScript 이름, "" = 시스템 글꼴, nil = 자동: 돋움 우선)
+    @Published var selectedFontName: String? {
+        didSet { UserDefaults.standard.set(selectedFontName, forKey: Keys.fontName) }
+    }
+    /// 실제로 쓸 글꼴 (상태바 이름·일정 입력창). nil이면 시스템 글꼴.
+    var customFontName: String? {
+        if let selected = selectedFontName {
+            return fontChoices.contains { $0.postScriptName == selected } ? selected : nil
+        }
+        return FontLoader.preferred(in: fontChoices)?.postScriptName
+    }
     @Published private(set) var launchAtLogin = LoginItem.isEnabled
     @Published private(set) var loginItemMessage: String?
 
@@ -51,6 +64,7 @@ final class AppStore: ObservableObject {
         static let soundAssignments = "soundAssignments"
         static let effectVolume = "effectVolume"
         static let quietVolume = "quietVolume"
+        static let fontName = "fontName"
         static let didSetupLoginItem = "didSetupLoginItem"
     }
 
@@ -80,6 +94,7 @@ final class AppStore: ObservableObject {
         soundAssignments = assignments
         effectVolume = defaults.object(forKey: Keys.effectVolume) as? Double ?? 0.5
         quietVolume = defaults.object(forKey: Keys.quietVolume) as? Double ?? 0.2
+        selectedFontName = defaults.string(forKey: Keys.fontName)
         schedule = storage.load()
         lastPosition = .empty
         lastPosition = schedule.position(at: Date())
@@ -145,6 +160,18 @@ final class AppStore: ObservableObject {
             skin = nil
             messages.append("상태바: 기본 모양 (StatusBar.img 없음)")
         }
+        if let url = AppFolder.skinFile(named: "UIWindow.img") {
+            do {
+                messengerSkin = try MessengerSkin(uiWindow: WZImage.load(contentsOf: url))
+                messages.append("일정 입력창: UIWindow.img 메신저 창 사용 중")
+            } catch {
+                messengerSkin = nil
+                messages.append("일정 입력창: UIWindow.img 읽기 실패 (\(error))")
+            }
+        } else {
+            messengerSkin = nil
+            messages.append("일정 입력창: 기본 (UIWindow.img 없음)")
+        }
         // Sound.wz의 Game.img(게임 효과음), UI.img(클릭 등)
         var bank = SoundBank()
         for (file, prefix) in [("Game.img", "Game"), ("UI.img", "UI")] {
@@ -161,8 +188,8 @@ final class AppStore: ObservableObject {
             }
         }
         soundBank = bank.sounds.isEmpty ? nil : bank
-        customFontName = FontLoader.registerFirstFont(in: AppFolder.skin)
-        messages.append(customFontName.map { "글꼴: \($0)" } ?? "글꼴: 시스템 글꼴 (ttf/otf/ttc 없음)")
+        fontChoices = FontLoader.registerAll(in: AppFolder.skin)
+        messages.append(fontChoices.isEmpty ? "글꼴: 시스템 글꼴 (ttf/otf/ttc 없음)" : "글꼴: \(fontChoices.count)개 불러옴")
         skinMessage = messages.joined(separator: "\n")
     }
 
@@ -188,6 +215,23 @@ final class AppStore: ObservableObject {
     }
 
     // MARK: - 일정 조작
+
+    /// 입력한 글을 해석해서 저장. 블록이 하나도 없으면 기존 일정 유지.
+    @discardableResult
+    func saveSchedule(text: String, tomorrow: Bool) -> ParseResult {
+        let result = Self.parse(text, tomorrow: tomorrow)
+        if result.blocks.isEmpty {
+            play(.scheduleFailed)
+        } else {
+            replaceSchedule(with: result.blocks)
+        }
+        return result
+    }
+
+    static func parse(_ text: String, tomorrow: Bool) -> ParseResult {
+        let day = tomorrow ? Calendar.current.date(byAdding: .day, value: 1, to: Date())! : Date()
+        return ScheduleParser.parse(text, day: day)
+    }
 
     /// 새 일정으로 교체
     func replaceSchedule(with blocks: [Block]) {

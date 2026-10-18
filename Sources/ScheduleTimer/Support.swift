@@ -168,26 +168,96 @@ final class SoundPlayer {
     }
 }
 
-/// Skin 폴더의 글꼴 파일을 이 앱에서만 쓰도록 등록
-enum FontLoader {
-    private static var registered: [URL: String] = [:]
+/// 고른 파일·폴더에서 메이플 .img를 찾아 이름에 맞는 폴더로 복사
+enum MapleFileImporter {
+    static let skinFiles = ["statusbar.img", "basic.img", "game.img", "ui.img", "uiwindow.img"]
+    static let fontExtensions = ["ttf", "otf", "ttc"]
 
-    /// 첫 번째 ttf/otf/ttc의 글꼴 이름(PostScript) 반환
-    static func registerFirstFont(in folder: URL) -> String? {
-        let files = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
-        guard let url = files
-            .filter({ ["ttf", "otf", "ttc"].contains($0.pathExtension.lowercased()) })
-            .sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
-            .first
-        else { return nil }
-        if let name = registered[url] { return name }
-        CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
-        guard let descriptors = CTFontManagerCreateFontDescriptorsFromURL(url as CFURL) as? [CTFontDescriptor],
-              let first = descriptors.first,
-              let name = CTFontDescriptorCopyAttribute(first, kCTFontNameAttribute) as? String
-        else { return nil }
-        registered[url] = name
-        return name
+    static func importFiles(_ urls: [URL]) -> String {
+        let fm = FileManager.default
+        try? fm.createDirectory(at: AppFolder.skin, withIntermediateDirectories: true)
+        try? fm.createDirectory(at: AppFolder.music, withIntermediateDirectories: true)
+
+        // 폴더를 고르면 안에 있는 파일 전부 (하위 폴더 포함)
+        var files: [URL] = []
+        for url in urls {
+            var isDir: ObjCBool = false
+            if fm.fileExists(atPath: url.path, isDirectory: &isDir), isDir.boolValue,
+               let walker = fm.enumerator(at: url, includingPropertiesForKeys: nil) {
+                for case let file as URL in walker { files.append(file) }
+            } else {
+                files.append(url)
+            }
+        }
+
+        var skin: [String] = [], music: [String] = [], skipped = 0
+        for file in files {
+            let name = file.lastPathComponent
+            let lower = name.lowercased()
+            let destFolder: URL
+            if lower.hasPrefix("bgm") && lower.hasSuffix(".img") {
+                destFolder = AppFolder.music
+            } else if skinFiles.contains(lower) || fontExtensions.contains(file.pathExtension.lowercased()) {
+                destFolder = AppFolder.skin
+            } else {
+                skipped += 1
+                continue
+            }
+            let dest = destFolder.appendingPathComponent(name)
+            try? fm.removeItem(at: dest)
+            do {
+                try fm.copyItem(at: file, to: dest)
+                if destFolder == AppFolder.music { music.append(name) } else { skin.append(name) }
+            } catch {
+                NSLog("가져오기 실패 \(name): \(error)")
+            }
+        }
+        var lines: [String] = []
+        if !skin.isEmpty { lines.append("스킨: " + skin.sorted().joined(separator: ", ")) }
+        if !music.isEmpty { lines.append("음악: \(music.count)개 파일") }
+        if skipped > 0 { lines.append("관계없는 파일 \(skipped)개는 건너뜀") }
+        return lines.isEmpty ? "가져온 파일 없음" : lines.joined(separator: "\n")
+    }
+}
+
+/// Skin 폴더의 글꼴 파일(ttf/otf/ttc)을 이 앱에서만 쓰도록 등록
+enum FontLoader {
+    struct Face: Hashable {
+        let postScriptName: String
+        let displayName: String
+    }
+
+    private static var registered: Set<URL> = []
+
+    /// 폴더 안 모든 글꼴 파일의 모든 글꼴 (ttc는 여러 개)
+    static func registerAll(in folder: URL) -> [Face] {
+        let files = ((try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? [])
+            .filter { ["ttf", "otf", "ttc"].contains($0.pathExtension.lowercased()) }
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        var faces: [Face] = []
+        for url in files {
+            if !registered.contains(url) {
+                CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+                registered.insert(url)
+            }
+            let descriptors = (CTFontManagerCreateFontDescriptorsFromURL(url as CFURL) as? [CTFontDescriptor]) ?? []
+            for descriptor in descriptors {
+                guard let name = CTFontDescriptorCopyAttribute(descriptor, kCTFontNameAttribute) as? String else { continue }
+                let display = (CTFontDescriptorCopyAttribute(descriptor, kCTFontDisplayNameAttribute) as? String) ?? name
+                faces.append(Face(postScriptName: name, displayName: display))
+            }
+        }
+        return faces
+    }
+
+    /// 기본 선택: 돋움 → 굴림 → 첫 번째
+    static func preferred(in faces: [Face]) -> Face? {
+        for key in ["dotum", "돋움", "gulim", "굴림"] {
+            if let face = faces.first(where: {
+                ($0.postScriptName + $0.displayName).lowercased().contains(key) && !$0.displayName.contains("체")
+            }) { return face }
+        }
+        return faces.first
     }
 }
 

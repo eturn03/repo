@@ -7,6 +7,8 @@ struct ContentView: View {
     @EnvironmentObject private var store: AppStore
     @EnvironmentObject private var music: MusicPlayer
     var onTestLevelUp: () -> Void = {}
+    /// 메신저 입력창 열기 (UIWindow.img가 있을 때)
+    var onOpenInput: () -> Void = {}
 
     private enum Pending: Equatable {
         case end, skip, extend(Int)
@@ -18,6 +20,7 @@ struct ContentView: View {
     @State private var forTomorrow = false
     @State private var resultMessage: String?
     @State private var parseErrors: [ParseError] = []
+    @State private var importMessage: String?
 
     var body: some View {
         ScrollView {
@@ -33,7 +36,9 @@ struct ContentView: View {
             scheduleList
 
             Divider()
-            if showInput || store.schedule.blocks.isEmpty {
+            if store.messengerSkin != nil {
+                Button("새 일정 입력 (메신저 창)") { onOpenInput() }
+            } else if showInput || store.schedule.blocks.isEmpty {
                 inputSection
             } else {
                 Button("새 일정 입력") { showInput = true }
@@ -169,19 +174,14 @@ struct ContentView: View {
     }
 
     private func save() {
-        let day = forTomorrow
-            ? Calendar.current.date(byAdding: .day, value: 1, to: Date())!
-            : Date()
-        let result = ScheduleParser.parse(inputText, day: day)
+        let result = store.saveSchedule(text: inputText, tomorrow: forTomorrow)
         parseErrors = result.errors
         if result.blocks.isEmpty {
             resultMessage = result.errors.isEmpty
                 ? "입력된 일정이 없음"
                 : "등록된 블록 없음 (기존 일정 유지)"
-            store.play(.scheduleFailed)
             return
         }
-        store.replaceSchedule(with: result.blocks)
         pending = nil
         if result.errors.isEmpty {
             resultMessage = nil
@@ -193,6 +193,21 @@ struct ContentView: View {
     }
 
     // MARK: - 하단
+
+    /// 파일·폴더를 골라서 메이플 파일을 알맞은 폴더로 복사
+    private func importMapleFiles() {
+        let panel = NSOpenPanel()
+        panel.title = "메이플 파일 가져오기 (.img 파일이나 폴더 선택)"
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = true
+        NSApp.activate(ignoringOtherApps: true)
+        guard panel.runModal() == .OK else { return }
+        let summary = MapleFileImporter.importFiles(panel.urls)
+        importMessage = summary
+        store.reloadSkin()
+        store.music.reload()
+    }
 
     /// 불러온 소리 목록 + 지금 배정된 소리(파일이 아직 없어도 목록에 보이게)
     private func soundChoices(for event: SoundEvent) -> [String] {
@@ -260,9 +275,26 @@ struct ContentView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
+                    Button("메이플 파일 가져오기…") { importMapleFiles() }
+                        .help("고른 .img 파일을 이름에 맞춰 스킨·음악 폴더에 복사")
+                    if let importMessage {
+                        Text(importMessage)
+                            .font(.caption)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     HStack {
                         Button("스킨 폴더 열기") { NSWorkspace.shared.open(AppFolder.skin) }
                         Button("스킨 다시 불러오기") { store.reloadSkin() }
+                    }
+                    Picker("글꼴", selection: Binding(
+                        get: { store.selectedFontName ?? "auto" },
+                        set: { store.selectedFontName = $0 == "auto" ? nil : $0 }
+                    )) {
+                        Text("자동 (돋움 우선)").tag("auto")
+                        Text("시스템 글꼴").tag("")
+                        ForEach(store.fontChoices, id: \.self) { face in
+                            Text(face.displayName).tag(face.postScriptName)
+                        }
                     }
                     Button("레벨업 미리보기") { onTestLevelUp() }
                     DisclosureGroup("상황별 효과음 바꾸기") {

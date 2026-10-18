@@ -16,6 +16,7 @@ struct ScheduleTimerApp: App {
     var body: some Scene {
         // 메뉴 막대에는 작은 아이콘만 (상태바를 숨겼을 때 다시 여는 용도)
         MenuBarExtra {
+            Button("일정 입력") { delegate.windows?.showScheduleInput() }
             Button("설정 열기") { delegate.windows?.showSettings() }
             Button("상태바 보이기/숨기기") {
                 delegate.store.showStatusBar.toggle()

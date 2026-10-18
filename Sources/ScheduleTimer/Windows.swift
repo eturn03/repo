@@ -33,6 +33,8 @@ final class WindowManager {
     private let store: AppStore
     private let statusPanel: FloatingPanel
     private var settingsWindow: NSWindow?
+    private var inputWindow: NSWindow?
+    private var inputDragStart: (mouse: NSPoint, origin: NSPoint)?
     private var effectPanel: FloatingPanel?
     private var effectID: UUID?
     private var dragStart: (mouse: NSPoint, origin: NSPoint)?
@@ -47,6 +49,7 @@ final class WindowManager {
         let root = StatusBarRoot(
             store: store,
             onOpenSettings: { [weak self] in self?.showSettings() },
+            onOpenInput: { [weak self] in self?.showScheduleInput() },
             onDrag: { [weak self] value in self?.handleDrag(value) }
         )
         statusPanel.contentView = NSHostingView(rootView: root)
@@ -172,10 +175,13 @@ final class WindowManager {
             window.title = "일정 타이머 설정"
             window.isReleasedWhenClosed = false
             window.contentView = NSHostingView(
-                rootView: ContentView(onTestLevelUp: { [weak self] in
-                    self?.store.play(.levelUp)
-                    self?.showLevelUpEffect()
-                })
+                rootView: ContentView(
+                    onTestLevelUp: { [weak self] in
+                        self?.store.play(.levelUp)
+                        self?.showLevelUpEffect()
+                    },
+                    onOpenInput: { [weak self] in self?.showScheduleInput() }
+                )
                 .environmentObject(store)
                 .environmentObject(store.music)
             )
@@ -185,12 +191,82 @@ final class WindowManager {
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.makeKeyAndOrderFront(nil)
     }
+
+    // MARK: - 일정 입력창 (메신저 모양)
+
+    /// UIWindow.img가 있으면 메신저 모양 입력창, 없으면 설정 창
+    func showScheduleInput() {
+        guard let skin = store.messengerSkin else {
+            showSettings()
+            return
+        }
+        store.play(.openSettings)
+        let scale: CGFloat = 2
+        let size = CGSize(width: MessengerSkin.size.width * scale, height: MessengerSkin.size.height * scale)
+        // 스킨을 다시 불러왔을 수 있으니 열 때마다 새로 만듦 (위치는 유지)
+        let previousOrigin = inputWindow?.frame.origin
+        inputWindow?.orderOut(nil)
+        let window = KeyableBorderlessWindow(
+            contentRect: CGRect(origin: .zero, size: size),
+            styleMask: [.borderless],
+            backing: .buffered,
+            defer: false
+        )
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.hasShadow = true
+        window.level = .floating
+        window.isReleasedWhenClosed = false
+        window.contentView = NSHostingView(
+            rootView: MessengerInputView(
+                skin: skin,
+                scale: scale,
+                onClose: { [weak self] in self?.inputWindow?.orderOut(nil) },
+                onDrag: { [weak self] value in self?.handleInputDrag(value) }
+            )
+            .environmentObject(store)
+        )
+        if let previousOrigin {
+            window.setFrameOrigin(previousOrigin)
+        } else {
+            window.center()
+        }
+        inputWindow = window
+        NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
+    }
+
+    private func handleInputDrag(_ value: DragGesture.Value?) {
+        guard let window = inputWindow else { return }
+        guard value != nil else {
+            if inputDragStart != nil { store.play(.dragEnd) }
+            inputDragStart = nil
+            return
+        }
+        let mouse = NSEvent.mouseLocation
+        if inputDragStart == nil {
+            inputDragStart = (mouse, window.frame.origin)
+            store.play(.dragStart)
+        }
+        guard let start = inputDragStart else { return }
+        window.setFrameOrigin(NSPoint(
+            x: start.origin.x + mouse.x - start.mouse.x,
+            y: start.origin.y + mouse.y - start.mouse.y
+        ))
+    }
+}
+
+/// 테두리 없는 창이지만 글자 입력을 받을 수 있게
+final class KeyableBorderlessWindow: NSWindow {
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { true }
 }
 
 /// 상태바 창 내용: store를 구독해서 1초마다 다시 그림. StatusBar.img가 있으면 원본 이미지로.
 private struct StatusBarRoot: View {
     @ObservedObject var store: AppStore
     let onOpenSettings: () -> Void
+    let onOpenInput: () -> Void
     let onDrag: (DragGesture.Value?) -> Void
 
     var body: some View {
@@ -216,6 +292,7 @@ private struct StatusBarRoot: View {
             }
         }
         .contextMenu {
+            Button("일정 입력", action: onOpenInput)
             Button("설정 열기", action: onOpenSettings)
             Divider()
             Button(store.music.isPlaying ? "음악 일시정지" : "음악 재생") { store.music.togglePlay() }
