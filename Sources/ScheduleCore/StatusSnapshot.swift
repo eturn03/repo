@@ -7,9 +7,9 @@ public struct StatusSnapshot: Equatable {
     public var phase: Phase
     /// 오늘 끝낸 블록 수 (건너뜀·없어짐 제외)
     public var completedBlocks: Int
-    /// 레벨: 끝낸 블록 하나에 10씩, 최고 200
+    /// 레벨: 1에서 시작, 끝낸 블록 하나에 10씩 (1 → 10 → 20 …), 최고 200
     public var level: Int { JobTitle.level(forCompletedBlocks: completedBlocks) }
-    /// 레벨에 따른 칭호
+    /// 레벨에 따른 직업
     public var jobTitle: String { JobTitle.title(forLevel: level) }
     /// 지금 할 일 (빈 시간이면 다음 할 일 안내)
     public var title: String
@@ -108,14 +108,15 @@ extension Format {
     }
 }
 
-/// 레벨과 칭호 (닉네임 뒤 [칭호])
+/// 레벨과 직업 (닉네임 뒤 [직업])
 public enum JobTitle {
     public static let levelPerBlock = 10
+    public static let minLevel = 1
     public static let maxLevel = 200
 
-    /// (이 레벨부터, 칭호) — 낮은 레벨부터
+    /// (이 레벨부터, 직업) — 낮은 레벨부터
     public static let ranks: [(minLevel: Int, title: String)] = [
-        (0, "게으른 백수"),
+        (1, "게으른 백수"),
         (10, "일을 시작한 자"),
         (30, "일을 하는 자"),
         (70, "현생 사는 자"),
@@ -124,7 +125,7 @@ public enum JobTitle {
     ]
 
     public static func level(forCompletedBlocks count: Int) -> Int {
-        min(maxLevel, max(0, count) * levelPerBlock)
+        min(maxLevel, max(minLevel, count * levelPerBlock))
     }
 
     public static func title(forLevel level: Int) -> String {

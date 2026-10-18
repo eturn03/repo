@@ -35,7 +35,7 @@ final class WindowManager {
     private var settingsWindow: NSWindow?
     private var inputWindow: NSWindow?
     private var inputDragStart: (mouse: NSPoint, origin: NSPoint)?
-    private var effectPanel: FloatingPanel?
+    private var effectPanels: [FloatingPanel] = []
     private var effectID: UUID?
     private var dragStart: (mouse: NSPoint, origin: NSPoint)?
     private var cancellables = Set<AnyCancellable>()
@@ -132,11 +132,15 @@ final class WindowManager {
 
     // MARK: - 레벨업 이펙트
 
+    /// 레벨업 이펙트는 항상, 직업이 바뀌면 전직 이펙트를 같이 겹쳐서
     func showLevelUpEffect(jobChanged: Bool = false) {
         guard store.showStatusBar else { return }
-        effectPanel?.orderOut(nil)
-        if let prepared = (jobChanged ? store.jobChangeAnimation : nil) ?? store.levelUpAnimation {
-            showMapleLevelUp(prepared)
+        hideEffects()
+        let id = UUID()
+        effectID = id
+        let animations = [store.levelUpAnimation, jobChanged ? store.jobChangeAnimation : nil].compactMap { $0 }
+        if !animations.isEmpty {
+            for prepared in animations { showMapleLevelUp(prepared, id: id) }
             return
         }
 
@@ -153,20 +157,27 @@ final class WindowManager {
         }
         panel.setFrameOrigin(origin)
         panel.orderFrontRegardless()
-        effectPanel = panel
+        effectPanels.append(panel)
+        hide(panel, after: LevelUpView.duration, id: id)
+    }
 
-        let id = UUID()
-        effectID = id
+    private func hideEffects() {
+        effectPanels.forEach { $0.orderOut(nil) }
+        effectPanels = []
+    }
+
+    /// 이펙트 창 하나를 seconds 뒤에 닫음 (그사이 새 이펙트가 떴으면 그쪽에서 이미 닫음)
+    private func hide(_ panel: FloatingPanel, after seconds: TimeInterval, id: UUID) {
         Task { @MainActor [weak self] in
-            try? await Task.sleep(nanoseconds: UInt64(LevelUpView.duration * 1_000_000_000))
+            try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
             guard let self, self.effectID == id else { return }
-            self.effectPanel?.orderOut(nil)
-            self.effectPanel = nil
+            panel.orderOut(nil)
+            self.effectPanels.removeAll { $0 === panel }
         }
     }
 
     /// 원본 레벨업 이펙트: 기준점(발밑)을 상태바 윗변, EXP 막대 위에 맞춤
-    private func showMapleLevelUp(_ prepared: PreparedAnimation) {
+    private func showMapleLevelUp(_ prepared: PreparedAnimation, id: UUID) {
         let scale = CGFloat(store.barScale)
         let bounds = prepared.animation.bounds
         let size = CGSize(width: prepared.size.width * scale, height: prepared.size.height * scale)
@@ -181,16 +192,8 @@ final class WindowManager {
         panel.setFrameOrigin(NSPoint(x: anchorX + CGFloat(bounds.minX) * scale,
                                      y: anchorY - CGFloat(bounds.maxY) * scale))
         panel.orderFrontRegardless()
-        effectPanel = panel
-
-        let id = UUID()
-        effectID = id
-        Task { @MainActor [weak self] in
-            try? await Task.sleep(nanoseconds: UInt64((prepared.duration + 0.1) * 1_000_000_000))
-            guard let self, self.effectID == id else { return }
-            self.effectPanel?.orderOut(nil)
-            self.effectPanel = nil
-        }
+        effectPanels.append(panel)
+        hide(panel, after: prepared.duration + 0.1, id: id)
     }
 
     // MARK: - 설정 창
@@ -213,6 +216,7 @@ final class WindowManager {
                         self?.showLevelUpEffect()
                     },
                     onTestJobChange: { [weak self] in
+                        self?.store.play(.levelUp)
                         self?.store.play(.jobChange)
                         self?.showLevelUpEffect(jobChanged: true)
                     },

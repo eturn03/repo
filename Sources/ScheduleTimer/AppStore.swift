@@ -388,15 +388,10 @@ final class AppStore: ObservableObject {
             let done = StatusSnapshot(schedule: schedule, now: t).completedBlocks
             let before = JobTitle.title(forLevel: JobTitle.level(forCompletedBlocks: done - 1))
             let after = JobTitle.title(forLevel: JobTitle.level(forCompletedBlocks: done))
-            if before != after {
-                // 직업이 바뀌면 전직 소리·이펙트
-                play(.jobChange)
-                onLevelUp?(true)
-            } else {
-                // 마지막 블록이면 "오늘 일정 모두 끝" 소리
-                play(position == .finished ? .allDone : .levelUp)
-                onLevelUp?(false)
-            }
+            // 레벨업은 항상 (마지막 블록이면 "오늘 일정 모두 끝" 소리), 직업이 바뀌면 전직 소리·이펙트도 같이
+            play(position == .finished ? .allDone : .levelUp)
+            if before != after { play(.jobChange) }
+            onLevelUp?(before != after)
         } else if case .inBlock = position {
             play(.blockStart)
         }

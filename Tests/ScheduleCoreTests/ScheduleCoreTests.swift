@@ -199,12 +199,12 @@ final class ScheduleCoreTests: XCTestCase {
         var s = Schedule(blocks: blocks)
         XCTAssertEqual(s.blocks[0].status, .expired)
         var snap = StatusSnapshot(schedule: s, now: at(10, 10))
-        XCTAssertEqual(snap.level, 0)
+        XCTAssertEqual(snap.level, 1)
         XCTAssertEqual(snap.mpTotal, 2)
         XCTAssertEqual(snap.phase, .inBlock)
         s.resetToOriginal()
         snap = StatusSnapshot(schedule: s, now: at(10, 10))
-        XCTAssertEqual(snap.level, 0)   // 되돌려도 지남은 그대로
+        XCTAssertEqual(snap.level, 1)   // 되돌려도 지남은 그대로
     }
 
     func testRemoveBlockLeavesGap() {
@@ -266,7 +266,7 @@ final class ScheduleCoreTests: XCTestCase {
         var snap = StatusSnapshot(schedule: s, now: at(9, 45))
         XCTAssertEqual(snap.phase, .gap)
         XCTAssertEqual(snap.title, "다음: B")
-        XCTAssertEqual(snap.level, 0)
+        XCTAssertEqual(snap.level, 1)
         XCTAssertEqual(snap.jobTitle, "게으른 백수")
         XCTAssertEqual(snap.expProgress, 0.5, accuracy: 0.0001)
         XCTAssertEqual(snap.mpRemaining, 2)
@@ -286,8 +286,10 @@ final class ScheduleCoreTests: XCTestCase {
     }
 
     func testJobTitleThresholds() {
+        XCTAssertEqual(JobTitle.level(forCompletedBlocks: 0), 1)
+        XCTAssertEqual(JobTitle.level(forCompletedBlocks: 1), 10)
         XCTAssertEqual(JobTitle.level(forCompletedBlocks: 25), 200)
-        let expected = [(0, "게으른 백수"), (9, "게으른 백수"), (10, "일을 시작한 자"), (29, "일을 시작한 자"),
+        let expected = [(1, "게으른 백수"), (9, "게으른 백수"), (10, "일을 시작한 자"), (29, "일을 시작한 자"),
                         (30, "일을 하는 자"), (70, "현생 사는 자"), (119, "현생 사는 자"), (120, "일에 미친 자"),
                         (199, "일에 미친 자"), (200, "갓생 사는 자")]
         for (level, title) in expected {
