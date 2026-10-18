@@ -1,0 +1,32 @@
+#!/bin/bash
+# 일정 타이머 앱을 빌드해서 ~/Applications 에 설치하고 실행한다.
+# 사용법: bash build.sh
+# (BUILD_ONLY=1 이면 설치·실행 없이 build/ 에 앱만 만든다)
+set -euo pipefail
+cd "$(dirname "$0")"
+
+echo "▶ 빌드 중... (처음엔 1~2분 걸릴 수 있음)"
+swift build -c release --product ScheduleTimer
+BIN_DIR="$(swift build -c release --show-bin-path)"
+
+APP="build/ScheduleTimer.app"
+rm -rf "$APP"
+mkdir -p "$APP/Contents/MacOS"
+cp "$BIN_DIR/ScheduleTimer" "$APP/Contents/MacOS/ScheduleTimer"
+cp Resources/Info.plist "$APP/Contents/Info.plist"
+codesign --force --sign - "$APP"
+echo "▶ 앱 생성 완료: $APP"
+
+if [ "${BUILD_ONLY:-0}" = "1" ]; then
+    exit 0
+fi
+
+DEST="$HOME/Applications/ScheduleTimer.app"
+pkill -x ScheduleTimer 2>/dev/null || true
+sleep 1
+mkdir -p "$HOME/Applications"
+rm -rf "$DEST"
+cp -R "$APP" "$DEST"
+open "$DEST"
+echo "✅ 설치 완료: $DEST"
+echo "   메뉴 막대 오른쪽 위에 '일정 없음'이 보이면 성공!"

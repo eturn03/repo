@@ -1,0 +1,20 @@
+name: macOS build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift --version
+      - name: 로직 테스트
+        run: swift test
+      - name: 앱 빌드
+        run: BUILD_ONLY=1 bash build.sh
+      - name: 앱 구성 확인
+        run: |
+          plutil -lint build/ScheduleTimer.app/Contents/Info.plist
+          codesign --verify --verbose build/ScheduleTimer.app
