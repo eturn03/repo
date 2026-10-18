@@ -106,10 +106,11 @@ struct AppIconView: View {
 
     private var smile: some View {
         Path { p in
-            p.addArc(center: .zero, radius: 34, startAngle: .degrees(20), endAngle: .degrees(160), clockwise: false)
+            p.addArc(center: CGPoint(x: 50, y: 10), radius: 34,
+                     startAngle: .degrees(20), endAngle: .degrees(160), clockwise: false)
         }
         .stroke(outline, style: StrokeStyle(lineWidth: 13, lineCap: .round))
-        .frame(width: 0, height: 0)
+        .frame(width: 100, height: 60)
     }
 
     private var bell: some View {

@@ -1,5 +1,5 @@
 #!/bin/bash
-# 일정 타이머 앱을 빌드해서 ~/Applications 에 설치하고 실행한다.
+# 일정 타이머 앱을 빌드해서 응용 프로그램 폴더(/Applications)에 설치하고 실행한다.
 # 사용법: bash build.sh
 # (BUILD_ONLY=1 이면 설치·실행 없이 build/ 에 앱만 만든다)
 set -euo pipefail
