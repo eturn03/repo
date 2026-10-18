@@ -66,7 +66,7 @@ struct Storage {
 
 /// 효과음이 나는 상황. 소리는 설정 창에서 바꿀 수 있고, quiet는 "작은 효과음" 볼륨을 씀.
 enum SoundEvent: String, CaseIterable, Identifiable {
-    case levelUp, allDone, blockStart, skip, scheduleSaved, scheduleFailed
+    case levelUp, jobChange, allDone, blockStart, skip, scheduleSaved, scheduleFailed
     case extend, reset, delete, click, openSettings, dragStart, dragEnd
 
     var id: String { rawValue }
@@ -74,6 +74,7 @@ enum SoundEvent: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .levelUp: return "블록 끝 (레벨업)"
+        case .jobChange: return "직업이 바뀔 때 (전직)"
         case .allDone: return "오늘 일정 모두 끝"
         case .blockStart: return "빈 시간 → 블록 시작"
         case .skip: return "건너뛰기"
@@ -93,7 +94,8 @@ enum SoundEvent: String, CaseIterable, Identifiable {
     var defaultSound: String {
         switch self {
         case .levelUp: return "Game/LevelUp"
-        case .allDone: return "Game/JobChanged"
+        case .jobChange: return "Game/JobChanged"
+        case .allDone: return "Game/QuestClear"
         case .blockStart: return ""
         case .skip: return "Game/Tombstone"
         case .scheduleSaved: return "Game/EnchantSuccess"
@@ -111,7 +113,7 @@ enum SoundEvent: String, CaseIterable, Identifiable {
     /// 일반 효과음보다 작게 나는 소리
     var isQuiet: Bool {
         switch self {
-        case .levelUp, .allDone, .blockStart: return false
+        case .levelUp, .jobChange, .allDone, .blockStart: return false
         default: return true
         }
     }
@@ -119,7 +121,7 @@ enum SoundEvent: String, CaseIterable, Identifiable {
     /// 게임 파일이 없을 때 macOS 기본음 (없으면 무음)
     var systemFallback: String? {
         switch self {
-        case .levelUp, .allDone: return "Hero"
+        case .levelUp, .jobChange, .allDone: return "Hero"
         case .blockStart: return "Glass"
         default: return nil
         }

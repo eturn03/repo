@@ -70,7 +70,7 @@ final class WindowManager {
             }
             .store(in: &cancellables)
 
-        store.onLevelUp = { [weak self] in self?.showLevelUpEffect() }
+        store.onLevelUp = { [weak self] jobChanged in self?.showLevelUpEffect(jobChanged: jobChanged) }
     }
 
     // MARK: - 상태바
@@ -132,10 +132,10 @@ final class WindowManager {
 
     // MARK: - 레벨업 이펙트
 
-    func showLevelUpEffect() {
+    func showLevelUpEffect(jobChanged: Bool = false) {
         guard store.showStatusBar else { return }
         effectPanel?.orderOut(nil)
-        if let prepared = store.levelUpAnimation {
+        if let prepared = (jobChanged ? store.jobChangeAnimation : nil) ?? store.levelUpAnimation {
             showMapleLevelUp(prepared)
             return
         }
@@ -211,6 +211,10 @@ final class WindowManager {
                     onTestLevelUp: { [weak self] in
                         self?.store.play(.levelUp)
                         self?.showLevelUpEffect()
+                    },
+                    onTestJobChange: { [weak self] in
+                        self?.store.play(.jobChange)
+                        self?.showLevelUpEffect(jobChanged: true)
                     },
                     onOpenInput: { [weak self] in self?.showScheduleInput() }
                 )
@@ -307,7 +311,7 @@ private struct StatusBarRoot: View {
                 SkinStatusBarView(
                     skin: skin,
                     snapshot: store.snapshot,
-                    nickname: store.nickname,
+                    nickname: store.displayName,
                     fontName: store.customFontName,
                     pixelFont: store.pixelFont,
                     scale: store.barScale,
@@ -317,7 +321,7 @@ private struct StatusBarRoot: View {
             } else {
                 StatusBarView(
                     snapshot: store.snapshot,
-                    nickname: store.nickname,
+                    nickname: store.displayName,
                     scale: store.barScale,
                     onOpenSettings: onOpenSettings,
                     onDrag: onDrag

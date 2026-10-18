@@ -7,6 +7,7 @@ struct ContentView: View {
     @EnvironmentObject private var store: AppStore
     @EnvironmentObject private var music: MusicPlayer
     var onTestLevelUp: () -> Void = {}
+    var onTestJobChange: () -> Void = {}
     /// 메신저 입력창 열기 (UIWindow.img가 있을 때)
     var onOpenInput: () -> Void = {}
 
@@ -278,6 +279,7 @@ struct ContentView: View {
             HStack {
                 Text("닉네임")
                 TextField("닉네임", text: $store.nickname)
+                    .help("직업은 레벨에 따라 [직업]으로 자동으로 붙음")
                     .textFieldStyle(.roundedBorder)
             }
             HStack {
@@ -359,7 +361,10 @@ struct ContentView: View {
                             Text(face.displayName).tag(face.postScriptName)
                         }
                     }
-                    Button("레벨업 미리보기") { onTestLevelUp() }
+                    HStack {
+                        Button("레벨업 미리보기") { onTestLevelUp() }
+                        Button("전직 미리보기") { onTestJobChange() }
+                    }
                     DisclosureGroup("상황별 효과음 바꾸기") {
                         ForEach(SoundEvent.allCases) { event in
                             HStack {

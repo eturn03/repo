@@ -37,7 +37,7 @@ enum PreviewRenderer {
 
         for (name, snapshot) in [("statusbar-block", inBlock), ("statusbar-gap", inGap)] {
             save(
-                StatusBarView(snapshot: snapshot, nickname: "임진택[무직백수]", scale: 1.5)
+                StatusBarView(snapshot: snapshot, nickname: "임진택[\(snapshot.jobTitle)]", scale: 1.5)
                     .padding(20)
                     .background(Color(white: 0.92)),
                 to: folder.appendingPathComponent("\(name).png")
@@ -47,7 +47,7 @@ enum PreviewRenderer {
         save(
             VStack(spacing: -20) {
                 LevelUpView(scale: 1, fixedElapsed: 0.7)
-                StatusBarView(snapshot: inBlock, nickname: "임진택[무직백수]", scale: 1)
+                StatusBarView(snapshot: inBlock, nickname: "임진택[\(inBlock.jobTitle)]", scale: 1)
             }
             .padding(20)
             .background(Color(white: 0.25)),

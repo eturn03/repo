@@ -224,7 +224,9 @@ final class ScheduleCoreTests: XCTestCase {
         let snap = StatusSnapshot(schedule: sample(), now: at(10, 12))
         XCTAssertEqual(snap.phase, .inBlock)
         XCTAssertEqual(snap.title, "B")
-        XCTAssertEqual(snap.level, 1)
+        XCTAssertEqual(snap.completedBlocks, 1)
+        XCTAssertEqual(snap.level, 10)
+        XCTAssertEqual(snap.jobTitle, "기지개 켠 자")
         XCTAssertEqual(snap.expProgress, 0.4, accuracy: 0.0001)
         XCTAssertEqual(snap.expRemaining, 18 * 60)
         XCTAssertEqual(snap.hpTotal, 2 * 3600)
@@ -244,20 +246,32 @@ final class ScheduleCoreTests: XCTestCase {
         XCTAssertEqual(snap.phase, .gap)
         XCTAssertEqual(snap.title, "다음: B")
         XCTAssertEqual(snap.level, 0)
+        XCTAssertEqual(snap.jobTitle, "이불 속 백수")
         XCTAssertEqual(snap.expProgress, 0.5, accuracy: 0.0001)
         XCTAssertEqual(snap.mpRemaining, 2)
 
         s.endCurrent(at: at(10, 5), mode: .keepSchedule, status: .completed)
         snap = StatusSnapshot(schedule: s, now: at(10, 6))
-        XCTAssertEqual(snap.level, 1)
+        XCTAssertEqual(snap.level, 10)
     }
 
     func testSnapshotEmptyAndFinished() {
         XCTAssertEqual(StatusSnapshot(schedule: Schedule(), now: at(9, 0)).phase, .empty)
         let done = StatusSnapshot(schedule: sample(), now: at(12, 0))
         XCTAssertEqual(done.phase, .finished)
-        XCTAssertEqual(done.level, 3)
+        XCTAssertEqual(done.level, 30)
+        XCTAssertEqual(done.jobTitle, "열일 꿈나무")
         XCTAssertEqual(done.hpRemaining, 0)
+    }
+
+    func testJobTitleThresholds() {
+        XCTAssertEqual(JobTitle.level(forCompletedBlocks: 25), 200)
+        let expected = [(0, "이불 속 백수"), (9, "이불 속 백수"), (10, "기지개 켠 자"), (29, "기지개 켠 자"),
+                        (30, "열일 꿈나무"), (70, "현생 생존자"), (119, "현생 생존자"), (120, "광기의 일꾼"),
+                        (199, "광기의 일꾼"), (200, "갓생 그 자체")]
+        for (level, title) in expected {
+            XCTAssertEqual(JobTitle.title(forLevel: level), title, "LV \(level)")
+        }
     }
 
     func testStatusFormats() {

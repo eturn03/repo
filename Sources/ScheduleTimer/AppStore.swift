@@ -8,6 +8,7 @@ import WZKit
 final class AppStore: ObservableObject {
     @Published private(set) var schedule: Schedule
     @Published private(set) var now = Date()
+    /// 닉네임 (직업은 레벨에 따라 자동으로 뒤에 [직업]으로 붙음)
     @Published var nickname: String {
         didSet { UserDefaults.standard.set(nickname, forKey: Keys.nickname) }
     }
@@ -34,6 +35,8 @@ final class AppStore: ObservableObject {
     @Published private(set) var soundBank: SoundBank?
     /// BasicEff.img의 LevelUp 애니메이션 (있으면 코드로 그린 이펙트 대신)
     @Published private(set) var levelUpAnimation: PreparedAnimation?
+    /// BasicEff.img의 JobChanged 애니메이션 (직업이 바뀔 때)
+    @Published private(set) var jobChangeAnimation: PreparedAnimation?
     /// UIWindow.img의 메신저 창 (있으면 일정 입력을 메이플 창으로)
     @Published private(set) var messengerSkin: MessengerSkin?
     @Published private(set) var skinMessage = ""
@@ -55,8 +58,11 @@ final class AppStore: ObservableObject {
     @Published private(set) var launchAtLogin = LoginItem.isEnabled
     @Published private(set) var loginItemMessage: String?
 
-    /// 레벨업 순간에 호출 (이펙트 창 띄우기)
-    var onLevelUp: (() -> Void)?
+    /// 레벨업 순간에 호출 (이펙트 창 띄우기). true면 직업이 바뀐 전직.
+    var onLevelUp: ((Bool) -> Void)?
+
+    /// 상태바 아랫줄: 닉네임[직업]
+    var displayName: String { "\(nickname)[\(snapshot.jobTitle)]" }
 
     static let scaleRange: ClosedRange<Double> = 0.6...3.0
 
@@ -85,7 +91,9 @@ final class AppStore: ObservableObject {
 
     init() {
         let defaults = UserDefaults.standard
-        nickname = defaults.string(forKey: Keys.nickname) ?? "임진택[무직백수]"
+        // 예전에 "임진택[무직백수]"처럼 직업까지 넣어 저장했으면 이름만 남김
+        let savedNickname = defaults.string(forKey: Keys.nickname) ?? "임진택"
+        nickname = savedNickname.split(separator: "[").first.map { String($0).trimmingCharacters(in: .whitespaces) } ?? "임진택"
         let savedScale = defaults.double(forKey: Keys.barScale)
         barScale = savedScale > 0 ? savedScale : 1.5
         showStatusBar = defaults.object(forKey: Keys.showStatusBar) as? Bool ?? true
@@ -164,15 +172,12 @@ final class AppStore: ObservableObject {
             skin = nil
             messages.append("상태바: 기본 모양 (StatusBar.img 없음)")
         }
-        if let url = AppFolder.skinFile(named: "BasicEff.img"),
-           let node = (try? WZImage.load(contentsOf: url))?["LevelUp"],
-           let animation = FrameAnimation(node: node) {
-            levelUpAnimation = PreparedAnimation(animation)
-            messages.append("레벨업 이펙트: BasicEff.img (\(animation.frames.count)프레임)")
-        } else {
-            levelUpAnimation = nil
-            messages.append("레벨업 이펙트: 기본 (BasicEff.img 없음)")
-        }
+        let effects = AppFolder.skinFile(named: "BasicEff.img").flatMap { try? WZImage.load(contentsOf: $0) }
+        levelUpAnimation = effects?["LevelUp"].flatMap { FrameAnimation(node: $0) }.flatMap(PreparedAnimation.init)
+        jobChangeAnimation = effects?["JobChanged"].flatMap { FrameAnimation(node: $0) }.flatMap(PreparedAnimation.init)
+        messages.append(levelUpAnimation != nil
+            ? "레벨업·전직 이펙트: BasicEff.img" + (jobChangeAnimation == nil ? " (전직 이펙트 없음)" : "")
+            : "레벨업 이펙트: 기본 (BasicEff.img 없음)")
         if let url = AppFolder.skinFile(named: "UIWindow.img") {
             do {
                 messengerSkin = try MessengerSkin(uiWindow: WZImage.load(contentsOf: url))
@@ -360,9 +365,18 @@ final class AppStore: ObservableObject {
         // 직전 블록을 끝까지 했거나 "완료"로 끝냈으면 레벨업 (건너뜀은 제외)
         if case .inBlock(let i) = previous, i < schedule.blocks.count,
            StatusSnapshot.countsAsDone(schedule.blocks[i], now: t) {
-            // 마지막 블록이면 "오늘 일정 모두 끝" 소리
-            play(position == .finished ? .allDone : .levelUp)
-            onLevelUp?()
+            let done = StatusSnapshot(schedule: schedule, now: t).completedBlocks
+            let before = JobTitle.title(forLevel: JobTitle.level(forCompletedBlocks: done - 1))
+            let after = JobTitle.title(forLevel: JobTitle.level(forCompletedBlocks: done))
+            if before != after {
+                // 직업이 바뀌면 전직 소리·이펙트
+                play(.jobChange)
+                onLevelUp?(true)
+            } else {
+                // 마지막 블록이면 "오늘 일정 모두 끝" 소리
+                play(position == .finished ? .allDone : .levelUp)
+                onLevelUp?(false)
+            }
         } else if case .inBlock = position {
             play(.blockStart)
         }

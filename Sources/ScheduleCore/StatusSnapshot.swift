@@ -6,7 +6,11 @@ public struct StatusSnapshot: Equatable {
 
     public var phase: Phase
     /// 오늘 끝낸 블록 수 (건너뜀·없어짐 제외)
-    public var level: Int
+    public var completedBlocks: Int
+    /// 레벨: 끝낸 블록 하나에 10씩, 최고 200
+    public var level: Int { JobTitle.level(forCompletedBlocks: completedBlocks) }
+    /// 레벨에 따른 칭호
+    public var jobTitle: String { JobTitle.title(forLevel: level) }
     /// 지금 할 일 (빈 시간이면 다음 할 일 안내)
     public var title: String
     /// EXP: 지금 블록(또는 빈 시간) 진행률 0...1, 남은 초
@@ -23,7 +27,7 @@ public struct StatusSnapshot: Equatable {
         let blocks = schedule.blocks
         let live = blocks.filter { $0.isLive }
 
-        level = blocks.filter { Self.countsAsDone($0, now: now) }.count
+        completedBlocks = blocks.filter { Self.countsAsDone($0, now: now) }.count
         mpTotal = blocks.count
         mpRemaining = live.filter { $0.end > now }.count
 
@@ -101,5 +105,29 @@ extension Format {
     public static func percent(_ value: Double) -> String {
         let floored = (value * 10000).rounded(.down) / 100
         return String(format: "%.2f%%", floored)
+    }
+}
+
+/// 레벨과 칭호 (닉네임 뒤 [칭호])
+public enum JobTitle {
+    public static let levelPerBlock = 10
+    public static let maxLevel = 200
+
+    /// (이 레벨부터, 칭호) — 낮은 레벨부터
+    public static let ranks: [(minLevel: Int, title: String)] = [
+        (0, "이불 속 백수"),
+        (10, "기지개 켠 자"),
+        (30, "열일 꿈나무"),
+        (70, "현생 생존자"),
+        (120, "광기의 일꾼"),
+        (200, "갓생 그 자체"),
+    ]
+
+    public static func level(forCompletedBlocks count: Int) -> Int {
+        min(maxLevel, max(0, count) * levelPerBlock)
+    }
+
+    public static func title(forLevel level: Int) -> String {
+        ranks.last { level >= $0.minLevel }?.title ?? ranks[0].title
     }
 }
