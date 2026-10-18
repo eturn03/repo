@@ -19,9 +19,6 @@ struct SkinStatusBarView: View {
         ZStack(alignment: .topLeading) {
             barImage
                 .frame(width: s(size.width), height: s(size.height))
-
-            settingsButton
-                .offset(x: s(StatusBarSkin.buttonSlot.x), y: s(StatusBarSkin.buttonSlot.y))
         }
         .frame(width: s(size.width), height: s(size.height), alignment: .topLeading)
         .contentShape(Rectangle())
@@ -30,16 +27,22 @@ struct SkinStatusBarView: View {
                 .onChanged { onDrag($0) }
                 .onEnded { _ in onDrag(nil) }
         )
+        // 돋보기 대신: 더블클릭 또는 오른쪽 클릭으로 설정 열기
+        .simultaneousGesture(TapGesture(count: 2).onEnded { onOpenSettings() })
+        .contextMenu {
+            Button("설정 열기", action: onOpenSettings)
+        }
+        .help("더블클릭: 설정 열기")
     }
 
     @ViewBuilder
     private var barImage: some View {
-        let bitmap = skin.compose(
+        let base = skin.compose(
             level: snapshot.level,
             hp: snapshot.hpFraction, mp: snapshot.mpFraction, exp: snapshot.expProgress,
             hpText: snapshot.hpText, mpText: snapshot.mpText, expText: snapshot.expText
         )
-        let bitmap = withNames(bitmap)
+        let bitmap = withNames(base)
         if let cgImage = bitmap.cgImage() {
             Image(decorative: cgImage, scale: 1)
                 .interpolation(.none)
@@ -60,24 +63,5 @@ struct SkinStatusBarView: View {
         out.draw(title, x: origin.x, y: origin.y)
         out.draw(name, x: origin.x, y: origin.y + 14)
         return out
-    }
-
-    private var settingsButton: some View {
-        let side = s(StatusBarSkin.buttonSlot.width)
-        return Button(action: onOpenSettings) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: side * 0.45, weight: .bold))
-                .foregroundStyle(Maple.buttonIcon)
-                .frame(width: side, height: side)
-                .background(
-                    Circle().fill(LinearGradient(
-                        colors: [Maple.buttonTop, Maple.buttonBottom],
-                        startPoint: .top, endPoint: .bottom
-                    ))
-                )
-                .overlay(Circle().strokeBorder(Maple.panelBorder, lineWidth: scale))
-        }
-        .buttonStyle(.plain)
-        .help("설정 열기")
     }
 }

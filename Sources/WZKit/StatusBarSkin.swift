@@ -1,9 +1,9 @@
 import Foundation
 
 /// 빅뱅 전 StatusBar.img로 상태바 아래쪽(LV·이름·HP/MP/EXP) 부분을 합성.
-/// 결과 크기 600×38: 원본 800×71 바탕에서 아래 38줄, 왼쪽 600칸(오른쪽 30칸은 돋보기 자리).
+/// 결과 크기 570×38: 원본 800×71 바탕에서 아래 38줄, EXP 칸 끝(570)까지.
 public struct StatusBarSkin {
-    public static let size = (width: 600, height: 38)
+    public static let size = (width: 570, height: 38)
     static let cropY = 33
     static let gaugeOrigin = (x: 216, y: 37 - 33)
     /// HP·MP·EXP 막대의 안쪽 채움 영역 (gauge/bar 기준 x 범위, y 15...28)
@@ -16,7 +16,6 @@ public struct StatusBarSkin {
     public static let levelOrigin = (x: 41, y: 14)
     /// 이름 칸 오른쪽 끝 (글자가 넘치면 여기서 자름)
     public static let nameMaxX = 205
-    public static let buttonSlot = (x: 571, y: 6, width: 27, height: 27)
 
     let background: Bitmap
     let background2: Bitmap
