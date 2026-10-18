@@ -136,7 +136,7 @@ struct MessengerInputView: View {
                 .font(font(11))
                 .foregroundStyle(statusIsError ? Color(red: 0.75, green: 0.1, blue: 0.1) : Color(white: 0.12))
                 .lineLimit(1)
-                .truncationMode(.tail)
+                .minimumScaleFactor(0.6)   // 칸보다 길면 글자를 줄여서 끝까지 보이게
                 .frame(width: rect(MessengerSkin.statusLine).width, height: rect(MessengerSkin.statusLine).height, alignment: .leading)
                 .offset(x: rect(MessengerSkin.statusLine).minX, y: rect(MessengerSkin.statusLine).minY)
 
@@ -188,7 +188,7 @@ struct MessengerInputView: View {
     private var statusText: String {
         if let saved { return saved }
         if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return "09:00-10:30 영어공부 처럼 한 줄에 하나씩"
+            return "예) 09:00-10:30 영어공부"
         }
         let result = preview
         if result.errors.isEmpty { return "블록 \(result.blocks.count)개 인식 · 오류 없음" }
