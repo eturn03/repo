@@ -18,3 +18,9 @@ jobs:
         run: |
           plutil -lint build/ScheduleTimer.app/Contents/Info.plist
           codesign --verify --verbose build/ScheduleTimer.app
+      - name: 화면 미리보기 렌더링
+        run: build/ScheduleTimer.app/Contents/MacOS/ScheduleTimer --render-preview preview
+      - uses: actions/upload-artifact@v4
+        with:
+          name: preview
+          path: preview/*.png

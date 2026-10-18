@@ -2,9 +2,10 @@ import AppKit
 import SwiftUI
 import ScheduleCore
 
-/// 메뉴 막대 아이콘을 클릭하면 뜨는 창
+/// 설정 창 (상태바의 돋보기 또는 메뉴 막대 아이콘으로 열기)
 struct ContentView: View {
     @EnvironmentObject private var store: AppStore
+    var onTestLevelUp: () -> Void = {}
 
     private enum Pending: Equatable {
         case end, skip, extend(Int)
@@ -19,7 +20,7 @@ struct ContentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(store.menuTitle)
+            Text(store.statusLine)
                 .font(.title3.monospacedDigit())
 
             if case .inBlock = store.position {
@@ -39,8 +40,8 @@ struct ContentView: View {
             Divider()
             footer
         }
-        .padding(12)
-        .frame(width: 360)
+        .padding(14)
+        .frame(minWidth: 380, maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     // MARK: - 블록 조작
@@ -48,7 +49,7 @@ struct ContentView: View {
     @ViewBuilder
     private var controls: some View {
         HStack {
-            Button("지금 끝내기") { pending = .end }
+            Button("완료") { pending = .end }
             Button("건너뛰기") { pending = .skip }
             Button("+5분") { pending = .extend(5) }
             Button("+10분") { pending = .extend(10) }
@@ -59,7 +60,7 @@ struct ContentView: View {
                 switch pending {
                 case .end, .skip:
                     let status: BlockStatus = pending == .end ? .completed : .skipped
-                    Text(pending == .end ? "지금 끝내고 다음은?" : "건너뛰고 다음은?")
+                    Text(pending == .end ? "완료하고 다음은? (레벨업 O)" : "건너뛰고 다음은? (레벨업 X)")
                         .font(.caption).foregroundStyle(.secondary)
                     Button("다음 블록 바로 시작 (이후 일정 앞당김)") {
                         store.endCurrent(mode: .pullForward, status: status)
@@ -117,7 +118,7 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxHeight: 280)
+            .frame(minHeight: 120, maxHeight: 320)
             .onAppear { proxy.scrollTo("now", anchor: .center) }
         }
     }
@@ -195,6 +196,23 @@ struct ContentView: View {
                 Spacer()
                 Button("종료") { NSApplication.shared.terminate(nil) }
             }
+            HStack {
+                Text("닉네임")
+                TextField("닉네임", text: $store.nickname)
+                    .textFieldStyle(.roundedBorder)
+            }
+            HStack {
+                Text("상태바 크기")
+                Slider(value: $store.barScale, in: AppStore.scaleRange, step: 0.1)
+                Text(String(format: "%.1f배", store.barScale))
+                    .monospacedDigit()
+                    .frame(width: 44, alignment: .trailing)
+            }
+            Toggle("상태바 보이기", isOn: $store.showStatusBar)
+            HStack {
+                Button("레벨업 미리보기") { onTestLevelUp() }
+                Button("효과음 폴더 열기") { NSWorkspace.shared.open(AppFolder.skin) }
+            }
             Toggle("로그인 시 자동 실행", isOn: Binding(
                 get: { store.launchAtLogin },
                 set: { store.setLaunchAtLogin($0) }
@@ -202,7 +220,6 @@ struct ContentView: View {
             if let message = store.loginItemMessage {
                 Text(message).font(.caption).foregroundStyle(.orange)
             }
-            Stepper("메뉴 막대 할 일 이름: \(store.maxTitleChars)글자", value: $store.maxTitleChars, in: 2...20)
         }
     }
 }

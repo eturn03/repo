@@ -2,39 +2,54 @@ import AppKit
 import Combine
 import ScheduleCore
 
-/// 앱 전체 상태: 일정, 현재 시각, 설정. 1초마다 갱신하고 블록 전환 시 소리·알림.
+/// 앱 전체 상태: 일정, 현재 시각, 설정. 1초마다 갱신하고 블록 전환 시 효과음·레벨업.
 @MainActor
 final class AppStore: ObservableObject {
     @Published private(set) var schedule: Schedule
     @Published private(set) var now = Date()
-    @Published var maxTitleChars: Int {
-        didSet { UserDefaults.standard.set(maxTitleChars, forKey: Keys.maxTitleChars) }
+    @Published var nickname: String {
+        didSet { UserDefaults.standard.set(nickname, forKey: Keys.nickname) }
+    }
+    @Published var barScale: Double {
+        didSet { UserDefaults.standard.set(barScale, forKey: Keys.barScale) }
+    }
+    @Published var showStatusBar: Bool {
+        didSet { UserDefaults.standard.set(showStatusBar, forKey: Keys.showStatusBar) }
     }
     @Published private(set) var launchAtLogin = LoginItem.isEnabled
     @Published private(set) var loginItemMessage: String?
 
+    /// 레벨업 순간에 호출 (이펙트 창 띄우기)
+    var onLevelUp: (() -> Void)?
+
+    static let scaleRange: ClosedRange<Double> = 0.6...3.0
+
     private enum Keys {
-        static let maxTitleChars = "maxTitleChars"
+        static let nickname = "nickname"
+        static let barScale = "barScale"
+        static let showStatusBar = "showStatusBar"
         static let didSetupLoginItem = "didSetupLoginItem"
     }
 
     private let storage = Storage()
-    private let notifier = Notifier()
     private var timer: Timer?
     private var lastTick = Date()
     private var lastSecond = 0
-    private var lastPositionKey: String
+    private var lastPosition: Position
     private var quietNextTransition = false
     private var activity: NSObjectProtocol?
 
     init() {
-        let saved = UserDefaults.standard.integer(forKey: Keys.maxTitleChars)
-        maxTitleChars = saved > 0 ? saved : 6
+        let defaults = UserDefaults.standard
+        nickname = defaults.string(forKey: Keys.nickname) ?? "임진택"
+        let savedScale = defaults.double(forKey: Keys.barScale)
+        barScale = savedScale > 0 ? savedScale : 1.5
+        showStatusBar = defaults.object(forKey: Keys.showStatusBar) as? Bool ?? true
         schedule = storage.load()
-        lastPositionKey = ""
-        lastPositionKey = positionKey(at: Date())
+        lastPosition = .empty
+        lastPosition = schedule.position(at: Date())
 
-        notifier.requestPermission()
+        AppFolder.prepareSkinFolder()
         setupLoginItemOnFirstLaunch()
 
         // App Nap 때문에 타이머가 늦어지지 않게 함 (잠자기는 막지 않음)
@@ -59,19 +74,17 @@ final class AppStore: ObservableObject {
         }
     }
 
-    var menuTitle: String {
-        Format.menuTitle(schedule, now: now, maxChars: maxTitleChars)
-    }
-
+    var snapshot: StatusSnapshot { StatusSnapshot(schedule: schedule, now: now) }
     var position: Position { schedule.position(at: now) }
+    var statusLine: String { Format.menuTitle(schedule, now: now, maxChars: 100) }
 
     // MARK: - 일정 조작
 
     /// 새 일정으로 교체
     func replaceSchedule(with blocks: [Block]) {
         schedule = Schedule(blocks: blocks)
-        // 저장 직후 현재 블록은 알림 없이 표시만
-        lastPositionKey = positionKey(at: Date())
+        // 저장 직후 현재 블록은 효과음 없이 표시만
+        lastPosition = schedule.position(at: Date())
         persistAndRefresh()
     }
 
@@ -87,6 +100,7 @@ final class AppStore: ObservableObject {
 
     func resetToOriginal() {
         schedule.resetToOriginal()
+        lastPosition = schedule.position(at: Date())
         persistAndRefresh()
     }
 
@@ -126,26 +140,30 @@ final class AppStore: ObservableObject {
     }
 
     private func checkTransition(at t: Date, wokeUp: Bool) {
-        let key = positionKey(at: t)
-        guard key != lastPositionKey else { return }
-        lastPositionKey = key
+        let position = schedule.position(at: t)
+        guard positionKey(position) != positionKey(lastPosition) else { return }
+        let previous = lastPosition
+        lastPosition = position
         now = t
-        // 블록이 시작될 때만 알림. 빈 시간 시작은 조용히.
-        guard case .inBlock(let i) = schedule.position(at: t) else { return }
-        let block = schedule.blocks[i]
-        if !wokeUp { Chime.play() }
-        notifier.post(
-            title: "지금 할 일: \(block.title)",
-            body: Format.range(block.start, block.end)
-        )
+        // 잠자기에서 깨어난 경우엔 표시만 바꾸고 조용히
+        guard !wokeUp else { return }
+
+        // 직전 블록을 끝까지 했거나 "완료"로 끝냈으면 레벨업 (건너뜀은 제외)
+        if case .inBlock(let i) = previous, i < schedule.blocks.count,
+           StatusSnapshot.countsAsDone(schedule.blocks[i], now: t) {
+            SoundEffect.levelUp.play()
+            onLevelUp?()
+        } else if case .inBlock = position {
+            SoundEffect.blockStart.play()
+        }
     }
 
-    private func positionKey(at t: Date) -> String {
-        switch schedule.position(at: t) {
+    private func positionKey(_ position: Position) -> String {
+        switch position {
         case .empty: return "empty"
         case .finished: return "finished"
-        case .inBlock(let i): return "block:\(schedule.blocks[i].id)"
-        case .gap(let j): return "gap:\(schedule.blocks[j].id)"
+        case .inBlock(let i): return i < schedule.blocks.count ? "block:\(schedule.blocks[i].id)" : "block:?"
+        case .gap(let j): return j < schedule.blocks.count ? "gap:\(schedule.blocks[j].id)" : "gap:?"
         }
     }
 
@@ -154,19 +172,5 @@ final class AppStore: ObservableObject {
         guard !defaults.bool(forKey: Keys.didSetupLoginItem) else { return }
         defaults.set(true, forKey: Keys.didSetupLoginItem)
         setLaunchAtLogin(true)
-    }
-}
-
-/// 짧은 효과음 (시스템 볼륨 기준 50%)
-enum Chime {
-    private static let sound: NSSound? = {
-        let s = NSSound(named: NSSound.Name("Glass"))
-        s?.volume = 0.5
-        return s
-    }()
-
-    static func play() {
-        sound?.stop()
-        sound?.play()
     }
 }

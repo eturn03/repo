@@ -189,6 +189,51 @@ final class ScheduleCoreTests: XCTestCase {
         XCTAssertEqual(Format.truncate("토익 리스닝 파트3", maxChars: 6), "토익 리스닝…")
     }
 
+    // MARK: - 상태바
+
+    func testSnapshotInBlock() {
+        // A 09:00-10:00, B 10:00-10:30, C 10:45-11:00
+        let snap = StatusSnapshot(schedule: sample(), now: at(10, 12))
+        XCTAssertEqual(snap.phase, .inBlock)
+        XCTAssertEqual(snap.title, "B")
+        XCTAssertEqual(snap.level, 1)
+        XCTAssertEqual(snap.expProgress, 0.4, accuracy: 0.0001)
+        XCTAssertEqual(snap.expRemaining, 18 * 60)
+        XCTAssertEqual(snap.hpTotal, 2 * 3600)
+        XCTAssertEqual(snap.hpRemaining, 48 * 60)
+        XCTAssertEqual(snap.mpRemaining, 2)
+        XCTAssertEqual(snap.mpTotal, 3)
+    }
+
+    func testSnapshotGapAndSkipDoesNotLevelUp() {
+        var s = sample()
+        s.endCurrent(at: at(9, 30), mode: .keepSchedule, status: .skipped)
+        var snap = StatusSnapshot(schedule: s, now: at(9, 45))
+        XCTAssertEqual(snap.phase, .gap)
+        XCTAssertEqual(snap.title, "다음: B")
+        XCTAssertEqual(snap.level, 0)
+        XCTAssertEqual(snap.expProgress, 0.5, accuracy: 0.0001)
+        XCTAssertEqual(snap.mpRemaining, 2)
+
+        s.endCurrent(at: at(10, 5), mode: .keepSchedule, status: .completed)
+        snap = StatusSnapshot(schedule: s, now: at(10, 6))
+        XCTAssertEqual(snap.level, 1)
+    }
+
+    func testSnapshotEmptyAndFinished() {
+        XCTAssertEqual(StatusSnapshot(schedule: Schedule(), now: at(9, 0)).phase, .empty)
+        let done = StatusSnapshot(schedule: sample(), now: at(12, 0))
+        XCTAssertEqual(done.phase, .finished)
+        XCTAssertEqual(done.level, 3)
+        XCTAssertEqual(done.hpRemaining, 0)
+    }
+
+    func testStatusFormats() {
+        XCTAssertEqual(Format.hoursMinutes(3 * 3600 + 12 * 60 + 59), "3:12")
+        XCTAssertEqual(Format.percent(0.437749), "43.77%")
+        XCTAssertEqual(Format.percent(1), "100.00%")
+    }
+
     func testMenuTitle() {
         let s = sample()
         XCTAssertEqual(Format.menuTitle(s, now: at(9, 36, 19), maxChars: 6), "A · 23:41")
