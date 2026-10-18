@@ -23,8 +23,31 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published private(set) var current: Track?
     @Published private(set) var isPlaying = false
     @Published private(set) var message = ""
-    /// 추출 곡과 겹쳐서 뺀 음악 파일 → 겹친 추출 곡 (설정 창에서 확인용)
-    @Published private(set) var skippedDuplicates: [(file: String, matched: String)] = []
+    /// 추출 곡과 겹쳐서 뺀 음악 파일 (설정 창에서 확인·휴지통으로 보내기)
+    struct SkippedFile {
+        let url: URL
+        let matched: String
+        var file: String { url.lastPathComponent }
+    }
+    @Published private(set) var skippedDuplicates: [SkippedFile] = []
+
+    /// 겹친 파일들의 전체 크기 (바이트)
+    var skippedBytes: Int {
+        skippedDuplicates.reduce(0) { total, item in
+            total + ((try? item.url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+        }
+    }
+
+    /// 겹친 파일을 휴지통으로 (되살릴 수 있음). 옮긴 개수 반환.
+    @discardableResult
+    func trashDuplicates() -> Int {
+        var moved = 0
+        for item in skippedDuplicates where (try? FileManager.default.trashItem(at: item.url, resultingItemURL: nil)) != nil {
+            moved += 1
+        }
+        reload()
+        return moved
+    }
     @Published var volume: Double {
         didSet {
             player?.volume = Float(volume)
@@ -98,7 +121,7 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 
     nonisolated private static func scan() -> (tracks: [Track], failed: [String], fromImages: Int, fromFiles: Int,
-                                               skipped: [(file: String, matched: String)]) {
+                                               skipped: [SkippedFile]) {
         let fm = FileManager.default
         try? fm.createDirectory(at: AppFolder.music, withIntermediateDirectories: true)
         // 하위 폴더까지 (음원 묶음을 폴더째 넣어도 됨)
@@ -129,13 +152,13 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
         }
         // 2) 일반 음악 파일: 추출 곡(또는 먼저 넣은 파일)과 이름이나 음원 데이터가 같으면 뺌
         var fileTracks: [Track] = []
-        var skipped: [(file: String, matched: String)] = []
+        var skipped: [SkippedFile] = []
         for url in files where audioExtensions.contains(url.pathExtension.lowercased()) {
             let track = Track(url: url, soundPath: nil)
             let name = normalizedName(url.deletingPathExtension().lastPathComponent)
             let signature = (try? Data(contentsOf: url)).map(audioSignature) ?? Data()
             if let matched = (signature.isEmpty ? nil : signatures[signature]) ?? (name.isEmpty ? nil : names[name]) {
-                skipped.append((url.lastPathComponent, matched))
+                skipped.append(SkippedFile(url: url, matched: matched))
                 continue
             }
             if !name.isEmpty { names[name] = track.title }

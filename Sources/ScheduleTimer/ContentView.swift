@@ -21,6 +21,7 @@ struct ContentView: View {
     @State private var resultMessage: String?
     @State private var parseErrors: [ParseError] = []
     @State private var importMessage: String?
+    @State private var confirmTrash = false
 
     var body: some View {
         ScrollView {
@@ -217,6 +218,10 @@ struct ContentView: View {
         return names
     }
 
+    private func megabytes(_ bytes: Int) -> String {
+        String(format: "%.1f MB", Double(bytes) / 1_048_576)
+    }
+
     private func volumeSlider(_ label: String, value: Binding<Double>) -> some View {
         HStack {
             Text(label)
@@ -273,6 +278,18 @@ struct ContentView: View {
                             }
                         }
                         .font(.caption)
+                        Button("겹친 파일 \(music.skippedDuplicates.count)개 휴지통으로 (\(megabytes(music.skippedBytes)))") {
+                            confirmTrash = true
+                        }
+                        .confirmationDialog(
+                            "추출한 곡과 같은 음악 파일 \(music.skippedDuplicates.count)개를 휴지통으로 옮길까?",
+                            isPresented: $confirmTrash
+                        ) {
+                            Button("휴지통으로 옮기기", role: .destructive) { music.trashDuplicates() }
+                            Button("취소", role: .cancel) {}
+                        } message: {
+                            Text("셔플에는 추출한 곡이 그대로 나와. 휴지통에서 되살릴 수 있고, 휴지통을 비우면 용량이 확보돼.")
+                        }
                     }
                     volumeSlider("음악 볼륨", value: $music.volume)
                     volumeSlider("효과음 볼륨", value: $store.effectVolume)
