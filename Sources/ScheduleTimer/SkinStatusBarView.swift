@@ -22,12 +22,12 @@ struct SkinStatusBarView: View {
             barImage
                 .frame(width: s(size.width), height: s(size.height))
 
-            // 닉네임 / 지금 할 일: 비트맵 글꼴이 없으면 화면 크기 그대로 부드럽게
+            // 지금 할 일 / 닉네임: 비트맵 글꼴이 없으면 화면 크기 그대로 부드럽게
             if pixelFont == nil {
                 VStack(alignment: .leading, spacing: 0) {
-                    bracketText(nickname, base: .white)
-                        .frame(height: s(14), alignment: .leading)
                     bracketText(snapshot.title, base: snapshot.phase == .inBlock ? .white : Color(white: 0.75))
+                        .frame(height: s(14), alignment: .leading)
+                    bracketText(nickname, base: .white)
                         .frame(height: s(14), alignment: .leading)
                 }
                 .font(nameFont)
@@ -76,9 +76,8 @@ struct SkinStatusBarView: View {
         func colors(_ base: (r: UInt8, g: UInt8, b: UInt8)) -> (Character) -> (r: UInt8, g: UInt8, b: UInt8) {
             { ch in ch == "[" || ch == "]" ? PixelText.bracketColor : base }
         }
-        // 윗줄: 닉네임, 아랫줄: 지금 할 일
-        out.draw(font.render(nickname, maxWidth: maxWidth, color: colors((255, 255, 255))), x: origin.x, y: origin.y)
-        out.draw(font.render(snapshot.title, maxWidth: maxWidth, color: colors(titleColor)), x: origin.x, y: origin.y + 14)
+        out.draw(font.render(snapshot.title, maxWidth: maxWidth, color: colors(titleColor)), x: origin.x, y: origin.y)
+        out.draw(font.render(nickname, maxWidth: maxWidth, color: colors((255, 255, 255))), x: origin.x, y: origin.y + 14)
         return out
     }
 

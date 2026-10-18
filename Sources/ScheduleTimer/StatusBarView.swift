@@ -77,10 +77,10 @@ struct StatusBarView: View {
 
     private var nameSection: some View {
         VStack(alignment: .leading, spacing: s(2)) {
-            Text(nickname)
-                .foregroundStyle(.white)
             Text(snapshot.title)
                 .foregroundStyle(snapshot.phase == .inBlock ? Color.white : Maple.mutedText)
+            Text(nickname)
+                .foregroundStyle(.white)
         }
         .font(.system(size: s(14), weight: .medium))
         .lineLimit(1)
