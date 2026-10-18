@@ -108,14 +108,14 @@ final class AppStore: ObservableObject {
         effectVolume = defaults.object(forKey: Keys.effectVolume) as? Double ?? 0.5
         quietVolume = defaults.object(forKey: Keys.quietVolume) as? Double ?? 0.2
         selectedFontName = defaults.string(forKey: Keys.fontName)
-        schedule = storage.load()
         // 지난 날짜(새벽 4시 이전에 끝난) 일정 정리
+        var loaded = Storage().load()
         let boundary = Schedule.dayBoundary(for: Date())
+        let hadPastDays = loaded.blocks.contains { $0.end <= boundary }
+        loaded.removeBlocks(endingBefore: boundary)
+        if hadPastDays { Storage().save(loaded) }
+        schedule = loaded
         lastBoundary = boundary
-        if schedule.blocks.contains(where: { $0.end <= boundary }) {
-            schedule.removeBlocks(endingBefore: boundary)
-            storage.save(schedule)
-        }
         lastPosition = .empty
         lastPosition = schedule.position(at: Date())
 
