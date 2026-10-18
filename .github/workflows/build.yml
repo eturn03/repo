@@ -24,3 +24,11 @@ jobs:
         with:
           name: preview
           path: preview/*.png
+      - name: 미리보기 로그 출력 (JPEG base64)
+        run: |
+          for f in preview/*.png; do
+            sips -Z 1100 -s format jpeg -s formatOptions 70 "$f" --out "${f%.png}.jpg" >/dev/null
+            echo "BEGIN-IMAGE $(basename "${f%.png}").jpg"
+            base64 -b 1000 -i "${f%.png}.jpg"
+            echo "END-IMAGE"
+          done
