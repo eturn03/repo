@@ -21,6 +21,9 @@ public struct StatusBarSkin {
     let graduation: Bitmap
     let emptyColor: (r: UInt8, g: UInt8, b: UInt8)
     let glyphs: [Character: Bitmap]
+    /// LV 숫자 이미지 (Basic.img의 LevelNo). 없으면 앱이 글자로 그림.
+    public private(set) var levelDigits: [Character: Bitmap] = [:]
+    public var hasLevelDigits: Bool { levelDigits.count == 10 }
 
     /// StatusBar.img에서 필요한 조각 읽기
     public init(statusBar root: WZNode) throws {
@@ -64,8 +67,26 @@ public struct StatusBarSkin {
         self.glyphs = glyphs
     }
 
+    /// Basic.img에서 LV 숫자 0~9 읽기. 성공하면 true.
+    @discardableResult
+    public mutating func loadLevelDigits(basic root: WZNode) -> Bool {
+        for path in ["LevelNo", "levelNo", "LvNo"] {
+            var digits: [Character: Bitmap] = [:]
+            for d in 0...9 {
+                if let bitmap = try? root["\(path)/\(d)"]?.canvas?.bitmap() {
+                    digits[Character(String(d))] = bitmap
+                }
+            }
+            if digits.count == 10 {
+                levelDigits = digits
+                return true
+            }
+        }
+        return false
+    }
+
     /// 게이지 비율(0...1)과 각 값 문자열로 한 장 합성
-    public func compose(hp: Double, mp: Double, exp: Double,
+    public func compose(level: Int = 0, hp: Double, mp: Double, exp: Double,
                         hpText: String, mpText: String, expText: String) -> Bitmap {
         var out = Bitmap(width: Self.size.width, height: Self.size.height)
         out.draw(background, x: 0, y: 0, sx: 0, sy: Self.cropY, w: Self.size.width, h: Self.size.height)
@@ -92,7 +113,48 @@ public struct StatusBarSkin {
                 x += glyph.width + 1
             }
         }
+
+        do {
+            // LV 칸 가운데 정렬. Basic.img 숫자가 없으면 주황 블록 + 흰 숫자로 대신 그림
+            let chars = Array(String(max(0, level)))
+            let images = chars.compactMap { hasLevelDigits ? levelDigits[$0] : orangeTile($0) }
+            let total = images.reduce(0) { $0 + $1.width } + max(0, images.count - 1)
+            let slot = Self.levelSlot
+            var x = slot.x + (slot.width - total) / 2
+            for image in images {
+                out.draw(image, x: x, y: slot.y + (slot.height - image.height) / 2)
+                x += image.width + 1
+            }
+        }
         return out
+    }
+
+    /// 대체 LV 숫자: 11×15 주황 블록(위가 밝은 그라데이션, 진한 테두리) 가운데 흰 숫자 (2배)
+    private func orangeTile(_ ch: Character) -> Bitmap? {
+        guard let glyph = glyphs[ch] else { return nil }
+        var tile = Bitmap(width: 13, height: 17)
+        tile.fill(x: 1, y: 0, w: 11, h: 17, r: 0x5a, g: 0x1c, b: 0x00)
+        tile.fill(x: 0, y: 1, w: 13, h: 15, r: 0x5a, g: 0x1c, b: 0x00)
+        for row in 1..<16 {
+            let t = Double(row - 1) / 14
+            let r = UInt8(0xf2 - (0xf2 - 0xb8) * t)
+            let g = UInt8(0x9a - (0x9a - 0x52) * t)
+            let b = UInt8(0x4c - (0x4c - 0x14) * t)
+            tile.fill(x: 1, y: row, w: 11, h: 1, r: r, g: g, b: b)
+        }
+        tile.fill(x: 2, y: 1, w: 9, h: 1, r: 0xff, g: 0xc8, b: 0x8a)   // 윗변 하이라이트
+        // 숫자 2배 확대 (그림자 1px 먼저)
+        for y in 0..<glyph.height {
+            for x in 0..<glyph.width where glyph.pixel(x: x, y: y).a > 128 {
+                tile.fill(x: 2 + x * 2 + 1, y: 2 + y * 2 + 1, w: 2, h: 2, r: 0x6a, g: 0x24, b: 0x00)
+            }
+        }
+        for y in 0..<glyph.height {
+            for x in 0..<glyph.width where glyph.pixel(x: x, y: y).a > 128 {
+                tile.fill(x: 2 + x * 2, y: 2 + y * 2, w: 2, h: 2, r: 0xff, g: 0xf4, b: 0xe0)
+            }
+        }
+        return tile
     }
 }
 

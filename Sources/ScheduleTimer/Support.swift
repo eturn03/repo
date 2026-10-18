@@ -1,5 +1,6 @@
 import AppKit
 import AVFoundation
+import CoreText
 import ServiceManagement
 import ScheduleCore
 import WZKit
@@ -109,6 +110,29 @@ final class SoundPlayer {
             if let data = try? Data(contentsOf: url) { return data }
         }
         return nil
+    }
+}
+
+/// Skin 폴더의 글꼴 파일을 이 앱에서만 쓰도록 등록
+enum FontLoader {
+    private static var registered: [URL: String] = [:]
+
+    /// 첫 번째 ttf/otf/ttc의 글꼴 이름(PostScript) 반환
+    static func registerFirstFont(in folder: URL) -> String? {
+        let files = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
+        guard let url = files
+            .filter({ ["ttf", "otf", "ttc"].contains($0.pathExtension.lowercased()) })
+            .sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
+            .first
+        else { return nil }
+        if let name = registered[url] { return name }
+        CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+        guard let descriptors = CTFontManagerCreateFontDescriptorsFromURL(url as CFURL) as? [CTFontDescriptor],
+              let first = descriptors.first,
+              let name = CTFontDescriptorCopyAttribute(first, kCTFontNameAttribute) as? String
+        else { return nil }
+        registered[url] = name
+        return name
     }
 }
 

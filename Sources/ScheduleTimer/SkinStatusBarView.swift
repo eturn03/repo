@@ -7,6 +7,7 @@ struct SkinStatusBarView: View {
     let skin: StatusBarSkin
     let snapshot: StatusSnapshot
     let nickname: String
+    let fontName: String?
     let scale: CGFloat
     var onOpenSettings: () -> Void = {}
     var onDrag: (DragGesture.Value?) -> Void = { _ in }
@@ -19,14 +20,6 @@ struct SkinStatusBarView: View {
             barImage
                 .frame(width: s(size.width), height: s(size.height))
 
-            // LV 숫자 (원본 숫자 이미지가 없어서 글자로)
-            Text(String(snapshot.level))
-                .font(.system(size: 15 * scale, weight: .black, design: .rounded))
-                .foregroundStyle(Color(red: 1, green: 0.67, blue: 0.2))
-                .shadow(color: .black, radius: 0, x: scale, y: scale)
-                .frame(width: s(StatusBarSkin.levelSlot.width), height: s(StatusBarSkin.levelSlot.height))
-                .offset(x: s(StatusBarSkin.levelSlot.x), y: s(StatusBarSkin.levelSlot.y))
-
             // 지금 할 일 / 닉네임
             VStack(alignment: .leading, spacing: 1 * scale) {
                 Text(snapshot.title)
@@ -34,7 +27,7 @@ struct SkinStatusBarView: View {
                 Text(nickname)
                     .foregroundStyle(.white)
             }
-            .font(.system(size: 12 * scale, weight: .medium))
+            .font(fontName.map { .custom($0, fixedSize: 12 * scale) } ?? .system(size: 12 * scale, weight: .medium))
             .lineLimit(1)
             .truncationMode(.tail)
             .frame(width: s(205 - StatusBarSkin.nameOrigin.x), alignment: .leading)
@@ -55,6 +48,7 @@ struct SkinStatusBarView: View {
     @ViewBuilder
     private var barImage: some View {
         let bitmap = skin.compose(
+            level: snapshot.level,
             hp: snapshot.hpFraction, mp: snapshot.mpFraction, exp: snapshot.expProgress,
             hpText: snapshot.hpText, mpText: snapshot.mpText, expText: snapshot.expText
         )

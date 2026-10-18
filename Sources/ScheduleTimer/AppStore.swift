@@ -25,6 +25,8 @@ final class AppStore: ObservableObject {
     @Published private(set) var skin: StatusBarSkin?
     @Published private(set) var soundBank: SoundBank?
     @Published private(set) var skinMessage = ""
+    /// Skin 폴더에 넣은 글꼴 (이름·할 일 글자용). nil이면 시스템 글꼴.
+    @Published private(set) var customFontName: String?
     @Published private(set) var launchAtLogin = LoginItem.isEnabled
     @Published private(set) var loginItemMessage: String?
 
@@ -105,8 +107,15 @@ final class AppStore: ObservableObject {
         var messages: [String] = []
         if let url = AppFolder.skinFile(named: "StatusBar.img") {
             do {
-                skin = try StatusBarSkin(statusBar: WZImage.load(contentsOf: url))
+                var loaded = try StatusBarSkin(statusBar: WZImage.load(contentsOf: url))
                 messages.append("상태바: StatusBar.img 사용 중")
+                if let basic = AppFolder.skinFile(named: "Basic.img") {
+                    let ok = (try? WZImage.load(contentsOf: basic)).map { loaded.loadLevelDigits(basic: $0) } ?? false
+                    messages.append(ok ? "LV 숫자: Basic.img 사용 중" : "LV 숫자: Basic.img에서 LevelNo를 못 찾음")
+                } else {
+                    messages.append("LV 숫자: 기본 글자 (Basic.img 없음)")
+                }
+                skin = loaded
             } catch {
                 skin = nil
                 messages.append("상태바: StatusBar.img 읽기 실패 (\(error))")
@@ -128,6 +137,8 @@ final class AppStore: ObservableObject {
             soundBank = nil
             messages.append("효과음: 기본음 (Game.img 없음)")
         }
+        customFontName = FontLoader.registerFirstFont(in: AppFolder.skin)
+        messages.append(customFontName.map { "글꼴: \($0)" } ?? "글꼴: 시스템 글꼴 (ttf/otf/ttc 없음)")
         skinMessage = messages.joined(separator: "\n")
     }
 
