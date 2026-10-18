@@ -4,6 +4,7 @@ import WZKit
 
 /// Music 폴더의 BGM을 셔플 재생. Bgm*.img(Sound.wz) 안의 곡과 mp3/m4a/wav/aiff 파일을 모두 모음.
 /// .img 안의 30초 미만 소리(로고음 등)는 뺌.
+/// 일반 음악 파일이 .img 곡과 겹치면(이름이나 내용이 같으면) .img 곡을 우선하고 파일은 뺌.
 @MainActor
 final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     struct Track: Hashable {
@@ -29,7 +30,7 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 
     private static let volumeKey = "musicVolume"
-    nonisolated private static let audioExtensions = ["mp3", "m4a", "wav", "aiff", "aif"]
+    nonisolated static let audioExtensions = ["mp3", "m4a", "wav", "aiff", "aif", "flac"]
     nonisolated private static let minimumBgmMs = 30_000
     private var player: AVAudioPlayer?
     private var queue: [Track] = []
@@ -45,39 +46,94 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     func reload() {
         message = "곡 목록 읽는 중…"
         Task.detached(priority: .utility) {
-            let (found, failed) = MusicPlayer.scan()
+            let result = MusicPlayer.scan()
+            let found = result.tracks
             await MainActor.run {
                 self.tracks = found
                 self.queue = self.queue.filter { found.contains($0) }
-                self.message = found.isEmpty
+                var text = found.isEmpty
                     ? "곡 없음 — Music 폴더에 Bgm*.img나 mp3를 넣어줘"
-                    : "곡 \(found.count)개" + (failed.isEmpty ? "" : " (읽기 실패: \(failed.joined(separator: ", ")))")
+                    : "곡 \(found.count)개 (추출 \(result.fromImages) + 추가 \(result.fromFiles)"
+                        + (result.duplicates > 0 ? ", 겹쳐서 뺀 \(result.duplicates)" : "") + ")"
+                if !result.failed.isEmpty { text += " · 읽기 실패: \(result.failed.joined(separator: ", "))" }
+                self.message = text
             }
         }
     }
 
-    nonisolated private static func scan() -> (tracks: [Track], failed: [String]) {
-        try? FileManager.default.createDirectory(at: AppFolder.music, withIntermediateDirectories: true)
-        let files = ((try? FileManager.default.contentsOfDirectory(at: AppFolder.music, includingPropertiesForKeys: nil)) ?? [])
-            .sorted { $0.lastPathComponent < $1.lastPathComponent }
-        var found: [Track] = []
+    /// 같은 곡인지 비교용: 크기 + 앞부분 4KB
+    private struct Fingerprint: Hashable {
+        let size: Int
+        let head: Data
+    }
+
+    nonisolated private static func fingerprint(_ data: Data) -> Fingerprint {
+        Fingerprint(size: data.count, head: data.prefix(4096))
+    }
+
+    nonisolated private static func fingerprint(file url: URL) -> Fingerprint? {
+        guard let handle = try? FileHandle(forReadingFrom: url) else { return nil }
+        defer { try? handle.close() }
+        let size = (try? handle.seekToEnd()).map(Int.init) ?? 0
+        try? handle.seek(toOffset: 0)
+        let head = (try? handle.read(upToCount: 4096)) ?? Data()
+        return Fingerprint(size: size, head: head)
+    }
+
+    /// 이름 비교용: 소문자, 글자·숫자만, 앞 번호 제거 ("01. Sleepy Wood" → "sleepywood")
+    nonisolated static func normalizedName(_ name: String) -> String {
+        var scalars = String.UnicodeScalarView()
+        for scalar in name.lowercased().unicodeScalars where CharacterSet.alphanumerics.contains(scalar) {
+            scalars.append(scalar)
+        }
+        var text = String(scalars)
+        while let first = text.first, first.isNumber { text.removeFirst() }
+        return text
+    }
+
+    nonisolated private static func scan() -> (tracks: [Track], failed: [String], fromImages: Int, fromFiles: Int, duplicates: Int) {
+        let fm = FileManager.default
+        try? fm.createDirectory(at: AppFolder.music, withIntermediateDirectories: true)
+        // 하위 폴더까지 (음원 묶음을 폴더째 넣어도 됨)
+        var files: [URL] = []
+        if let walker = fm.enumerator(at: AppFolder.music, includingPropertiesForKeys: nil) {
+            for case let url as URL in walker { files.append(url) }
+        }
+        files.sort { $0.path < $1.path }
+
+        var imageTracks: [Track] = []
+        var names = Set<String>()
+        var prints = Set<Fingerprint>()
         var failed: [String] = []
-        for url in files {
-            let ext = url.pathExtension.lowercased()
-            if ext == "img" {
-                do {
-                    let root = try WZImage.load(contentsOf: url)
-                    for path in root.soundPaths where (root[path]?.sound?.durationMs ?? 0) >= minimumBgmMs {
-                        found.append(Track(url: url, soundPath: path))
-                    }
-                } catch {
-                    failed.append(url.lastPathComponent)
+        // 1) 추출한 .img 곡 먼저
+        for url in files where url.pathExtension.lowercased() == "img" {
+            do {
+                let root = try WZImage.load(contentsOf: url)
+                for path in root.soundPaths {
+                    guard let sound = root[path]?.sound, sound.durationMs >= minimumBgmMs else { continue }
+                    imageTracks.append(Track(url: url, soundPath: path))
+                    names.insert(normalizedName(String(path.split(separator: "/").last ?? "")))
+                    prints.insert(fingerprint(sound.data))
                 }
-            } else if audioExtensions.contains(ext) {
-                found.append(Track(url: url, soundPath: nil))
+            } catch {
+                failed.append(url.lastPathComponent)
             }
         }
-        return (found, failed)
+        // 2) 일반 음악 파일: .img 곡과 이름이나 내용이 같으면 뺌
+        var fileTracks: [Track] = []
+        var duplicates = 0
+        for url in files where audioExtensions.contains(url.pathExtension.lowercased()) {
+            let name = normalizedName(url.deletingPathExtension().lastPathComponent)
+            let filePrint = fingerprint(file: url)
+            if (!name.isEmpty && names.contains(name)) || (filePrint.map { prints.contains($0) } ?? false) {
+                duplicates += 1
+                continue
+            }
+            if !name.isEmpty { names.insert(name) }   // 파일끼리 같은 이름도 하나만
+            if let filePrint { prints.insert(filePrint) }
+            fileTracks.append(Track(url: url, soundPath: nil))
+        }
+        return (imageTracks + fileTracks, failed, imageTracks.count, fileTracks.count, duplicates)
     }
 
     func togglePlay() {

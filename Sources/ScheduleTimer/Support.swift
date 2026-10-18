@@ -195,7 +195,8 @@ enum MapleFileImporter {
             let name = file.lastPathComponent
             let lower = name.lowercased()
             let destFolder: URL
-            if lower.hasPrefix("bgm") && lower.hasSuffix(".img") {
+            if (lower.hasPrefix("bgm") && lower.hasSuffix(".img"))
+                || MusicPlayer.audioExtensions.contains(file.pathExtension.lowercased()) {
                 destFolder = AppFolder.music
             } else if skinFiles.contains(lower) || fontExtensions.contains(file.pathExtension.lowercased()) {
                 destFolder = AppFolder.skin
@@ -203,7 +204,15 @@ enum MapleFileImporter {
                 skipped += 1
                 continue
             }
-            let dest = destFolder.appendingPathComponent(name)
+            var dest = destFolder.appendingPathComponent(name)
+            if destFolder == AppFolder.music, !lower.hasSuffix(".img"), fm.fileExists(atPath: dest.path),
+               (try? Data(contentsOf: dest)) != (try? Data(contentsOf: file)) {
+                // 이름만 같고 다른 음악 파일이면 덮어쓰지 않고 번호 붙임
+                let base = file.deletingPathExtension().lastPathComponent, ext = file.pathExtension
+                var n = 2
+                while fm.fileExists(atPath: destFolder.appendingPathComponent("\(base) (\(n)).\(ext)").path) { n += 1 }
+                dest = destFolder.appendingPathComponent("\(base) (\(n)).\(ext)")
+            }
             try? fm.removeItem(at: dest)
             do {
                 try fm.copyItem(at: file, to: dest)
