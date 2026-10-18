@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import ScheduleCore
+import WZKit
 
 /// `ScheduleTimer --render-preview <폴더>`: 예시 일정으로 상태바·레벨업 화면을 PNG로 저장 (확인용)
 @MainActor
@@ -52,6 +53,20 @@ enum PreviewRenderer {
             .background(Color(white: 0.25)),
             to: folder.appendingPathComponent("levelup.png")
         )
+        saveText(to: folder)
+    }
+
+    /// 상태바 이름 글자(12px, 각진 글자)를 원래 크기 PNG로 (스킨 합성 확인용)
+    static func saveText(to folder: URL) {
+        let samples = [("text-title", "경컴1 핵심개념"), ("text-nick", "임진택[무직백수]"), ("text-long", "경영과컴퓨터활용 블록 1: 핵심 개념")]
+        for (name, text) in samples {
+            let bitmap = PixelText.render(text, fontName: nil, maxWidth: 123)
+            guard let cg = bitmap.cgImage(),
+                  let png = NSBitmapImageRep(cgImage: cg).representation(using: .png, properties: [:])
+            else { continue }
+            try? png.write(to: folder.appendingPathComponent("\(name).png"))
+            print("저장: \(name).png \(bitmap.width)x\(bitmap.height)")
+        }
     }
 
     private static func save<V: View>(_ view: V, to url: URL) {
