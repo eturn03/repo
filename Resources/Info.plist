@@ -8,6 +8,8 @@
 	<string>ScheduleTimer</string>
 	<key>CFBundleDisplayName</key>
 	<string>일정 타이머</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleExecutable</key>
 	<string>ScheduleTimer</string>
 	<key>CFBundlePackageType</key>

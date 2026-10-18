@@ -14,6 +14,17 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS"
 cp "$BIN_DIR/ScheduleTimer" "$APP/Contents/MacOS/ScheduleTimer"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
+
+# 앱 아이콘: 앱이 직접 그린 PNG → .icns
+mkdir -p "$APP/Contents/Resources"
+ICONSET="build/AppIcon.iconset"
+rm -rf "$ICONSET"
+if "$APP/Contents/MacOS/ScheduleTimer" --render-icon "$ICONSET" >/dev/null 2>&1 \
+    && iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"; then
+    echo "▶ 아이콘 생성 완료"
+else
+    echo "(아이콘 생성 실패 — 기본 아이콘으로 진행)"
+fi
 codesign --force --sign - "$APP"
 echo "▶ 앱 생성 완료: $APP"
 
@@ -33,6 +44,7 @@ pkill -x ScheduleTimer 2>/dev/null || true
 sleep 1
 rm -rf "$DEST"
 cp -R "$APP" "$DEST"
+touch "$DEST"   # Finder·Dock이 새 아이콘을 다시 읽게
 open "$DEST"
 echo "✅ 설치 완료: $DEST"
 echo "   화면 아래쪽에 상태바가 뜨면 성공!"
