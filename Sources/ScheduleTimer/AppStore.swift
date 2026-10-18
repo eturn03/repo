@@ -21,6 +21,10 @@ final class AppStore: ObservableObject {
     @Published var blockStartSoundName: String {
         didSet { UserDefaults.standard.set(blockStartSoundName, forKey: Keys.blockStartSound) }
     }
+    /// 효과음 볼륨 0...1
+    @Published var effectVolume: Double {
+        didSet { UserDefaults.standard.set(effectVolume, forKey: Keys.effectVolume) }
+    }
     /// Skin 폴더의 StatusBar.img / Game.img에서 읽은 것 (없으면 nil → 코드로 그린 모양·기본음)
     @Published private(set) var skin: StatusBarSkin?
     @Published private(set) var soundBank: SoundBank?
@@ -40,11 +44,14 @@ final class AppStore: ObservableObject {
         static let barScale = "barScale"
         static let showStatusBar = "showStatusBar"
         static let blockStartSound = "blockStartSound"
+        static let effectVolume = "effectVolume"
         static let didSetupLoginItem = "didSetupLoginItem"
     }
 
     private let storage = Storage()
     private let soundPlayer = SoundPlayer()
+    /// BGM 셔플 재생
+    let music = MusicPlayer()
     private var timer: Timer?
     private var lastTick = Date()
     private var lastSecond = 0
@@ -59,6 +66,7 @@ final class AppStore: ObservableObject {
         barScale = savedScale > 0 ? savedScale : 1.5
         showStatusBar = defaults.object(forKey: Keys.showStatusBar) as? Bool ?? true
         blockStartSoundName = defaults.string(forKey: Keys.blockStartSound) ?? ""
+        effectVolume = defaults.object(forKey: Keys.effectVolume) as? Double ?? 0.5
         schedule = storage.load()
         lastPosition = .empty
         lastPosition = schedule.position(at: Date())
@@ -148,7 +156,7 @@ final class AppStore: ObservableObject {
         case .levelUp: name = "LevelUp"
         case .blockStart: name = blockStartSoundName.isEmpty ? nil : blockStartSoundName
         }
-        soundPlayer.play(effect, bank: soundBank, bankName: name)
+        soundPlayer.play(effect, bank: soundBank, bankName: name, volume: effectVolume)
     }
 
     // MARK: - 일정 조작

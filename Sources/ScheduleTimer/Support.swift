@@ -14,6 +14,9 @@ enum AppFolder {
     /// 직접 구한 효과음·이미지를 넣는 폴더 (저장소에는 넣지 않음)
     static let skin = root.appendingPathComponent("Skin", isDirectory: true)
 
+    /// 셔플 재생할 BGM (Bgm*.img, mp3 등)
+    static let music = root.appendingPathComponent("Music", isDirectory: true)
+
     static func prepareSkinFolder() {
         try? FileManager.default.createDirectory(at: skin, withIntermediateDirectories: true)
         let readme = skin.appendingPathComponent("README.txt")
@@ -75,12 +78,12 @@ enum SoundEffect: String {
     }
 }
 
-/// 효과음 재생 (볼륨 50%). 우선순위: Skin 폴더의 levelup.mp3 등 → Game.img 소리 → macOS 기본음
+/// 효과음 재생. 우선순위: Skin 폴더의 levelup.mp3 등 → Game.img 소리 → macOS 기본음
 final class SoundPlayer {
     private var player: AVAudioPlayer?
     private var systemSound: NSSound?
 
-    func play(_ effect: SoundEffect, bank: SoundBank?, bankName: String?) {
+    func play(_ effect: SoundEffect, bank: SoundBank?, bankName: String?, volume: Double) {
         player?.stop()
         systemSound?.stop()
         let audio: AVAudioPlayer?
@@ -93,13 +96,13 @@ final class SoundPlayer {
             audio = nil
         }
         if let audio {
-            audio.volume = 0.5
+            audio.volume = Float(volume)
             audio.play()
             player = audio
             return
         }
         let sound = NSSound(named: NSSound.Name(effect.fallbackName))
-        sound?.volume = 0.5
+        sound?.volume = Float(volume)
         sound?.play()
         systemSound = sound
     }

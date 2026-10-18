@@ -38,6 +38,7 @@ final class WZKitTests: XCTestCase {
     func testReadsSound() throws {
         let sound = try XCTUnwrap(try root()["Beep"]?.sound)
         XCTAssertEqual(sound.durationMs, 1234)
+        XCTAssertEqual(try root().soundPaths, ["Beep"])
         XCTAssertEqual(sound.data, Data([0xff, 0xf3]) + Data("TEST".utf8))
     }
 

@@ -55,6 +55,20 @@ public indirect enum WZNode {
         return nil
     }
 
+    /// 이 노드 아래 모든 소리의 경로 (예: "SleepyWood", "Sub/Henesys")
+    public var soundPaths: [String] {
+        var result: [String] = []
+        func walk(_ node: WZNode, _ prefix: String) {
+            if case .sound = node { result.append(prefix); return }
+            guard case .property(let children) = node else { return }
+            for name in children.keys.sorted() {
+                walk(children[name]!, prefix.isEmpty ? name : "\(prefix)/\(name)")
+            }
+        }
+        walk(self, "")
+        return result
+    }
+
     /// 하위 항목 이름들 (속성 노드일 때)
     public var childNames: [String] {
         if case .property(let children) = self { return children.keys.sorted() }

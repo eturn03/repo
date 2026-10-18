@@ -5,6 +5,7 @@ import ScheduleCore
 /// 설정 창 (상태바의 돋보기 또는 메뉴 막대 아이콘으로 열기)
 struct ContentView: View {
     @EnvironmentObject private var store: AppStore
+    @EnvironmentObject private var music: MusicPlayer
     var onTestLevelUp: () -> Void = {}
 
     private enum Pending: Equatable {
@@ -19,6 +20,7 @@ struct ContentView: View {
     @State private var parseErrors: [ParseError] = []
 
     var body: some View {
+        ScrollView {
         VStack(alignment: .leading, spacing: 10) {
             Text(store.statusLine)
                 .font(.title3.monospacedDigit())
@@ -41,7 +43,8 @@ struct ContentView: View {
             footer
         }
         .padding(14)
-        .frame(minWidth: 380, maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(minWidth: 380, maxWidth: .infinity, alignment: .topLeading)
+        }
     }
 
     // MARK: - 블록 조작
@@ -188,6 +191,16 @@ struct ContentView: View {
 
     // MARK: - 하단
 
+    private func volumeSlider(_ label: String, value: Binding<Double>) -> some View {
+        HStack {
+            Text(label)
+            Slider(value: value, in: 0...1)
+            Text("\(Int((value.wrappedValue * 100).rounded()))%")
+                .monospacedDigit()
+                .frame(width: 40, alignment: .trailing)
+        }
+    }
+
     private var footer: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
@@ -209,6 +222,26 @@ struct ContentView: View {
                     .frame(width: 44, alignment: .trailing)
             }
             Toggle("상태바 보이기", isOn: $store.showStatusBar)
+            GroupBox("음악 (셔플)") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(music.current.map { "♪ \($0.title)" } ?? "재생 중인 곡 없음")
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    HStack {
+                        Button(music.isPlaying ? "일시정지" : "재생") { music.togglePlay() }
+                        Button("다음 곡") { music.next() }
+                        Spacer()
+                        Button("음악 폴더 열기") { NSWorkspace.shared.open(AppFolder.music) }
+                        Button("다시 불러오기") { music.reload() }
+                    }
+                    Text(music.message)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    volumeSlider("음악 볼륨", value: $music.volume)
+                    volumeSlider("효과음 볼륨", value: $store.effectVolume)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
             GroupBox("스킨·효과음 (메이플 파일)") {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(store.skinMessage)

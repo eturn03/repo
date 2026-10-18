@@ -27,12 +27,9 @@ struct SkinStatusBarView: View {
                 .onChanged { onDrag($0) }
                 .onEnded { _ in onDrag(nil) }
         )
-        // 돋보기 대신: 더블클릭 또는 오른쪽 클릭으로 설정 열기
+        // 돋보기 대신: 더블클릭으로 설정 열기 (오른쪽 클릭 메뉴는 StatusBarRoot)
         .simultaneousGesture(TapGesture(count: 2).onEnded { onOpenSettings() })
-        .contextMenu {
-            Button("설정 열기", action: onOpenSettings)
-        }
-        .help("더블클릭: 설정 열기")
+        .help("더블클릭: 설정 열기 / 오른쪽 클릭: 메뉴")
     }
 
     @ViewBuilder

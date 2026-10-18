@@ -161,7 +161,7 @@ final class WindowManager {
     func showSettings() {
         if settingsWindow == nil {
             let window = NSWindow(
-                contentRect: CGRect(x: 0, y: 0, width: 400, height: 640),
+                contentRect: CGRect(x: 0, y: 0, width: 420, height: 760),
                 styleMask: [.titled, .closable, .miniaturizable, .resizable],
                 backing: .buffered,
                 defer: false
@@ -174,6 +174,7 @@ final class WindowManager {
                     self?.showLevelUpEffect()
                 })
                 .environmentObject(store)
+                .environmentObject(store.music)
             )
             window.center()
             settingsWindow = window
@@ -190,24 +191,32 @@ private struct StatusBarRoot: View {
     let onDrag: (DragGesture.Value?) -> Void
 
     var body: some View {
-        if let skin = store.skin {
-            SkinStatusBarView(
-                skin: skin,
-                snapshot: store.snapshot,
-                nickname: store.nickname,
-                fontName: store.customFontName,
-                scale: store.barScale,
-                onOpenSettings: onOpenSettings,
-                onDrag: onDrag
-            )
-        } else {
-            StatusBarView(
-                snapshot: store.snapshot,
-                nickname: store.nickname,
-                scale: store.barScale,
-                onOpenSettings: onOpenSettings,
-                onDrag: onDrag
-            )
+        Group {
+            if let skin = store.skin {
+                SkinStatusBarView(
+                    skin: skin,
+                    snapshot: store.snapshot,
+                    nickname: store.nickname,
+                    fontName: store.customFontName,
+                    scale: store.barScale,
+                    onOpenSettings: onOpenSettings,
+                    onDrag: onDrag
+                )
+            } else {
+                StatusBarView(
+                    snapshot: store.snapshot,
+                    nickname: store.nickname,
+                    scale: store.barScale,
+                    onOpenSettings: onOpenSettings,
+                    onDrag: onDrag
+                )
+            }
+        }
+        .contextMenu {
+            Button("설정 열기", action: onOpenSettings)
+            Divider()
+            Button(store.music.isPlaying ? "음악 일시정지" : "음악 재생") { store.music.togglePlay() }
+            Button("다음 곡") { store.music.next() }
         }
     }
 }
