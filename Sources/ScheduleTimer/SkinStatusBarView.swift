@@ -19,6 +19,20 @@ struct SkinStatusBarView: View {
         ZStack(alignment: .topLeading) {
             barImage
                 .frame(width: s(size.width), height: s(size.height))
+
+            // 지금 할 일 / 닉네임: 화면 크기 그대로 부드럽게 (12px에서 확대하면 맥에서 획이 뭉개짐)
+            VStack(alignment: .leading, spacing: 0) {
+                bracketText(snapshot.title, base: snapshot.phase == .inBlock ? .white : Color(white: 0.75))
+                    .frame(height: s(14), alignment: .leading)
+                bracketText(nickname, base: .white)
+                    .frame(height: s(14), alignment: .leading)
+            }
+            .font(nameFont)
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .frame(width: s(StatusBarSkin.nameMaxX - StatusBarSkin.nameOrigin.x), alignment: .leading)
+            .offset(x: s(StatusBarSkin.nameOrigin.x), y: s(StatusBarSkin.nameOrigin.y))
+            .allowsHitTesting(false)
         }
         .frame(width: s(size.width), height: s(size.height), alignment: .topLeading)
         .contentShape(Rectangle())
@@ -39,8 +53,7 @@ struct SkinStatusBarView: View {
             hp: snapshot.hpFraction, mp: snapshot.mpFraction, exp: snapshot.expProgress,
             hpText: snapshot.hpText, mpText: snapshot.mpText, expText: snapshot.expText
         )
-        let bitmap = withNames(base)
-        if let cgImage = bitmap.cgImage() {
+        if let cgImage = base.cgImage() {
             Image(decorative: cgImage, scale: 1)
                 .interpolation(.none)
                 .resizable()
@@ -49,16 +62,15 @@ struct SkinStatusBarView: View {
         }
     }
 
-    /// 지금 할 일 / 닉네임을 원본처럼 12px 각진 글자로 이미지 안에 그림
-    private func withNames(_ base: Bitmap) -> Bitmap {
-        var out = base
-        let origin = StatusBarSkin.nameOrigin
-        let maxWidth = StatusBarSkin.nameMaxX - origin.x
-        let titleColor: (r: UInt8, g: UInt8, b: UInt8) = snapshot.phase == .inBlock ? (255, 255, 255) : (190, 190, 190)
-        let title = PixelText.render(snapshot.title, fontName: fontName, color: titleColor, maxWidth: maxWidth)
-        let name = PixelText.render(nickname, fontName: fontName, maxWidth: maxWidth)
-        out.draw(title, x: origin.x, y: origin.y)
-        out.draw(name, x: origin.x, y: origin.y + 14)
-        return out
+    private var nameFont: Font {
+        .custom(fontName ?? PixelText.defaultFontName, fixedSize: 12 * scale)
+    }
+
+    /// 원본 상태바처럼 `[`, `]`만 초록색
+    private func bracketText(_ string: String, base: Color) -> Text {
+        let green = Color(red: 0x99 / 255, green: 0xcc / 255, blue: 0x33 / 255)
+        return string.reduce(Text("")) { text, ch in
+            text + Text(String(ch)).foregroundColor(ch == "[" || ch == "]" ? green : base)
+        }
     }
 }
