@@ -55,4 +55,30 @@ final class WZKitTests: XCTestCase {
         XCTAssertTrue(dst.pixel(x: 2, y: 1) == (128, 128, 128, 255))
         XCTAssertTrue(dst.pixel(x: 1, y: 1) == (0, 0, 0, 255))
     }
+
+    func testSkinComposeFillsEmptyPartWithGray() throws {
+        func solid(_ w: Int, _ h: Int, _ v: UInt8) -> Bitmap {
+            var b = Bitmap(width: w, height: h)
+            b.fill(x: 0, y: 0, w: w, h: h, r: v, g: v, b: v)
+            return b
+        }
+        var glyphs: [Character: Bitmap] = [:]
+        for ch in "0123456789/%[]" { glyphs[ch] = solid(5, 7, 255) }
+        let skin = try StatusBarSkin(
+            background: solid(800, 71, 10), background2: solid(570, 71, 20),
+            bar: solid(340, 31, 200), graduation: Bitmap(width: 340, height: 31),
+            emptyColor: (204, 204, 204), glyphs: glyphs
+        )
+        let out = skin.compose(hp: 0.5, mp: 1, exp: 0, hpText: "[1:00/2:00]", mpText: "[1/1]", expText: "")
+        XCTAssertEqual(out.width, 600)
+        XCTAssertEqual(out.height, 38)
+        // HP 막대 오른쪽 끝은 회색, 왼쪽 끝은 막대 색
+        XCTAssertTrue(out.pixel(x: 216 + 100, y: 4 + 20) == (204, 204, 204, 255))
+        XCTAssertTrue(out.pixel(x: 216 + 5, y: 4 + 20) == (200, 200, 200, 255))
+        // EXP 0% → 전부 회색, MP 100% → 회색 없음
+        XCTAssertTrue(out.pixel(x: 216 + 224, y: 4 + 20) == (204, 204, 204, 255))
+        XCTAssertTrue(out.pixel(x: 216 + 213, y: 4 + 20) == (200, 200, 200, 255))
+        // 돋보기 자리 (바탕만)
+        XCTAssertTrue(out.pixel(x: 590, y: 20) == (10, 10, 10, 255))
+    }
 }

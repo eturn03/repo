@@ -1,6 +1,8 @@
 import AppKit
 import Combine
+import ScheduleCore
 import SwiftUI
+import WZKit
 
 /// 테두리 없이 항상 위에 떠 있는 창
 final class FloatingPanel: NSPanel {
@@ -40,7 +42,7 @@ final class WindowManager {
 
     init(store: AppStore) {
         self.store = store
-        statusPanel = FloatingPanel(size: Self.statusSize(scale: store.barScale), clickThrough: false)
+        statusPanel = FloatingPanel(size: Self.statusSize(base: store.statusBaseSize, scale: store.barScale), clickThrough: false)
 
         let root = StatusBarRoot(
             store: store,
@@ -50,9 +52,14 @@ final class WindowManager {
         statusPanel.contentView = NSHostingView(rootView: root)
         restorePosition()
 
-        store.$barScale
-            .removeDuplicates()
-            .sink { [weak self] scale in self?.resizeStatusPanel(scale: scale) }
+        // @Published는 값이 바뀌기 직전에 알려주므로 새 값을 그대로 받아서 계산
+        Publishers.CombineLatest(store.$barScale.removeDuplicates(), store.$skin.map { $0 != nil }.removeDuplicates())
+            .sink { [weak self] scale, hasSkin in
+                let base = hasSkin
+                    ? CGSize(width: StatusBarSkin.size.width, height: StatusBarSkin.size.height)
+                    : StatusBarView.baseSize
+                self?.resizeStatusPanel(base: base, scale: scale)
+            }
             .store(in: &cancellables)
         store.$showStatusBar
             .sink { [weak self] show in
@@ -65,14 +72,14 @@ final class WindowManager {
 
     // MARK: - 상태바
 
-    private static func statusSize(scale: Double) -> CGSize {
-        CGSize(width: StatusBarView.baseSize.width * scale, height: StatusBarView.baseSize.height * scale)
+    private static func statusSize(base: CGSize, scale: Double) -> CGSize {
+        CGSize(width: base.width * scale, height: base.height * scale)
     }
 
-    private func resizeStatusPanel(scale: Double) {
+    private func resizeStatusPanel(base: CGSize, scale: Double) {
         // 왼쪽 아래 기준점을 유지한 채 크기만 바꿈
         let origin = statusPanel.frame.origin
-        statusPanel.setFrame(CGRect(origin: origin, size: Self.statusSize(scale: scale)), display: true)
+        statusPanel.setFrame(CGRect(origin: origin, size: Self.statusSize(base: base, scale: scale)), display: true)
         keepOnScreen()
     }
 
@@ -163,7 +170,7 @@ final class WindowManager {
             window.isReleasedWhenClosed = false
             window.contentView = NSHostingView(
                 rootView: ContentView(onTestLevelUp: { [weak self] in
-                    SoundEffect.levelUp.play()
+                    self?.store.play(.levelUp)
                     self?.showLevelUpEffect()
                 })
                 .environmentObject(store)
@@ -176,19 +183,30 @@ final class WindowManager {
     }
 }
 
-/// 상태바 창 내용: store를 구독해서 1초마다 다시 그림
+/// 상태바 창 내용: store를 구독해서 1초마다 다시 그림. StatusBar.img가 있으면 원본 이미지로.
 private struct StatusBarRoot: View {
     @ObservedObject var store: AppStore
     let onOpenSettings: () -> Void
     let onDrag: (DragGesture.Value?) -> Void
 
     var body: some View {
-        StatusBarView(
-            snapshot: store.snapshot,
-            nickname: store.nickname,
-            scale: store.barScale,
-            onOpenSettings: onOpenSettings,
-            onDrag: onDrag
-        )
+        if let skin = store.skin {
+            SkinStatusBarView(
+                skin: skin,
+                snapshot: store.snapshot,
+                nickname: store.nickname,
+                scale: store.barScale,
+                onOpenSettings: onOpenSettings,
+                onDrag: onDrag
+            )
+        } else {
+            StatusBarView(
+                snapshot: store.snapshot,
+                nickname: store.nickname,
+                scale: store.barScale,
+                onOpenSettings: onOpenSettings,
+                onDrag: onDrag
+            )
+        }
     }
 }

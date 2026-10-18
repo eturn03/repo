@@ -1,6 +1,7 @@
 import AppKit
 import Combine
 import ScheduleCore
+import WZKit
 
 /// 앱 전체 상태: 일정, 현재 시각, 설정. 1초마다 갱신하고 블록 전환 시 효과음·레벨업.
 @MainActor
@@ -16,6 +17,14 @@ final class AppStore: ObservableObject {
     @Published var showStatusBar: Bool {
         didSet { UserDefaults.standard.set(showStatusBar, forKey: Keys.showStatusBar) }
     }
+    /// 블록 시작 소리로 쓸 Game.img 안의 소리 이름 (빈 문자열이면 기본음)
+    @Published var blockStartSoundName: String {
+        didSet { UserDefaults.standard.set(blockStartSoundName, forKey: Keys.blockStartSound) }
+    }
+    /// Skin 폴더의 StatusBar.img / Game.img에서 읽은 것 (없으면 nil → 코드로 그린 모양·기본음)
+    @Published private(set) var skin: StatusBarSkin?
+    @Published private(set) var soundBank: SoundBank?
+    @Published private(set) var skinMessage = ""
     @Published private(set) var launchAtLogin = LoginItem.isEnabled
     @Published private(set) var loginItemMessage: String?
 
@@ -28,10 +37,12 @@ final class AppStore: ObservableObject {
         static let nickname = "nickname"
         static let barScale = "barScale"
         static let showStatusBar = "showStatusBar"
+        static let blockStartSound = "blockStartSound"
         static let didSetupLoginItem = "didSetupLoginItem"
     }
 
     private let storage = Storage()
+    private let soundPlayer = SoundPlayer()
     private var timer: Timer?
     private var lastTick = Date()
     private var lastSecond = 0
@@ -45,11 +56,13 @@ final class AppStore: ObservableObject {
         let savedScale = defaults.double(forKey: Keys.barScale)
         barScale = savedScale > 0 ? savedScale : 1.5
         showStatusBar = defaults.object(forKey: Keys.showStatusBar) as? Bool ?? true
+        blockStartSoundName = defaults.string(forKey: Keys.blockStartSound) ?? ""
         schedule = storage.load()
         lastPosition = .empty
         lastPosition = schedule.position(at: Date())
 
         AppFolder.prepareSkinFolder()
+        reloadSkin()
         setupLoginItemOnFirstLaunch()
 
         // App Nap 때문에 타이머가 늦어지지 않게 함 (잠자기는 막지 않음)
@@ -77,6 +90,55 @@ final class AppStore: ObservableObject {
     var snapshot: StatusSnapshot { StatusSnapshot(schedule: schedule, now: now) }
     var position: Position { schedule.position(at: now) }
     var statusLine: String { Format.menuTitle(schedule, now: now, maxChars: 100) }
+
+    /// 상태바 기준 크기 (스킨 유무에 따라 다름)
+    var statusBaseSize: CGSize {
+        skin != nil
+            ? CGSize(width: StatusBarSkin.size.width, height: StatusBarSkin.size.height)
+            : StatusBarView.baseSize
+    }
+
+    // MARK: - 스킨·효과음
+
+    /// Skin 폴더에서 StatusBar.img, Game.img 다시 읽기
+    func reloadSkin() {
+        var messages: [String] = []
+        if let url = AppFolder.skinFile(named: "StatusBar.img") {
+            do {
+                skin = try StatusBarSkin(statusBar: WZImage.load(contentsOf: url))
+                messages.append("상태바: StatusBar.img 사용 중")
+            } catch {
+                skin = nil
+                messages.append("상태바: StatusBar.img 읽기 실패 (\(error))")
+            }
+        } else {
+            skin = nil
+            messages.append("상태바: 기본 모양 (StatusBar.img 없음)")
+        }
+        if let url = AppFolder.skinFile(named: "Game.img") {
+            do {
+                let bank = SoundBank(gameImage: try WZImage.load(contentsOf: url))
+                soundBank = bank
+                messages.append("효과음: Game.img 소리 \(bank.names.count)개" + (bank.sounds["LevelUp"] == nil ? " (LevelUp 없음)" : ""))
+            } catch {
+                soundBank = nil
+                messages.append("효과음: Game.img 읽기 실패 (\(error))")
+            }
+        } else {
+            soundBank = nil
+            messages.append("효과음: 기본음 (Game.img 없음)")
+        }
+        skinMessage = messages.joined(separator: "\n")
+    }
+
+    func play(_ effect: SoundEffect) {
+        let name: String?
+        switch effect {
+        case .levelUp: name = "LevelUp"
+        case .blockStart: name = blockStartSoundName.isEmpty ? nil : blockStartSoundName
+        }
+        soundPlayer.play(effect, bank: soundBank, bankName: name)
+    }
 
     // MARK: - 일정 조작
 
@@ -151,10 +213,10 @@ final class AppStore: ObservableObject {
         // 직전 블록을 끝까지 했거나 "완료"로 끝냈으면 레벨업 (건너뜀은 제외)
         if case .inBlock(let i) = previous, i < schedule.blocks.count,
            StatusSnapshot.countsAsDone(schedule.blocks[i], now: t) {
-            SoundEffect.levelUp.play()
+            play(.levelUp)
             onLevelUp?()
         } else if case .inBlock = position {
-            SoundEffect.blockStart.play()
+            play(.blockStart)
         }
     }
 

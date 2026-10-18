@@ -1,6 +1,8 @@
 import AppKit
+import AVFoundation
 import ServiceManagement
 import ScheduleCore
+import WZKit
 
 /// 앱 데이터 폴더: ~/Library/Application Support/ScheduleTimer
 enum AppFolder {
@@ -14,15 +16,26 @@ enum AppFolder {
     static func prepareSkinFolder() {
         try? FileManager.default.createDirectory(at: skin, withIntermediateDirectories: true)
         let readme = skin.appendingPathComponent("README.txt")
-        guard !FileManager.default.fileExists(atPath: readme.path) else { return }
         let text = """
-        이 폴더에 아래 이름으로 파일을 넣으면 기본 소리 대신 사용됨 (앱 재시작 필요 없음)
-        확장자는 mp3, wav, m4a, aiff 중 아무거나
+        이 폴더에 넣은 파일을 앱이 읽어서 씀 (설정 창의 '스킨 다시 불러오기'로 반영)
 
+        StatusBar.img   UI.wz의 상태바 → 메이플 상태바 모양
+        Game.img        Sound.wz의 게임 효과음 → LevelUp 소리 등
+
+        직접 구한 소리 파일을 쓰려면 (mp3, wav, m4a, aiff):
         levelup.mp3     블록이 끝날 때 (레벨업)
         blockstart.mp3  빈 시간이 끝나고 블록이 시작될 때
         """
         try? text.write(to: readme, atomically: true, encoding: .utf8)
+    }
+
+    /// Skin 폴더에서 이름으로 파일 찾기 (대소문자 무시, 앞에 다른 글자가 붙어 있어도 됨)
+    static func skinFile(named name: String) -> URL? {
+        let files = (try? FileManager.default.contentsOfDirectory(at: skin, includingPropertiesForKeys: nil)) ?? []
+        return files
+            .filter { $0.lastPathComponent.lowercased().hasSuffix(name.lowercased()) }
+            .sorted { $0.lastPathComponent.count < $1.lastPathComponent.count }
+            .first
     }
 }
 
@@ -47,34 +60,53 @@ struct Storage {
     }
 }
 
-/// 효과음. Skin 폴더에 파일이 있으면 그걸, 없으면 시스템 효과음을 50% 볼륨으로 재생.
+/// 효과음 종류
 enum SoundEffect: String {
     case levelUp = "levelup"
     case blockStart = "blockstart"
 
-    private static var playing: NSSound?
-
-    func play() {
-        let sound = customSound() ?? NSSound(named: NSSound.Name(fallbackName))
-        sound?.volume = 0.5
-        Self.playing?.stop()
-        Self.playing = sound
-        sound?.play()
-    }
-
-    private var fallbackName: String {
+    /// 게임 파일·직접 넣은 파일이 없을 때 쓰는 macOS 기본음
+    var fallbackName: String {
         switch self {
         case .levelUp: return "Hero"
         case .blockStart: return "Glass"
         }
     }
+}
 
-    private func customSound() -> NSSound? {
+/// 효과음 재생 (볼륨 50%). 우선순위: Skin 폴더의 levelup.mp3 등 → Game.img 소리 → macOS 기본음
+final class SoundPlayer {
+    private var player: AVAudioPlayer?
+    private var systemSound: NSSound?
+
+    func play(_ effect: SoundEffect, bank: SoundBank?, bankName: String?) {
+        player?.stop()
+        systemSound?.stop()
+        let audio: AVAudioPlayer?
+        if let data = customFile(effect) {
+            audio = try? AVAudioPlayer(data: data)
+        } else if let name = bankName, let data = bank?.sounds[name]?.data {
+            // Game.img 소리는 MP3 스트림 그대로라 형식을 알려줌
+            audio = try? AVAudioPlayer(data: data, fileTypeHint: AVFileType.mp3.rawValue)
+        } else {
+            audio = nil
+        }
+        if let audio {
+            audio.volume = 0.5
+            audio.play()
+            player = audio
+            return
+        }
+        let sound = NSSound(named: NSSound.Name(effect.fallbackName))
+        sound?.volume = 0.5
+        sound?.play()
+        systemSound = sound
+    }
+
+    private func customFile(_ effect: SoundEffect) -> Data? {
         for ext in ["mp3", "wav", "m4a", "aiff", "aif"] {
-            let url = AppFolder.skin.appendingPathComponent("\(rawValue).\(ext)")
-            if FileManager.default.fileExists(atPath: url.path) {
-                return NSSound(contentsOf: url, byReference: true)
-            }
+            let url = AppFolder.skin.appendingPathComponent("\(effect.rawValue).\(ext)")
+            if let data = try? Data(contentsOf: url) { return data }
         }
         return nil
     }

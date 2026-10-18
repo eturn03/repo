@@ -203,6 +203,10 @@ final class ScheduleCoreTests: XCTestCase {
         XCTAssertEqual(snap.hpRemaining, 48 * 60)
         XCTAssertEqual(snap.mpRemaining, 2)
         XCTAssertEqual(snap.mpTotal, 3)
+        XCTAssertEqual(snap.hpText, "[0:48/2:00]")
+        XCTAssertEqual(snap.mpText, "[2/3]")
+        XCTAssertEqual(snap.expText, "18:00[40.00%]")
+        XCTAssertEqual(snap.hpFraction, 0.4, accuracy: 0.0001)
     }
 
     func testSnapshotGapAndSkipDoesNotLevelUp() {

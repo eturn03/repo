@@ -63,6 +63,17 @@ public struct StatusSnapshot: Equatable {
         }
     }
 
+    // MARK: - 게이지 표시용
+
+    public var hpFraction: Double { hpTotal > 0 ? hpRemaining / hpTotal : 0 }
+    public var mpFraction: Double { mpTotal > 0 ? Double(mpRemaining) / Double(mpTotal) : 0 }
+    public var hpText: String { "[\(Format.hoursMinutes(hpRemaining))/\(Format.hoursMinutes(hpTotal))]" }
+    public var mpText: String { "[\(mpRemaining)/\(mpTotal)]" }
+    /// `남은시간[퍼센트]`, 진행 중인 게 없으면 빈 문자열
+    public var expText: String {
+        expRemaining.map { "\(Format.countdown($0))[\(Format.percent(expProgress))]" } ?? ""
+    }
+
     /// 레벨에 포함되는 블록: 일찍 완료했거나 끝까지 진행한 블록
     public static func countsAsDone(_ block: Block, now: Date) -> Bool {
         switch block.status {

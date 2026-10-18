@@ -209,9 +209,28 @@ struct ContentView: View {
                     .frame(width: 44, alignment: .trailing)
             }
             Toggle("상태바 보이기", isOn: $store.showStatusBar)
-            HStack {
-                Button("레벨업 미리보기") { onTestLevelUp() }
-                Button("효과음 폴더 열기") { NSWorkspace.shared.open(AppFolder.skin) }
+            GroupBox("스킨·효과음 (메이플 파일)") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(store.skinMessage)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack {
+                        Button("스킨 폴더 열기") { NSWorkspace.shared.open(AppFolder.skin) }
+                        Button("스킨 다시 불러오기") { store.reloadSkin() }
+                    }
+                    Picker("블록 시작 소리", selection: $store.blockStartSoundName) {
+                        Text("기본음").tag("")
+                        ForEach(store.soundBank?.names ?? [], id: \.self) { name in
+                            Text(name).tag(name)
+                        }
+                    }
+                    HStack {
+                        Button("레벨업 미리보기") { onTestLevelUp() }
+                        Button("블록 시작 소리 듣기") { store.play(.blockStart) }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             Toggle("로그인 시 자동 실행", isOn: Binding(
                 get: { store.launchAtLogin },
