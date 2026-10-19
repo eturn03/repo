@@ -110,6 +110,9 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     private func playlistChanged() {
         let list = Set(playlist)
         queue = queue.filter { list.contains($0) }
+        // 범위가 넓어졌으면(옛날 메이플만 듣기 끔 등) 새로 들어온 곡을 남은 순서에 섞어 넣음
+        let added = playlist.filter { !queue.contains($0) && $0 != current }
+        if !added.isEmpty { queue = (queue + added).shuffled() }
         saveQueue()
         if isPlaying, let current, !list.contains(current) { next() }
     }
