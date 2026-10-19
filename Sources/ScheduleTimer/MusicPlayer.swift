@@ -60,6 +60,8 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     nonisolated private static let minimumBgmMs = 30_000
     private var player: AVAudioPlayer?
     private var queue: [Track] = []
+    /// 지금까지 들은 곡 (이전 곡 버튼용, 최근 것이 끝)
+    private var history: [Track] = []
 
     override init() {
         let saved = UserDefaults.standard.object(forKey: Self.volumeKey) as? Double
@@ -78,6 +80,7 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
                 self.tracks = found
                 self.skippedDuplicates = result.skipped
                 self.queue = self.queue.filter { found.contains($0) }
+                self.history = self.history.filter { found.contains($0) }
                 var text = found.isEmpty
                     ? "곡 없음 — Music 폴더에 Bgm*.img나 mp3를 넣어줘"
                     : "곡 \(found.count)개 (추출 \(result.fromImages) + 추가 \(result.fromFiles)"
@@ -205,9 +208,30 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
         message = "재생할 수 있는 곡이 없음"
     }
 
-    private func start(_ track: Track) -> Bool {
+    /// 이전에 들은 곡으로. 지금 곡은 다음 곡 순서 맨 앞으로 돌려놓음. 들은 곡이 없으면 지금 곡을 처음부터.
+    func previous() {
+        while let track = history.popLast() {
+            let now = current
+            if start(track, remember: false) {
+                if let now { queue.insert(now, at: 0) }
+                return
+            }
+        }
+        if let player, current != nil {
+            player.currentTime = 0
+            if !isPlaying { player.play(); isPlaying = true }
+        } else {
+            next()
+        }
+    }
+
+    private func start(_ track: Track, remember: Bool = true) -> Bool {
         player?.stop()
         guard let audio = makePlayer(track) else { return false }
+        if remember, let current {
+            history.append(current)
+            if history.count > 100 { history.removeFirst() }
+        }
         audio.delegate = self
         audio.volume = Float(volume)
         audio.play()

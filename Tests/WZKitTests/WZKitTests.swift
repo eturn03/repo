@@ -60,6 +60,16 @@ final class WZKitTests: XCTestCase {
         XCTAssertTrue(dst.pixel(x: 1, y: 1) == (0, 0, 0, 255))
     }
 
+    func testGaugeHitAreas() {
+        let y = 4 + 20
+        XCTAssertEqual(StatusBarSkin.gauge(atX: 216 + 50, y: y), 0)    // HP
+        XCTAssertEqual(StatusBarSkin.gauge(atX: 216 + 160, y: y), 1)   // MP
+        XCTAssertEqual(StatusBarSkin.gauge(atX: 216 + 300, y: y), 2)   // EXP
+        XCTAssertNil(StatusBarSkin.gauge(atX: 100, y: y))              // 이름 칸
+        XCTAssertNil(StatusBarSkin.gauge(atX: 216 + 219, y: y))        // MP와 EXP 사이
+        XCTAssertNil(StatusBarSkin.gauge(atX: 216 + 50, y: 1))         // 막대 위쪽 밖
+    }
+
     func testSkinComposeFillsEmptyPartWithGray() throws {
         func solid(_ w: Int, _ h: Int, _ v: UInt8) -> Bitmap {
             var b = Bitmap(width: w, height: h)

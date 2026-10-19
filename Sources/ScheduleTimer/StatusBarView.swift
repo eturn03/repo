@@ -7,6 +7,8 @@ struct StatusBarView: View {
     let nickname: String
     let scale: CGFloat
     var onOpenSettings: () -> Void = {}
+    /// HP(0)·MP(1)·EXP(2) 막대 클릭
+    var onGaugeClick: (Int) -> Void = { _ in }
     var onDrag: (DragGesture.Value?) -> Void = { _ in }
 
     static let baseSize = CGSize(width: 860, height: 54)
@@ -124,12 +126,16 @@ struct StatusBarView: View {
                 progress: snapshot.hpTotal > 0 ? snapshot.hpRemaining / snapshot.hpTotal : 0,
                 colors: Maple.hp, scale: scale
             )
+            .contentShape(Rectangle())
+            .onTapGesture { onGaugeClick(0) }
             Gauge(
                 label: "MP",
                 value: "[\(snapshot.mpRemaining)/\(snapshot.mpTotal)]",
                 progress: snapshot.mpTotal > 0 ? Double(snapshot.mpRemaining) / Double(snapshot.mpTotal) : 0,
                 colors: Maple.mp, scale: scale
             )
+            .contentShape(Rectangle())
+            .onTapGesture { onGaugeClick(1) }
             Gauge(
                 label: "EXP.",
                 value: snapshot.expRemaining.map {
@@ -138,6 +144,8 @@ struct StatusBarView: View {
                 progress: snapshot.expProgress,
                 colors: Maple.exp, scale: scale
             )
+            .contentShape(Rectangle())
+            .onTapGesture { onGaugeClick(2) }
         }
         .padding(.horizontal, s(8))
         .padding(.vertical, s(3))

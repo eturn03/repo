@@ -320,6 +320,7 @@ private struct StatusBarRoot: View {
                     pixelFont: store.pixelFont,
                     scale: store.barScale,
                     onOpenSettings: onOpenSettings,
+                    onGaugeClick: gaugeClick,
                     onDrag: onDrag
                 )
             } else {
@@ -328,6 +329,7 @@ private struct StatusBarRoot: View {
                     nickname: store.displayName,
                     scale: store.barScale,
                     onOpenSettings: onOpenSettings,
+                    onGaugeClick: gaugeClick,
                     onDrag: onDrag
                 )
             }
@@ -337,7 +339,18 @@ private struct StatusBarRoot: View {
             Button("설정 열기", action: onOpenSettings)
             Divider()
             Button(store.music.isPlaying ? "음악 일시정지" : "음악 재생") { store.music.togglePlay() }
+            Button("이전 곡") { store.music.previous() }
             Button("다음 곡") { store.music.next() }
+        }
+    }
+
+    /// HP: 이전 곡, MP: 재생/일시정지, EXP: 다음 곡
+    private func gaugeClick(_ gauge: Int) {
+        store.play(.click)
+        switch gauge {
+        case 0: store.music.previous()
+        case 1: store.music.togglePlay()
+        default: store.music.next()
         }
     }
 }

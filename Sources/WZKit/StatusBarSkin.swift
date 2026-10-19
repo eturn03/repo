@@ -10,6 +10,13 @@ public struct StatusBarSkin {
     static let segments = [(2, 106), (110, 214), (223, 337)]
     static let valueX = [20, 131, 248]
 
+    /// 상태바 이미지 좌표(원본 픽셀)가 HP(0)·MP(1)·EXP(2) 막대 위면 그 번호
+    public static func gauge(atX x: Int, y: Int) -> Int? {
+        let localX = x - gaugeOrigin.x, localY = y - gaugeOrigin.y
+        guard (2...31).contains(localY) else { return nil }
+        return segments.firstIndex { localX >= $0.0 - 2 && localX <= $0.1 + 2 }
+    }
+
     /// 이름 칸·LV 칸 위치 (합성 결과 좌표) — 글자는 앱에서 겹쳐 그림
     public static let nameOrigin = (x: 79, y: 5)
     /// LV 숫자 시작 위치 ("LV." 바로 오른쪽, 높이 맞춤)

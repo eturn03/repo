@@ -296,6 +296,7 @@ struct ContentView: View {
                         .lineLimit(1)
                         .truncationMode(.middle)
                     HStack {
+                        Button("이전 곡") { music.previous() }
                         Button(music.isPlaying ? "일시정지" : "재생") { music.togglePlay() }
                         Button("다음 곡") { music.next() }
                         Spacer()

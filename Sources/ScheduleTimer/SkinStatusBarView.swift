@@ -12,6 +12,8 @@ struct SkinStatusBarView: View {
     let pixelFont: BitmapFont?
     let scale: CGFloat
     var onOpenSettings: () -> Void = {}
+    /// HP(0)·MP(1)·EXP(2) 막대 클릭
+    var onGaugeClick: (Int) -> Void = { _ in }
     var onDrag: (DragGesture.Value?) -> Void = { _ in }
 
     private func s(_ v: Int) -> CGFloat { CGFloat(v) * scale }
@@ -45,9 +47,15 @@ struct SkinStatusBarView: View {
                 .onChanged { onDrag($0) }
                 .onEnded { _ in onDrag(nil) }
         )
-        // 돋보기 대신: 더블클릭으로 설정 열기 (오른쪽 클릭 메뉴는 StatusBarRoot)
-        .simultaneousGesture(TapGesture(count: 2).onEnded { onOpenSettings() })
-        .help("더블클릭: 설정 열기 / 오른쪽 클릭: 메뉴")
+        // 더블클릭: 설정 열기, 한 번 클릭: 막대별 음악 조작 (더블클릭이 아닌 게 확인된 뒤 실행)
+        .simultaneousGesture(
+            TapGesture(count: 2).onEnded { onOpenSettings() }
+                .exclusively(before: SpatialTapGesture().onEnded { value in
+                    let x = Int(value.location.x / scale), y = Int(value.location.y / scale)
+                    if let gauge = StatusBarSkin.gauge(atX: x, y: y) { onGaugeClick(gauge) }
+                })
+        )
+        .help("HP 클릭: 이전 곡 / MP 클릭: 재생·일시정지 / EXP 클릭: 다음 곡\n더블클릭: 설정 열기 / 오른쪽 클릭: 메뉴")
     }
 
     @ViewBuilder
