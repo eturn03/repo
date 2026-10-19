@@ -5,6 +5,8 @@ public struct StatusSnapshot: Equatable {
     public enum Phase: Equatable { case empty, inBlock, gap, finished }
 
     public var phase: Phase
+    /// "오늘은 여기까지"를 눌렀는지
+    public var gaveUp: Bool
     /// 오늘 끝낸 블록 수 (건너뜀·없어짐 제외)
     public var completedBlocks: Int
     /// 레벨: 1에서 시작, 끝낸 블록 하나에 10씩 (1 → 10 → 20 …), 최고 200
@@ -27,6 +29,7 @@ public struct StatusSnapshot: Equatable {
         let blocks = schedule.blocks
         let live = blocks.filter { $0.isLive }
 
+        gaveUp = schedule.gaveUpAt != nil
         completedBlocks = blocks.filter { Self.countsAsDone($0, now: now) }.count
         mpTotal = blocks.filter { $0.status != .expired }.count
         mpRemaining = live.filter { $0.end > now }.count
@@ -47,7 +50,7 @@ public struct StatusSnapshot: Equatable {
             expRemaining = nil
         case .finished:
             phase = .finished
-            title = "오늘 일정 끝"
+            title = gaveUp ? "오늘은 여기까지" : "오늘 일정 끝"
             expProgress = 0
             expRemaining = nil
         case .inBlock(let i):
@@ -83,7 +86,7 @@ public struct StatusSnapshot: Equatable {
         switch block.status {
         case .completed: return true
         case .scheduled: return block.end > block.start && block.end <= now
-        case .skipped, .dropped, .expired: return false
+        case .skipped, .dropped, .expired, .abandoned: return false
         }
     }
 

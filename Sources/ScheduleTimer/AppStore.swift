@@ -55,11 +55,26 @@ final class AppStore: ObservableObject {
         }
         return FontLoader.preferred(in: fontChoices)?.postScriptName
     }
+    /// 블록 끝 사냥 장면 보이기
+    @Published var showBattleScene: Bool {
+        didSet {
+            UserDefaults.standard.set(showBattleScene, forKey: Keys.showBattleScene)
+            if !showBattleScene { cancelScene() }
+        }
+    }
+    /// 캐릭터·몬스터·NPC·스킬 게임 파일 (장면용)
+    let assets = GameAssets()
     @Published private(set) var launchAtLogin = LoginItem.isEnabled
     @Published private(set) var loginItemMessage: String?
 
-    /// 레벨업 순간에 호출 (이펙트 창 띄우기). true면 직업이 바뀐 전직.
-    var onLevelUp: ((Bool) -> Void)?
+    /// 레벨업 순간에 호출 (이펙트 창 띄우기)
+    var onLevelUp: ((LevelUpEvent) -> Void)?
+    /// 블록이 곧 끝남 (사냥 장면 준비). Date = 레벨업 순간.
+    var onBlockEnding: ((LevelUpEvent, Date) -> Void)?
+    /// 준비한 장면 취소 (연장·건너뛰기·삭제 등으로 끝나는 시각이 바뀜)
+    var onSceneCancel: (() -> Void)?
+    /// 포기(true) / 포기 취소(false)
+    var onGiveUp: ((Bool) -> Void)?
 
     /// 상태바 아랫줄: 닉네임[직업]
     var displayName: String { "\(nickname)[\(snapshot.jobTitle)]" }
@@ -76,7 +91,13 @@ final class AppStore: ObservableObject {
         static let quietVolume = "quietVolume"
         static let fontName = "fontName"
         static let didSetupLoginItem = "didSetupLoginItem"
+        static let showBattleScene = "showBattleScene"
     }
+
+    /// 장면을 미리 준비하는 시간 (블록 끝 몇 초 전부터)
+    static let scenePrepareLead: TimeInterval = 8
+    /// 장면이 시작되고 레벨업까지 걸리는 시간
+    static let sceneLead: TimeInterval = 3
 
     private let storage = Storage()
     private let soundPlayer = SoundPlayer()
@@ -89,6 +110,10 @@ final class AppStore: ObservableObject {
     private var quietNextTransition = false
     private var lastBoundary = Date.distantPast
     private var activity: NSObjectProtocol?
+    /// 장면을 준비한 블록과 그때 정한 레벨업 정보
+    private var announced: (blockID: UUID, event: LevelUpEvent)?
+    /// "완료"를 눌러 일찍 끝낸 블록 (장면을 보여준 뒤 레벨업)
+    private var manualCompletedBlockID: UUID?
 
     init() {
         let defaults = UserDefaults.standard
@@ -108,6 +133,7 @@ final class AppStore: ObservableObject {
         effectVolume = defaults.object(forKey: Keys.effectVolume) as? Double ?? 0.5
         quietVolume = defaults.object(forKey: Keys.quietVolume) as? Double ?? 0.2
         selectedFontName = defaults.string(forKey: Keys.fontName)
+        showBattleScene = defaults.object(forKey: Keys.showBattleScene) as? Bool ?? true
         // 지난 날짜(새벽 4시 이전에 끝난) 일정 정리
         var loaded = Storage().load()
         let boundary = Schedule.dayBoundary(for: Date())
@@ -160,6 +186,7 @@ final class AppStore: ObservableObject {
 
     /// Skin 폴더에서 StatusBar.img, Game.img 다시 읽기
     func reloadSkin() {
+        assets.invalidate()
         var messages: [String] = []
         if let url = AppFolder.skinFile(named: "StatusBar.img") {
             do {
@@ -294,7 +321,10 @@ final class AppStore: ObservableObject {
 
     /// 새 일정으로 교체
     func replaceSchedule(with blocks: [Block]) {
+        cancelScene()
+        let gaveUpAt = schedule.gaveUpAt
         schedule = Schedule(blocks: blocks)
+        schedule.gaveUpAt = gaveUpAt
         // 저장 직후 현재 블록은 레벨업·블록 시작음 없이 표시만
         lastPosition = schedule.position(at: Date())
         persistAndRefresh()
@@ -302,19 +332,27 @@ final class AppStore: ObservableObject {
     }
 
     func endCurrent(mode: EndMode, status: BlockStatus) {
+        if case .inBlock(let i) = schedule.position(at: Date()) {
+            if status == .completed { manualCompletedBlockID = schedule.blocks[i].id }
+        }
+        if status != .completed { cancelScene() }
         schedule.endCurrent(at: Date(), mode: mode, status: status)
         if status == .skipped { play(.skip) }
         persistAndRefresh()
     }
 
     func extendCurrent(minutes: Int, mode: ExtendMode) {
+        cancelScene()
         schedule.extendCurrent(by: TimeInterval(minutes * 60), at: Date(), mode: mode)
         play(.extend)
         persistAndRefresh()
     }
 
     func resetToOriginal() {
+        cancelScene()
+        let hadGivenUp = schedule.gaveUpAt != nil
         schedule.resetToOriginal()
+        if hadGivenUp { onGiveUp?(false) }
         lastPosition = schedule.position(at: Date())
         play(.reset)
         persistAndRefresh()
@@ -322,6 +360,7 @@ final class AppStore: ObservableObject {
 
     /// 블록 하나 삭제. 진행 중인 블록을 지워도 레벨업·블록 시작음 없이 표시만 바뀜.
     func deleteBlock(id: UUID) {
+        cancelScene()
         schedule.removeBlock(id: id)
         lastPosition = schedule.position(at: Date())
         play(.delete)
@@ -330,10 +369,54 @@ final class AppStore: ObservableObject {
 
     /// 오늘 일정 전체 삭제
     func deleteAllBlocks() {
+        cancelScene()
+        if schedule.gaveUpAt != nil { onGiveUp?(false) }
         schedule = Schedule()
         lastPosition = .empty
         play(.delete)
         persistAndRefresh()
+    }
+
+    /// 오늘은 여기까지: 남은 블록 포기, 묘비 (얻은 레벨은 그대로)
+    func giveUp() {
+        guard schedule.gaveUpAt == nil else { return }
+        cancelScene()
+        schedule.giveUp(at: Date())
+        lastPosition = schedule.position(at: Date())
+        play(.giveUp)
+        onGiveUp?(true)
+        persistAndRefresh()
+    }
+
+    func undoGiveUp() {
+        guard schedule.gaveUpAt != nil else { return }
+        schedule.undoGiveUp()
+        lastPosition = schedule.position(at: Date())
+        play(.reset)
+        onGiveUp?(false)
+        persistAndRefresh()
+    }
+
+    var hasGivenUp: Bool { schedule.gaveUpAt != nil }
+
+    /// 장면 미리보기 (설정 창): 이 레벨로 오르는 블록이 지금 막 끝나려는 것처럼
+    func previewScene(toLevel: Int) {
+        let to = min(JobTitle.maxLevel, max(JobTitle.levelPerBlock, toLevel / JobTitle.levelPerBlock * JobTitle.levelPerBlock))
+        let from = to == JobTitle.levelPerBlock ? JobTitle.minLevel : to - JobTitle.levelPerBlock
+        let event = LevelUpEvent(fromLevel: from, toLevel: to,
+                                 jobChanged: JobTitle.title(forLevel: from) != JobTitle.title(forLevel: to),
+                                 blockID: nil, roll: Int.random(in: 0..<1000))
+        let climax = Date().addingTimeInterval(Self.sceneLead + 0.5)
+        onBlockEnding?(event, climax)
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.sceneLead + 0.5) { [weak self] in
+            self?.play(.levelUp)
+            if event.jobChanged { self?.play(.jobChange) }
+        }
+    }
+
+    /// 아무 소리 데이터 재생 (장면의 스킬·몬스터 소리, 효과음 볼륨)
+    func playSound(_ data: Data) {
+        soundPlayer.play(data: data, isRawMP3: true, systemFallback: nil, volume: effectVolume * 0.8)
     }
 
     func setLaunchAtLogin(_ on: Bool) {
@@ -380,6 +463,35 @@ final class AppStore: ObservableObject {
             now = t
         }
         checkTransition(at: t, wokeUp: wokeUp)
+        announceUpcomingEnd(at: t, wokeUp: wokeUp)
+    }
+
+    private func cancelScene() {
+        announced = nil
+        manualCompletedBlockID = nil
+        onSceneCancel?()
+    }
+
+    /// 지금까지 끝낸 블록 수가 done일 때 다음 블록을 끝내면 오르는 레벨
+    private func levelUpEvent(doneBefore done: Int, blockID: UUID?) -> LevelUpEvent {
+        let from = JobTitle.level(forCompletedBlocks: done)
+        let to = JobTitle.level(forCompletedBlocks: done + 1)
+        return LevelUpEvent(fromLevel: from, toLevel: to,
+                            jobChanged: JobTitle.title(forLevel: from) != JobTitle.title(forLevel: to),
+                            blockID: blockID, roll: Int.random(in: 0..<1000))
+    }
+
+    /// 진행 중인 블록이 곧 끝나면 사냥 장면 준비 (끝나는 순간이 레벨업)
+    private func announceUpcomingEnd(at t: Date, wokeUp: Bool) {
+        guard showBattleScene, !wokeUp, case .inBlock(let i) = schedule.position(at: t) else { return }
+        let block = schedule.blocks[i]
+        let remaining = block.end.timeIntervalSince(t)
+        guard block.status == .scheduled, remaining > 0, remaining <= Self.scenePrepareLead,
+              announced?.blockID != block.id, assets.hasCharacter else { return }
+        let done = StatusSnapshot(schedule: schedule, now: t).completedBlocks
+        let event = levelUpEvent(doneBefore: done, blockID: block.id)
+        announced = (block.id, event)
+        onBlockEnding?(event, block.end)
     }
 
     private func checkTransition(at t: Date, wokeUp: Bool) {
@@ -394,21 +506,38 @@ final class AppStore: ObservableObject {
         // 직전 블록을 끝까지 했거나 "완료"로 끝냈으면 레벨업 (건너뜀은 제외)
         if case .inBlock(let i) = previous, i < schedule.blocks.count,
            StatusSnapshot.countsAsDone(schedule.blocks[i], now: t) {
+            let block = schedule.blocks[i]
             let done = StatusSnapshot(schedule: schedule, now: t).completedBlocks
-            let before = JobTitle.title(forLevel: JobTitle.level(forCompletedBlocks: done - 1))
-            let after = JobTitle.title(forLevel: JobTitle.level(forCompletedBlocks: done))
-            // 레벨업은 항상, 직업이 바뀌면 전직 소리·이펙트도 같이.
-            // 마지막 블록이면 "오늘 일정 모두 끝" 소리는 레벨업 소리가 끝난 뒤에
-            play(.levelUp)
-            if before != after { play(.jobChange) }
-            onLevelUp?(before != after)
-            if position == .finished {
-                DispatchQueue.main.asyncAfter(deadline: .now() + soundDuration(.levelUp)) { [weak self] in
-                    self?.play(.allDone)
+            var event = levelUpEvent(doneBefore: done - 1, blockID: block.id)
+            if let announced, announced.blockID == block.id { event = announced.event }
+            let manual = manualCompletedBlockID == block.id
+            manualCompletedBlockID = nil
+            announced = nil
+            let finished = position == .finished
+            if manual, showBattleScene, assets.hasCharacter {
+                // "완료"로 일찍 끝냄: 사냥 장면을 보여준 뒤 레벨업
+                onBlockEnding?(event, t.addingTimeInterval(Self.sceneLead))
+                DispatchQueue.main.asyncAfter(deadline: .now() + Self.sceneLead) { [weak self] in
+                    self?.levelUp(event, finished: finished)
                 }
+            } else {
+                levelUp(event, finished: finished)
             }
         } else if case .inBlock = position {
             play(.blockStart)
+        }
+    }
+
+    /// 레벨업 소리·이펙트. 직업이 바뀌면 전직도 같이.
+    /// 마지막 블록이면 "오늘 일정 모두 끝" 소리는 레벨업 소리가 끝난 뒤에
+    private func levelUp(_ event: LevelUpEvent, finished: Bool) {
+        play(.levelUp)
+        if event.jobChanged { play(.jobChange) }
+        onLevelUp?(event)
+        if finished {
+            DispatchQueue.main.asyncAfter(deadline: .now() + soundDuration(.levelUp)) { [weak self] in
+                self?.play(.allDone)
+            }
         }
     }
 

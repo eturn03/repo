@@ -8,6 +8,8 @@ struct ContentView: View {
     @EnvironmentObject private var music: MusicPlayer
     var onTestLevelUp: () -> Void = {}
     var onTestJobChange: () -> Void = {}
+    /// 사냥 장면 미리보기 (이 레벨로 오르는 블록)
+    var onTestBattle: (Int) -> Void = { _ in }
     /// 메신저 입력창 열기 (UIWindow.img가 있을 때)
     var onOpenInput: () -> Void = {}
 
@@ -25,6 +27,8 @@ struct ContentView: View {
     @State private var importMessage: String?
     @State private var confirmTrash = false
     @State private var confirmDeleteAll = false
+    @State private var confirmGiveUp = false
+    @State private var previewLevel = 30
 
     var body: some View {
         ScrollView {
@@ -151,14 +155,27 @@ struct ContentView: View {
         }
         .safeAreaInset(edge: .bottom, alignment: .leading) {
             if !blocks.isEmpty {
-                Button("오늘 일정 전체 삭제") { confirmDeleteAll = true }
-                    .confirmationDialog("오늘 일정 \(blocks.count)개를 모두 지울까?", isPresented: $confirmDeleteAll) {
-                        Button("전체 삭제", role: .destructive) { store.deleteAllBlocks() }
-                        Button("취소", role: .cancel) {}
-                    } message: {
-                        Text("되돌릴 수 없어. 새 일정은 일정 입력으로 다시 넣으면 돼.")
+                HStack {
+                    Button("오늘 일정 전체 삭제") { confirmDeleteAll = true }
+                        .confirmationDialog("오늘 일정 \(blocks.count)개를 모두 지울까?", isPresented: $confirmDeleteAll) {
+                            Button("전체 삭제", role: .destructive) { store.deleteAllBlocks() }
+                            Button("취소", role: .cancel) {}
+                        } message: {
+                            Text("되돌릴 수 없어. 새 일정은 일정 입력으로 다시 넣으면 돼.")
+                        }
+                    if store.hasGivenUp {
+                        Button("포기 취소") { store.undoGiveUp() }
+                    } else {
+                        Button("오늘은 여기까지 (포기)") { confirmGiveUp = true }
+                            .confirmationDialog("오늘은 여기까지 할까?", isPresented: $confirmGiveUp) {
+                                Button("포기", role: .destructive) { store.giveUp() }
+                                Button("취소", role: .cancel) {}
+                            } message: {
+                                Text("남은 블록은 모두 포기로 바뀌어. 오늘 얻은 레벨은 그대로고, 새벽 4시에 정리돼.")
+                            }
                     }
-                    .padding(.top, 4)
+                }
+                .padding(.top, 4)
             }
         }
     }
@@ -303,6 +320,17 @@ struct ContentView: View {
                         Button("음악 폴더 열기") { NSWorkspace.shared.open(AppFolder.music) }
                         Button("다시 불러오기") { music.reload() }
                     }
+                    HStack {
+                        Toggle("옛날 메이플만 듣기", isOn: $music.oldMapleOnly)
+                            .help("처음 뽑은 Bgm*.img 곡만 셔플 (mp3 등은 뺌)")
+                        Spacer()
+                        Button("지금 곡 삭제") { music.deleteCurrent() }
+                            .disabled(music.current == nil)
+                            .help("mp3 등은 휴지통으로, .img 곡은 목록에서 숨김")
+                    }
+                    if !music.hiddenKeys.isEmpty {
+                        Button("숨긴 곡 \(music.hiddenKeys.count)개 되살리기") { music.unhideAll() }
+                    }
                     Text(music.message)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -365,6 +393,20 @@ struct ContentView: View {
                     HStack {
                         Button("레벨업 미리보기") { onTestLevelUp() }
                         Button("전직 미리보기") { onTestJobChange() }
+                    }
+                    GroupBox("블록 끝 사냥 장면") {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Toggle("블록이 끝날 때 캐릭터가 몬스터를 잡고 레벨업", isOn: $store.showBattleScene)
+                            Text(store.assets.summary())
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            HStack {
+                                Stepper("LV \(previewLevel)로 오르는 블록", value: $previewLevel, in: 10...200, step: 10)
+                                Button("장면 미리보기") { onTestBattle(previewLevel) }
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     DisclosureGroup("상황별 효과음 바꾸기") {
                         ForEach(SoundEvent.allCases) { event in
@@ -455,6 +497,7 @@ private struct BlockRow: View {
         case .skipped: return "건너뜀"
         case .dropped: return "없어짐"
         case .expired: return "지남 (등록 전)"
+        case .abandoned: return "포기"
         case .scheduled:
             if block.isModified { return "시간 변경" }
             return isPast ? "지남" : nil

@@ -6,6 +6,7 @@ public enum BlockStatus: String, Codable {
     case skipped     // 건너뜀
     case dropped     // 연장 때문에 시간이 0이 되어 없어짐
     case expired     // 등록할 때 이미 끝나 있던 블록 (레벨에 안 침)
+    case abandoned   // "오늘은 여기까지"로 포기한 블록
 }
 
 public struct Block: Codable, Identifiable, Equatable {
@@ -55,6 +56,8 @@ public enum ExtendMode {
 
 public struct Schedule: Codable, Equatable {
     public var blocks: [Block]
+    /// "오늘은 여기까지"를 누른 시각 (새벽 4시 정리 때 없어짐)
+    public var gaveUpAt: Date?
 
     public init(blocks: [Block] = []) {
         self.blocks = blocks
@@ -134,6 +137,25 @@ public struct Schedule: Codable, Equatable {
     /// date 이전에 끝난 블록 지우기 (어제 이전 일정 정리용)
     public mutating func removeBlocks(endingBefore date: Date) {
         blocks.removeAll { $0.end <= date }
+        if let g = gaveUpAt, g < date { gaveUpAt = nil }
+    }
+
+    /// 오늘은 여기까지: 진행 중인 블록은 지금 끝내고, 남은 블록은 전부 포기 (이미 얻은 레벨은 그대로)
+    public mutating func giveUp(at now: Date) {
+        for k in blocks.indices where blocks[k].isLive && blocks[k].end > now {
+            if blocks[k].start < now { blocks[k].end = now }
+            blocks[k].status = .abandoned
+        }
+        gaveUpAt = now
+    }
+
+    /// 포기 취소: 포기한 블록을 원래 시간대로 되살림
+    public mutating func undoGiveUp() {
+        for k in blocks.indices where blocks[k].status == .abandoned {
+            blocks[k].status = .scheduled
+            if blocks[k].end < blocks[k].originalEnd { blocks[k].end = blocks[k].originalEnd }
+        }
+        gaveUpAt = nil
     }
 
     /// 블록 하나 삭제 (뒤 일정 시간은 그대로, 지운 자리는 빈 시간)
@@ -147,6 +169,7 @@ public struct Schedule: Codable, Equatable {
             blocks[k].end = blocks[k].originalEnd
             if blocks[k].status != .expired { blocks[k].status = .scheduled }
         }
+        gaveUpAt = nil
     }
 
     /// 하루의 경계: 가장 최근의 새벽 4시 (자정 넘어 공부해도 그날 일정으로 취급)

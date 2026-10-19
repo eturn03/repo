@@ -17,6 +17,29 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
             let file = url.deletingPathExtension().lastPathComponent
             return soundPath.map { "\(file)/\($0)" } ?? file
         }
+
+        /// 저장용 이름 (파일 이름 + .img 안 경로)
+        var key: String { "\(url.lastPathComponent)#\(soundPath ?? "")" }
+
+        /// 처음 뽑은 옛날 메이플 곡(.img)인지
+        var isOldMaple: Bool { soundPath != nil }
+    }
+
+    /// 옛날 메이플만 듣기: .img에서 뽑은 곡만 (mp3 등은 뺌)
+    @Published var oldMapleOnly: Bool {
+        didSet {
+            UserDefaults.standard.set(oldMapleOnly, forKey: Self.oldMapleKey)
+            playlistChanged()
+        }
+    }
+    /// 숨긴 .img 곡 (지금 곡 삭제로 뺀 것)
+    @Published private(set) var hiddenKeys: Set<String> {
+        didSet { UserDefaults.standard.set(Array(hiddenKeys), forKey: Self.hiddenKey) }
+    }
+
+    /// 실제로 셔플할 곡: 숨긴 곡 빼고, 옛날 메이플만 듣기면 .img 곡만
+    var playlist: [Track] {
+        tracks.filter { !hiddenKeys.contains($0.key) && (!oldMapleOnly || $0.isOldMaple) }
     }
 
     @Published private(set) var tracks: [Track] = []
@@ -56,6 +79,9 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 
     private static let volumeKey = "musicVolume"
+    private static let oldMapleKey = "musicOldMapleOnly"
+    private static let hiddenKey = "musicHidden"
+    private static let queueKey = "musicQueue"
     nonisolated static let audioExtensions = ["mp3", "m4a", "wav", "aiff", "aif", "flac"]
     nonisolated private static let minimumBgmMs = 30_000
     private var player: AVAudioPlayer?
@@ -63,11 +89,63 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     /// 지금까지 들은 곡 (이전 곡 버튼용, 최근 것이 끝)
     private var history: [Track] = []
 
+    private var restoredQueue = false
+
     override init() {
-        let saved = UserDefaults.standard.object(forKey: Self.volumeKey) as? Double
+        let defaults = UserDefaults.standard
+        let saved = defaults.object(forKey: Self.volumeKey) as? Double
         volume = saved ?? 0.3
+        oldMapleOnly = defaults.bool(forKey: Self.oldMapleKey)
+        hiddenKeys = Set(defaults.stringArray(forKey: Self.hiddenKey) ?? [])
         super.init()
         reload()
+    }
+
+    /// 셔플 순서(이번 바퀴에 남은 곡)를 저장 → 앱을 다시 켜도 이어서, 한 바퀴 안에 중복 없음
+    private func saveQueue() {
+        UserDefaults.standard.set(queue.map(\.key), forKey: Self.queueKey)
+    }
+
+    /// 듣는 곡 범위가 바뀌면 이번 바퀴를 새로 섞음 (지금 곡이 빠졌으면 다음 곡으로)
+    private func playlistChanged() {
+        let list = Set(playlist)
+        queue = queue.filter { list.contains($0) }
+        saveQueue()
+        if isPlaying, let current, !list.contains(current) { next() }
+    }
+
+    /// 지금 곡 삭제: mp3 등은 휴지통으로, .img 곡은 파일 하나에 여러 곡이라 목록에서 숨김. 다음 곡 재생.
+    @discardableResult
+    func deleteCurrent() -> String? {
+        guard let track = current else { return nil }
+        let text: String
+        if track.isOldMaple {
+            hiddenKeys.insert(track.key)
+            text = "숨김: \(track.title) (설정에서 되돌릴 수 있음)"
+        } else {
+            guard (try? FileManager.default.trashItem(at: track.url, resultingItemURL: nil)) != nil else {
+                message = "삭제 실패: \(track.title)"
+                return message
+            }
+            tracks.removeAll { $0 == track }
+            text = "휴지통으로: \(track.title)"
+        }
+        queue.removeAll { $0 == track }
+        history.removeAll { $0 == track }
+        let wasPlaying = isPlaying
+        player?.stop()
+        player = nil
+        current = nil
+        isPlaying = false
+        if wasPlaying { next() } else { saveQueue() }
+        message = text
+        return text
+    }
+
+    /// 숨긴 곡 모두 되살리기
+    func unhideAll() {
+        hiddenKeys = []
+        message = "숨긴 곡을 모두 되살림"
     }
 
     /// Music 폴더 다시 읽기 (파일이 커서 백그라운드에서)
@@ -79,8 +157,16 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
             await MainActor.run {
                 self.tracks = found
                 self.skippedDuplicates = result.skipped
-                self.queue = self.queue.filter { found.contains($0) }
+                if !self.restoredQueue {
+                    // 지난번에 듣던 바퀴 이어서
+                    self.restoredQueue = true
+                    let byKey = Dictionary(found.map { ($0.key, $0) }, uniquingKeysWith: { a, _ in a })
+                    self.queue = (UserDefaults.standard.stringArray(forKey: Self.queueKey) ?? []).compactMap { byKey[$0] }
+                }
+                let list = Set(self.playlist)
+                self.queue = self.queue.filter { list.contains($0) }
                 self.history = self.history.filter { found.contains($0) }
+                self.saveQueue()
                 var text = found.isEmpty
                     ? "곡 없음 — Music 폴더에 Bgm*.img나 mp3를 넣어줘"
                     : "곡 \(found.count)개 (추출 \(result.fromImages) + 추가 \(result.fromFiles)"
@@ -191,14 +277,16 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
     /// 셔플 순서의 다음 곡. 한 바퀴 돌면 다시 섞음.
     func next() {
-        guard !tracks.isEmpty else {
-            message = "곡 없음 — Music 폴더에 Bgm*.img나 mp3를 넣어줘"
+        let list = playlist
+        guard !list.isEmpty else {
+            message = tracks.isEmpty ? "곡 없음 — Music 폴더에 Bgm*.img나 mp3를 넣어줘" : "들을 곡 없음 (숨김·옛날 메이플만 듣기 확인)"
             return
         }
+        defer { saveQueue() }
         // 재생 실패한 곡은 건너뜀 (전부 실패하면 멈춤)
-        for _ in 0..<tracks.count {
+        for _ in 0..<list.count {
             if queue.isEmpty {
-                queue = tracks.shuffled()
+                queue = list.shuffled()
                 if queue.count > 1, queue.first == current { queue.swapAt(0, 1) }
             }
             let track = queue.removeFirst()
@@ -214,6 +302,7 @@ final class MusicPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
             let now = current
             if start(track, remember: false) {
                 if let now { queue.insert(now, at: 0) }
+                saveQueue()
                 return
             }
         }

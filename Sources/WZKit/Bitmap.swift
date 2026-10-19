@@ -62,6 +62,29 @@ public struct Bitmap: Equatable {
         pixels[i + 3] = UInt8((outA * 255).rounded())
     }
 
+    /// 좌우 뒤집기
+    public func flippedHorizontally() -> Bitmap {
+        var out = Bitmap(width: width, height: height)
+        for y in 0..<height {
+            for x in 0..<width {
+                let s = (y * width + x) * 4, d = (y * width + (width - 1 - x)) * 4
+                out.pixels[d] = pixels[s]; out.pixels[d + 1] = pixels[s + 1]
+                out.pixels[d + 2] = pixels[s + 2]; out.pixels[d + 3] = pixels[s + 3]
+            }
+        }
+        return out
+    }
+
+    /// 흑백 (밝기만 남김)
+    public func grayscale() -> Bitmap {
+        var out = self
+        for i in stride(from: 0, to: pixels.count, by: 4) {
+            let l = UInt8((0.299 * Double(pixels[i]) + 0.587 * Double(pixels[i + 1]) + 0.114 * Double(pixels[i + 2])).rounded())
+            out.pixels[i] = l; out.pixels[i + 1] = l; out.pixels[i + 2] = l
+        }
+        return out
+    }
+
     public func cgImage() -> CGImage? {
         guard width > 0, height > 0,
               let provider = CGDataProvider(data: Data(pixels) as CFData)

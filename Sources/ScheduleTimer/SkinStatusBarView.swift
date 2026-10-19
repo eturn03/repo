@@ -65,7 +65,9 @@ struct SkinStatusBarView: View {
             hp: snapshot.hpFraction, mp: snapshot.mpFraction, exp: snapshot.expProgress,
             hpText: snapshot.hpText, mpText: snapshot.mpText, expText: snapshot.expText
         )
-        let bitmap = pixelFont.map { withPixelNames(base, font: $0) } ?? base
+        let named = pixelFont.map { withPixelNames(base, font: $0) } ?? base
+        // 오늘은 여기까지(포기)면 회색
+        let bitmap = snapshot.gaveUp ? named.grayscale() : named
         if let cgImage = bitmap.cgImage() {
             Image(decorative: cgImage, scale: 1)
                 .interpolation(.none)

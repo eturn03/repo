@@ -74,6 +74,72 @@ public indirect enum WZNode {
         if case .property(let children) = self { return children.keys.sorted() }
         return []
     }
+
+    /// 속성·캔버스의 하위 항목들
+    public var children: [String: WZNode] {
+        switch self {
+        case .property(let c): return c
+        case .canvas(let c): return c.children
+        default: return [:]
+        }
+    }
+
+    public var intValue: Int? {
+        switch self {
+        case .int(let v): return v
+        case .double(let v): return Int(v)
+        case .string(let s): return Int(s)
+        default: return nil
+        }
+    }
+
+    public var stringValue: String? {
+        switch self {
+        case .string(let s): return s
+        case .int(let v): return String(v)
+        default: return nil
+        }
+    }
+
+    public var vectorValue: (x: Int, y: Int)? {
+        if case .vector(let x, let y) = self { return (x, y) }
+        return nil
+    }
+
+    /// 이 노드를 최상위로 보고 경로를 따라감. 중간의 UOL(다른 항목을 가리키는 링크, "../../front/head" 등)도 따라감.
+    public func node(at path: String) -> WZNode? {
+        resolve(path.split(separator: "/").map(String.init), depth: 0)
+    }
+
+    private func resolve(_ parts: [String], depth: Int) -> WZNode? {
+        guard depth < 16 else { return nil }
+        var stack: [String] = []
+        var node: WZNode = self
+        var i = 0
+        while i < parts.count {
+            let part = parts[i]
+            if part == ".." {
+                guard !stack.isEmpty else { return nil }
+                stack.removeLast()
+                node = resolve(stack, depth: depth + 1) ?? self
+                i += 1
+                continue
+            }
+            guard let next = node.children[part] else { return nil }
+            if case .uol(let target) = next {
+                // 링크는 그 링크가 들어 있는 항목(stack) 기준의 상대 경로
+                var resolved = stack
+                for t in target.split(separator: "/").map(String.init) {
+                    if t == ".." { if !resolved.isEmpty { resolved.removeLast() } } else if !t.isEmpty { resolved.append(t) }
+                }
+                return resolve(resolved + parts[(i + 1)...], depth: depth + 1)
+            }
+            stack.append(part)
+            node = next
+            i += 1
+        }
+        return node
+    }
 }
 
 /// 효과음 (Sound.wz). data는 보통 MP3 스트림 그대로.
@@ -195,6 +261,18 @@ public enum WZImage {
 
     public static func load(contentsOf url: URL) throws -> WZNode {
         try load([UInt8](Data(contentsOf: url)))
+    }
+
+    /// 최상위 항목 이름을 파일에 적힌 순서대로 (Base.wz의 zmap.img: 앞에 그릴 층부터)
+    public static func rootNames(_ data: [UInt8]) throws -> [String] {
+        for iv in [WZKey.kmsIV, WZKey.gmsIV, WZKey.zeroIV] {
+            let key = WZKey.generate(iv: iv)
+            var reader = WZReader(bytes: data, key: key)
+            guard (try? reader.stringBlock()) == "Property" else { continue }
+            try reader.skip(2)
+            return try reader.propertyEntries().map(\.0)
+        }
+        throw WZError.unknownEncryption
     }
 }
 
@@ -323,7 +401,12 @@ struct WZReader {
     }
 
     mutating func properties() throws -> [String: WZNode] {
-        var result: [String: WZNode] = [:]
+        Dictionary(try propertyEntries(), uniquingKeysWith: { _, last in last })
+    }
+
+    /// 속성 목록을 파일에 적힌 순서대로 (zmap처럼 순서가 의미 있는 것용)
+    mutating func propertyEntries() throws -> [(String, WZNode)] {
+        var result: [(String, WZNode)] = []
         let count = try compressedInt()
         for _ in 0..<max(0, count) {
             let name = try stringBlock()
@@ -350,7 +433,7 @@ struct WZReader {
             default:
                 throw WZError.badFormat("속성 형식 \(type) (\(name))")
             }
-            result[name] = value
+            result.append((name, value))
         }
         return result
     }

@@ -17,6 +17,15 @@ enum AppFolder {
     /// 셔플 재생할 BGM (Bgm*.img, mp3 등)
     static let music = root.appendingPathComponent("Music", isDirectory: true)
 
+    /// 캐릭터 몸·머리·얼굴·헤어·장비 (Character.wz의 00002000.img, 01040009.img 등)
+    static let character = skin.appendingPathComponent("Character", isDirectory: true)
+    /// 몬스터 (Mob.wz의 0100101.img 등)
+    static let mob = skin.appendingPathComponent("Mob", isDirectory: true)
+    /// NPC (Npc.wz의 1022000.img 등)
+    static let npc = skin.appendingPathComponent("Npc", isDirectory: true)
+    /// 스킬 (Skill.wz의 100.img 등)
+    static let skill = skin.appendingPathComponent("Skill", isDirectory: true)
+
     static func prepareSkinFolder() {
         try? FileManager.default.createDirectory(at: skin, withIntermediateDirectories: true)
         let readme = skin.appendingPathComponent("README.txt")
@@ -66,7 +75,7 @@ struct Storage {
 
 /// 효과음이 나는 상황. 소리는 설정 창에서 바꿀 수 있고, quiet는 "작은 효과음" 볼륨을 씀.
 enum SoundEvent: String, CaseIterable, Identifiable {
-    case levelUp, jobChange, allDone, blockStart, skip, scheduleSaved, scheduleFailed
+    case levelUp, jobChange, allDone, blockStart, skip, giveUp, scheduleSaved, scheduleFailed
     case extend, reset, delete, click, openSettings, dragStart, dragEnd
 
     var id: String { rawValue }
@@ -78,6 +87,7 @@ enum SoundEvent: String, CaseIterable, Identifiable {
         case .allDone: return "오늘 일정 모두 끝"
         case .blockStart: return "빈 시간 → 블록 시작"
         case .skip: return "건너뛰기"
+        case .giveUp: return "오늘은 여기까지 (포기)"
         case .scheduleSaved: return "일정 저장 성공"
         case .scheduleFailed: return "일정 저장 실패"
         case .extend: return "연장 (+5/+10분)"
@@ -97,7 +107,8 @@ enum SoundEvent: String, CaseIterable, Identifiable {
         case .jobChange: return "Game/JobChanged"
         case .allDone: return "Game/QuestClear"
         case .blockStart: return ""
-        case .skip: return "Game/Tombstone"
+        case .skip: return "Game/Portal"
+        case .giveUp: return "Game/Tombstone"
         case .scheduleSaved: return "Game/EnchantSuccess"
         case .scheduleFailed: return "Game/EnchantFailure"
         case .extend: return "Game/DropItem"
@@ -113,7 +124,7 @@ enum SoundEvent: String, CaseIterable, Identifiable {
     /// 일반 효과음보다 작게 나는 소리
     var isQuiet: Bool {
         switch self {
-        case .levelUp, .jobChange, .allDone, .blockStart: return false
+        case .levelUp, .jobChange, .allDone, .blockStart, .giveUp: return false
         default: return true
         }
     }
@@ -174,13 +185,46 @@ final class SoundPlayer {
 
 /// 고른 파일·폴더에서 메이플 .img를 찾아 이름에 맞는 폴더로 복사
 enum MapleFileImporter {
-    static let skinFiles = ["statusbar.img", "basic.img", "game.img", "ui.img", "uiwindow.img", "basiceff.img"]
+    static let skinFiles = ["statusbar.img", "basic.img", "game.img", "ui.img", "uiwindow.img", "basiceff.img",
+                            "zmap.img", "smap.img", "tomb.img", "chatballoon.img"]
     static let fontExtensions = ["ttf", "otf", "ttc"]
+
+    /// 파일을 어디에 어떤 이름으로 둘지. nil이면 관계없는 파일.
+    static func destination(for file: URL) -> (folder: URL, name: String)? {
+        let name = file.lastPathComponent
+        let lower = name.lowercased()
+        let ext = file.pathExtension.lowercased()
+        if (lower.hasPrefix("bgm") && ext == "img") || MusicPlayer.audioExtensions.contains(ext) {
+            return (AppFolder.music, name)
+        }
+        if skinFiles.contains(lower) || fontExtensions.contains(ext) { return (AppFolder.skin, name) }
+        guard ext == "img" else { return nil }
+        let base = file.deletingPathExtension().lastPathComponent
+        // Sound.wz의 Mob.img·Skill.img (String.wz에도 같은 이름이 있어서 소리가 든 것만)
+        for kind in ["mob", "skill"] where lower == "\(kind).img" || lower.hasSuffix("_\(kind).img") {
+            guard let root = try? WZImage.load(contentsOf: file), !root.soundPaths.isEmpty else { return nil }
+            return (AppFolder.skin, kind == "mob" ? "SoundMob.img" : "SoundSkill.img")
+        }
+        guard !base.isEmpty, base.allSatisfy(\.isNumber) else { return nil }
+        switch base.count {
+        case 8: return (AppFolder.character, name)          // 00002000 몸, 0002xxxx 얼굴, 01xxxxxx 장비 …
+        case 3: return (AppFolder.skill, name)              // 100, 110 … 직업별 스킬
+        case 7:
+            // 몬스터와 NPC는 번호 자릿수가 같음 → 폴더 이름이나 내용(체력 정보)으로 구별
+            let folders = file.pathComponents.map { $0.lowercased() }
+            if folders.contains(where: { $0.hasPrefix("mob") }) { return (AppFolder.mob, name) }
+            if folders.contains(where: { $0.hasPrefix("npc") }) { return (AppFolder.npc, name) }
+            guard let root = try? WZImage.load(contentsOf: file) else { return nil }
+            return (root["info/maxHP"] != nil ? AppFolder.mob : AppFolder.npc, name)
+        default: return nil
+        }
+    }
 
     static func importFiles(_ urls: [URL]) -> String {
         let fm = FileManager.default
-        try? fm.createDirectory(at: AppFolder.skin, withIntermediateDirectories: true)
-        try? fm.createDirectory(at: AppFolder.music, withIntermediateDirectories: true)
+        for folder in [AppFolder.skin, AppFolder.music, AppFolder.character, AppFolder.mob, AppFolder.npc, AppFolder.skill] {
+            try? fm.createDirectory(at: folder, withIntermediateDirectories: true)
+        }
 
         // 폴더를 고르면 안에 있는 파일 전부 (하위 폴더 포함)
         var files: [URL] = []
@@ -194,21 +238,16 @@ enum MapleFileImporter {
             }
         }
 
-        var skin: [String] = [], music: [String] = [], skipped = 0
+        var skin: [String] = [], music: [String] = [], counts: [String: Int] = [:], skipped = 0
         for file in files {
-            let name = file.lastPathComponent
-            let lower = name.lowercased()
-            let destFolder: URL
-            if (lower.hasPrefix("bgm") && lower.hasSuffix(".img"))
-                || MusicPlayer.audioExtensions.contains(file.pathExtension.lowercased()) {
-                destFolder = AppFolder.music
-            } else if skinFiles.contains(lower) || fontExtensions.contains(file.pathExtension.lowercased()) {
-                destFolder = AppFolder.skin
-            } else {
+            guard let target = destination(for: file) else {
                 skipped += 1
                 continue
             }
-            var dest = destFolder.appendingPathComponent(name)
+            let (destFolder, destName) = target
+            let name = file.lastPathComponent
+            let lower = name.lowercased()
+            var dest = destFolder.appendingPathComponent(destName)
             if destFolder == AppFolder.music, !lower.hasSuffix(".img"), fm.fileExists(atPath: dest.path),
                (try? Data(contentsOf: dest)) != (try? Data(contentsOf: file)) {
                 // 이름만 같고 다른 음악 파일이면 덮어쓰지 않고 번호 붙임
@@ -220,7 +259,11 @@ enum MapleFileImporter {
             try? fm.removeItem(at: dest)
             do {
                 try fm.copyItem(at: file, to: dest)
-                if destFolder == AppFolder.music { music.append(name) } else { skin.append(name) }
+                switch destFolder {
+                case AppFolder.music: music.append(name)
+                case AppFolder.skin: skin.append(destName)
+                default: counts[destFolder.lastPathComponent, default: 0] += 1
+                }
             } catch {
                 NSLog("가져오기 실패 \(name): \(error)")
             }
@@ -228,6 +271,10 @@ enum MapleFileImporter {
         var lines: [String] = []
         if !skin.isEmpty { lines.append("스킨: " + skin.sorted().joined(separator: ", ")) }
         if !music.isEmpty { lines.append("음악: \(music.count)개 파일") }
+        let labels = ["Character": "캐릭터·장비", "Mob": "몬스터", "Npc": "NPC", "Skill": "스킬"]
+        for (folder, n) in counts.sorted(by: { $0.key < $1.key }) {
+            lines.append("\(labels[folder] ?? folder): \(n)개")
+        }
         if skipped > 0 { lines.append("관계없는 파일 \(skipped)개는 건너뜀") }
         return lines.isEmpty ? "가져온 파일 없음" : lines.joined(separator: "\n")
     }

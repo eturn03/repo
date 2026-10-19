@@ -45,6 +45,71 @@ final class WZKitTests: XCTestCase {
         XCTAssertEqual(sound.data, Data([0xff, 0xf3]) + Data("TEST".utf8))
     }
 
+    func testRootNamesKeepFileOrder() throws {
+        let names = try WZImage.rootNames([UInt8](Data(base64Encoded: Self.fixtureBase64)!))
+        XCTAssertEqual(Set(names), Set(try root().children.keys))
+        XCTAssertEqual(names.count, try root().children.count)
+    }
+
+    func testFollowsUOLLinks() {
+        let canvas = WZNode.int(7)
+        let root = WZNode.property([
+            "front": .property(["head": canvas]),
+            "stand1": .property(["0": .property(["head": .uol("../../front/head")])]),
+            "alias": .uol("stand1"),
+        ])
+        XCTAssertEqual(root.node(at: "stand1/0/head")?.intValue, 7)
+        XCTAssertEqual(root.node(at: "alias/0/head")?.intValue, 7)
+        XCTAssertNil(root.node(at: "stand1/9"))
+    }
+
+    func testCharacterAssemblyUsesAnchors() {
+        func solid(_ w: Int, _ h: Int, _ v: UInt8) -> Bitmap {
+            var b = Bitmap(width: w, height: h)
+            b.fill(x: 0, y: 0, w: w, h: h, r: v, g: v, b: v)
+            return b
+        }
+        // 몸: 10x20, 기준점 발밑(5,20), 목은 기준점에서 (0,-18)
+        let body = CharacterRenderer.Part(image: solid(10, 20, 100), origin: (5, 20), map: ["neck": (0, -18)], z: "body")
+        // 머리: 8x8, 기준점 (4,8), 목은 기준점에서 (0,0) → 머리 아래쪽 가운데가 몸의 목에 붙음
+        let head = CharacterRenderer.Part(image: solid(8, 8, 200), origin: (4, 8), map: ["neck": (0, 0)], z: "head")
+        let (image, ox, oy) = CharacterRenderer.assemble([head, body].reversed(), zRank: ["head": 0, "body": 1])!
+        XCTAssertEqual(image.width, 10)
+        XCTAssertEqual(image.height, 26)   // 머리 위 6px + 몸 20px
+        XCTAssertEqual(ox, 5)
+        XCTAssertEqual(oy, 26)
+        XCTAssertTrue(image.pixel(x: 5, y: 3) == (200, 200, 200, 255))   // 머리
+        XCTAssertTrue(image.pixel(x: 5, y: 7) == (200, 200, 200, 255))   // 머리가 몸 위에 그려짐
+        XCTAssertTrue(image.pixel(x: 5, y: 20) == (100, 100, 100, 255))  // 몸
+    }
+
+    func testWarriorOutfitPicksHighestUsable() {
+        let items = [
+            EquipInfo(id: "01040009", slot: .coat, reqLevel: 25, reqJob: 1, cash: false),
+            EquipInfo(id: "01040012", slot: .coat, reqLevel: 40, reqJob: 1, cash: false),
+            EquipInfo(id: "01040002", slot: .coat, reqLevel: 0, reqJob: 0, cash: false),
+            EquipInfo(id: "01050000", slot: .longcoat, reqLevel: 35, reqJob: 1, cash: false),
+            EquipInfo(id: "01060009", slot: .pants, reqLevel: 25, reqJob: 1, cash: false),
+            EquipInfo(id: "01402015", slot: .weapon, reqLevel: 80, reqJob: 1, cash: false),
+            EquipInfo(id: "01402001", slot: .weapon, reqLevel: 0, reqJob: 0, cash: false),
+            EquipInfo(id: "01302000", slot: .weapon, reqLevel: 0, reqJob: 0, cash: false),
+            EquipInfo(id: "01082005", slot: .glove, reqLevel: 30, reqJob: 1, cash: true),
+        ]
+        XCTAssertEqual(EquipInfo.warriorOutfit(from: items, level: 30).map(\.id), ["01040009", "01060009", "01402001"])
+        XCTAssertEqual(EquipInfo.warriorOutfit(from: items, level: 36).map(\.id), ["01050000", "01402001"])
+        XCTAssertEqual(EquipInfo.warriorOutfit(from: items, level: 80).map(\.id), ["01040012", "01060009", "01402015"])
+        XCTAssertEqual(EquipInfo.slot(forID: "01402015"), .weapon)
+        XCTAssertEqual(EquipInfo.slot(forID: "00002000"), nil)
+    }
+
+    func testFlipMirrorsImageAndOrigin() {
+        var b = Bitmap(width: 3, height: 1)
+        b.fill(x: 0, y: 0, w: 1, h: 1, r: 255, g: 0, b: 0)
+        let anim = FrameAnimation(frames: [.init(image: b, originX: 0, originY: 1, delayMs: 100)]).flipped()
+        XCTAssertTrue(anim.frames[0].image.pixel(x: 2, y: 0) == (255, 0, 0, 255))
+        XCTAssertEqual(anim.frames[0].originX, 3)
+    }
+
     func testRejectsGarbage() {
         XCTAssertThrowsError(try WZImage.load([0x01, 0x02, 0x03]))
     }

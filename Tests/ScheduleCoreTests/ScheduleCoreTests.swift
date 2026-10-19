@@ -310,4 +310,68 @@ final class ScheduleCoreTests: XCTestCase {
         XCTAssertEqual(Format.menuTitle(s, now: at(12, 0), maxChars: 6), "일정 끝")
         XCTAssertEqual(Format.menuTitle(Schedule(), now: at(12, 0), maxChars: 6), "일정 없음")
     }
+
+    // MARK: - 포기
+
+    func testGiveUpKeepsLevelAndAbandonsTheRest() {
+        var s = sample()
+        s.giveUp(at: at(10, 10))   // A 끝남, B 진행 중
+        XCTAssertEqual(s.blocks.map(\.status), [.scheduled, .abandoned, .abandoned])
+        XCTAssertEqual(s.blocks[1].end, at(10, 10))
+        let snap = StatusSnapshot(schedule: s, now: at(10, 11))
+        XCTAssertTrue(snap.gaveUp)
+        XCTAssertEqual(snap.phase, .finished)
+        XCTAssertEqual(snap.title, "오늘은 여기까지")
+        XCTAssertEqual(snap.completedBlocks, 1)
+        XCTAssertEqual(snap.level, 10)
+        XCTAssertEqual(snap.mpRemaining, 0)
+
+        s.undoGiveUp()
+        XCTAssertNil(s.gaveUpAt)
+        XCTAssertEqual(s.blocks.map(\.status), [.scheduled, .scheduled, .scheduled])
+        XCTAssertEqual(s.blocks[1].end, at(10, 30))
+    }
+
+    func testGiveUpFlagClearedAtDayBoundary() {
+        var s = sample()
+        s.giveUp(at: at(10, 10))
+        s.removeBlocks(endingBefore: at(4, 0, dayOffset: 1))
+        XCTAssertNil(s.gaveUpAt)
+        XCTAssertTrue(s.blocks.isEmpty)
+    }
+
+    func testOldSavedScheduleWithoutGiveUpStillDecodes() throws {
+        let data = try JSONEncoder().encode(sample())
+        var json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+        json.removeValue(forKey: "gaveUpAt")
+        let decoded = try JSONDecoder().decode(Schedule.self, from: JSONSerialization.data(withJSONObject: json))
+        XCTAssertNil(decoded.gaveUpAt)
+        XCTAssertEqual(decoded.blocks.count, 3)
+    }
+
+    // MARK: - 몬스터
+
+    func testBestiary() {
+        XCTAssertEqual(Bestiary.encounter(fromLevel: 1, toLevel: 10, roll: 0)?.name, "파란 달팽이")
+        XCTAssertEqual(Bestiary.encounter(fromLevel: 20, toLevel: 30, roll: 5)?.name, "마노")
+        XCTAssertEqual(Bestiary.encounter(fromLevel: 60, toLevel: 70, roll: 1)?.name, "머쉬맘")
+        XCTAssertEqual(Bestiary.encounter(fromLevel: 110, toLevel: 120, roll: 2)?.name, "피아누스")
+        XCTAssertEqual(Bestiary.encounter(fromLevel: 190, toLevel: 200, roll: 3)?.name, "핑크빈")
+        XCTAssertEqual(Bestiary.encounter(fromLevel: 10, toLevel: 20, roll: 1)?.name, "주황버섯")
+        // 140 구간: 망각 3마리 + 자쿰
+        XCTAssertEqual(Bestiary.encounter(fromLevel: 140, toLevel: 150, roll: 3)?.name, "자쿰")
+        XCTAssertEqual(Bestiary.encounter(fromLevel: 140, toLevel: 150, roll: 3)?.mobIDs.last, "8800000")
+        // 핑크빈은 180 구간 무작위에 없음
+        for roll in 0..<10 {
+            XCTAssertNotEqual(Bestiary.encounter(fromLevel: 180, toLevel: 190, roll: roll)?.name, "핑크빈")
+        }
+        // 모든 구간에 상대가 있음
+        for from in stride(from: 10, through: 190, by: 10) {
+            XCTAssertNotNil(Bestiary.encounter(fromLevel: from, toLevel: from + 10, roll: 7), "LV \(from)")
+        }
+        XCTAssertTrue(Bestiary.isJobLevel(70))
+        XCTAssertFalse(Bestiary.isJobLevel(80))
+        XCTAssertEqual(Bestiary.jobInstructor(forLevel: 120), "2081100")
+        XCTAssertGreaterThan(Bestiary.damage(level: 100, roll: 0), Bestiary.damage(level: 10, roll: 0))
+    }
 }

@@ -25,6 +25,7 @@ struct StatusBarView: View {
         .padding(s(4))
         .frame(width: s(Self.baseSize.width), height: s(Self.baseSize.height))
         .background(outerFrame)
+        .grayscale(snapshot.gaveUp ? 1 : 0)
         .contentShape(Rectangle())
         .gesture(
             DragGesture(minimumDistance: 1, coordinateSpace: .global)
