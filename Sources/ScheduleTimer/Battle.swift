@@ -309,7 +309,8 @@ enum BattleSceneBuilder {
             mobScale = min(1, 150 / max(1, h), 200 / max(1, w))
             mobHeight = h * mobScale
         }
-        let dieEnd = tDie + 1.3
+        // 전직 블록은 몬스터가 다 사라진 뒤 전직관이 나오도록 조금 빨리 사라짐
+        let dieEnd = jobBlock ? min(tDie + 1.0, climax - 0.6) : tDie + 1.3
         for (standAnim, hitAnim, dieAnim) in mobLayersStand {
             let s = mobScale
             layers.append(SceneLayer(anim: standAnim, x: mx, y: ground, scale: s, start: 0, end: tHit, loop: true))
@@ -370,7 +371,7 @@ enum BattleSceneBuilder {
         // 전직: 몬스터가 사라진 자리에 전직관 + 말풍선
         if jobBlock, let npcRoot = assets.npc(Bestiary.jobInstructor(forLevel: event.toLevel)),
            let npc = prepared(FrameAnimation(root: npcRoot, path: "stand")) {
-            let tNpc = min(dieEnd - 0.3, climax - 0.8)
+            let tNpc = dieEnd - 0.1
             layers.append(SceneLayer(anim: npc, x: mx, y: ground, start: tNpc, end: duration, loop: true))
             let npcTop = CGFloat(-npc.animation.bounds.minY)
             if let balloon = balloon(Bestiary.jobLine(forLevel: event.toLevel), assets: assets, font: font, fontName: fontName) {

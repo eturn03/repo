@@ -197,9 +197,9 @@ public struct EquipInfo: Codable, Equatable {
             !item.cash && item.reqLevel <= level && (item.reqJob == 0 || item.reqJob & 1 != 0)
         }
         func best(_ slot: Slot, warriorOnly: Bool = true, prefix: String? = nil) -> EquipInfo? {
-            items.filter {
-                $0.slot == slot && usable($0) && (!warriorOnly || $0.reqJob & 1 != 0)
-                    && (prefix.map { p in $0.id.hasPrefix(p) } ?? true)
+            items.filter { item in
+                item.slot == slot && usable(item) && (!warriorOnly || item.reqJob & 1 != 0)
+                    && (prefix.map { item.id.hasPrefix($0) } ?? true)
             }
             .max { ($0.reqLevel, $1.id) < ($1.reqLevel, $0.id) }
         }
