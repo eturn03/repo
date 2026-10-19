@@ -242,7 +242,6 @@ struct SceneLayer: Identifiable {
 struct BattleScene {
     static let size = CGSize(width: 420, height: 210)
     static let ground: CGFloat = 195
-    static let characterX: CGFloat = 120
     static let mobX: CGFloat = 300
 
     let layers: [SceneLayer]
@@ -278,7 +277,7 @@ enum BattleSceneBuilder {
         let jobBlock = event.jobChanged || Bestiary.isJobLevel(event.toLevel)
         let climax = 3.0
         let duration = jobBlock ? 5.6 : 5.0
-        let cx = BattleScene.characterX, mx = BattleScene.mobX, ground = BattleScene.ground
+        let mx = BattleScene.mobX, ground = BattleScene.ground
 
         var layers: [SceneLayer] = []
         var sounds: [(at: Double, data: Data)] = []
@@ -302,13 +301,18 @@ enum BattleSceneBuilder {
         }
         var mobScale: CGFloat = 1
         var mobHeight: CGFloat = 60
+        var mobLeft = mx - 20   // 몬스터 왼쪽 끝
         if !mobLayersStand.isEmpty {
             let bounds = mobLayersStand.map { $0.0.animation.bounds }
             let w = CGFloat((bounds.map { $0.maxX }.max() ?? 0) - (bounds.map { $0.minX }.min() ?? 0))
             let h = CGFloat((bounds.map { $0.maxY }.max() ?? 0) - (bounds.map { $0.minY }.min() ?? 0))
             mobScale = min(1, 150 / max(1, h), 200 / max(1, w))
             mobHeight = h * mobScale
+            mobLeft = mx + CGFloat(bounds.map { $0.minX }.min() ?? 0) * mobScale
         }
+        // 캐릭터는 몬스터 바로 앞에 (몬스터 크기와 상관없이 왼쪽 끝에서 45px, 게임에서 붙어서 때리는 거리)
+        let attackEffect = skillAnim(attack, attack?.effect)
+        let cx = max(40, mobLeft - 45)
         // 전직 블록은 몬스터가 다 사라진 뒤 전직관이 나오도록 조금 빨리 사라짐
         let dieEnd = jobBlock ? min(tDie + 1.0, climax - 0.6) : tDie + 1.3
         for (standAnim, hitAnim, dieAnim) in mobLayersStand {
@@ -346,7 +350,7 @@ enum BattleSceneBuilder {
         layers.append(SceneLayer(anim: stand, x: cx, y: ground, start: attackEnd, end: climax, loop: true))
         layers.append(SceneLayer(anim: smile, x: cx, y: ground, start: climax, end: duration, loop: true))
         if let attack {
-            if let e = skillAnim(attack, attack.effect) {
+            if let e = attackEffect {
                 layers.append(SceneLayer(anim: e, x: cx, y: ground, start: tAttack,
                                          end: tAttack + Double(e.animation.durationMs) / 1000))
             }
