@@ -243,6 +243,15 @@ final class AppStore: ObservableObject {
         )
     }
 
+    /// 효과음 길이 (게임 소리는 파일에 적힌 길이, 모르면 3초)
+    private func soundDuration(_ event: SoundEvent) -> TimeInterval {
+        if event.customFileName.flatMap({ SoundPlayer.customFile(named: $0) }) == nil,
+           let ms = soundBank?.sounds[sound(for: event)]?.durationMs, ms > 0 {
+            return Double(ms) / 1000
+        }
+        return 3
+    }
+
     // MARK: - 일정 조작
 
     /// 저장 결과: 넣은 블록 수 + 형식 오류·겹침 오류
@@ -388,10 +397,16 @@ final class AppStore: ObservableObject {
             let done = StatusSnapshot(schedule: schedule, now: t).completedBlocks
             let before = JobTitle.title(forLevel: JobTitle.level(forCompletedBlocks: done - 1))
             let after = JobTitle.title(forLevel: JobTitle.level(forCompletedBlocks: done))
-            // 레벨업은 항상 (마지막 블록이면 "오늘 일정 모두 끝" 소리), 직업이 바뀌면 전직 소리·이펙트도 같이
-            play(position == .finished ? .allDone : .levelUp)
+            // 레벨업은 항상, 직업이 바뀌면 전직 소리·이펙트도 같이.
+            // 마지막 블록이면 "오늘 일정 모두 끝" 소리는 레벨업 소리가 끝난 뒤에
+            play(.levelUp)
             if before != after { play(.jobChange) }
             onLevelUp?(before != after)
+            if position == .finished {
+                DispatchQueue.main.asyncAfter(deadline: .now() + soundDuration(.levelUp)) { [weak self] in
+                    self?.play(.allDone)
+                }
+            }
         } else if case .inBlock = position {
             play(.blockStart)
         }

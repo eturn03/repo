@@ -151,7 +151,7 @@ bash build.sh
 |---|---|---|
 | 블록 끝 (레벨업) | Game/LevelUp | 효과음 볼륨 |
 | 직업이 바뀔 때 (전직) | Game/JobChanged | 효과음 볼륨 |
-| 오늘 일정 모두 끝 | Game/QuestClear | 효과음 볼륨 |
+| 오늘 일정 모두 끝 (마지막 블록의 레벨업 소리 다음에) | Game/QuestClear | 효과음 볼륨 |
 | 빈 시간 → 블록 시작 | macOS 기본음 | 효과음 볼륨 |
 | 건너뛰기 | Game/Tombstone | 작은 효과음 볼륨 |
 | 일정 저장 성공 / 실패 | Game/EnchantSuccess / EnchantFailure | 작은 효과음 볼륨 |
