@@ -22,5 +22,7 @@ final class AudioFormatTests: XCTestCase {
         if let f = try? AVAudioFile(forReading: url) {
             print("AUDIOCHECK avaudiofile rate=\(f.fileFormat.sampleRate) frames=\(f.length)")
         } else { print("AUDIOCHECK avaudiofile failed") }
+        let p = try AVAudioPlayer(data: data, fileTypeHint: AVFileType.mp3.rawValue)
+        XCTAssertEqual(p.format.sampleRate, 22050, "AUDIOCHECK duration=\(p.duration)")
     }
 }
