@@ -157,9 +157,11 @@ final class SoundPlayer {
         active.removeAll { !$0.isPlaying }
         systemSounds.removeAll { !$0.isPlaying }
         if let data {
-            // .img 소리는 MP3 스트림 그대로라 형식을 알려줌
+            // .img 소리는 MP3 스트림 그대로. 메모리에서 바로 열면 저음질 MP3의 음높이가 달라지는 경우가 있어서
+            // Finder처럼 .mp3 파일로 저장해두고 파일로 엶
             let audio = isRawMP3
-                ? ((try? AVAudioPlayer(data: data, fileTypeHint: AVFileType.mp3.rawValue)) ?? (try? AVAudioPlayer(data: data)))
+                ? (Self.cachedFile(for: data).flatMap { try? AVAudioPlayer(contentsOf: $0) }
+                    ?? (try? AVAudioPlayer(data: data, fileTypeHint: AVFileType.mp3.rawValue)))
                 : (try? AVAudioPlayer(data: data))
             if let audio {
                 audio.volume = Float(volume)
@@ -172,6 +174,19 @@ final class SoundPlayer {
         sound.volume = Float(volume)
         sound.play()
         systemSounds.append(sound)
+    }
+
+    /// 소리 데이터를 임시 폴더의 .mp3 파일로 (내용이 같으면 같은 파일 재사용)
+    private static var fileCache: [Int: URL] = [:]
+    static func cachedFile(for data: Data) -> URL? {
+        let key = data.hashValue
+        if let url = fileCache[key], FileManager.default.fileExists(atPath: url.path) { return url }
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("ScheduleTimerSounds", isDirectory: true)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let url = folder.appendingPathComponent("\(UInt(bitPattern: key)).mp3")
+        guard (try? data.write(to: url, options: .atomic)) != nil else { return nil }
+        fileCache[key] = url
+        return url
     }
 
     static func customFile(named name: String) -> Data? {
