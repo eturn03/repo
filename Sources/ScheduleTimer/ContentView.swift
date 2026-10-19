@@ -405,6 +405,11 @@ struct ContentView: View {
                                 Stepper("LV \(previewLevel)로 오르는 블록", value: $previewLevel, in: 10...200, step: 10)
                                 Button("장면 미리보기") { onTestBattle(previewLevel) }
                             }
+                            Text(store.assets.previewInfo(toLevel: previewLevel))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .textSelection(.enabled)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }

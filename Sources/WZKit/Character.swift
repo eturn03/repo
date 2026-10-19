@@ -191,7 +191,7 @@ public struct EquipInfo: Codable, Equatable {
     }
 
     /// 전사가 이 레벨에 입을 장비 고르기: 부위마다 착용 가능한 것 중 레벨이 가장 높은 것.
-    /// 무기는 두손검(01402…)만 (히어로 동작에 맞춤). 한벌옷이 상·하의보다 높으면 한벌옷.
+    /// 무기는 두손검(01402…)만 (히어로 동작에 맞춤, 맞는 게 없으면 가장 낮은 것). 한벌옷이 상·하의보다 높으면 한벌옷.
     public static func warriorOutfit(from items: [EquipInfo], level: Int) -> [EquipInfo] {
         func usable(_ item: EquipInfo) -> Bool {
             !item.cash && item.reqLevel <= level && (item.reqJob == 0 || item.reqJob & 1 != 0)
@@ -213,7 +213,10 @@ public struct EquipInfo: Codable, Equatable {
         }
         if let shoes = best(.shoes) { outfit.append(shoes) }
         if let glove = best(.glove) { outfit.append(glove) }
-        if let weapon = best(.weapon, warriorOnly: false, prefix: "01402") { outfit.append(weapon) }
+        // 무기는 스킬 동작에 꼭 필요해서, 레벨에 맞는 게 없으면 가진 두손검 중 가장 낮은 것이라도
+        let fallbackWeapon = items.filter { !$0.cash && $0.slot == .weapon && $0.id.hasPrefix("01402") }
+            .min { ($0.reqLevel, $0.id) < ($1.reqLevel, $1.id) }
+        if let weapon = best(.weapon, warriorOnly: false, prefix: "01402") ?? fallbackWeapon { outfit.append(weapon) }
         return outfit
     }
 }

@@ -74,13 +74,17 @@ public enum Bestiary {
         ]
     }()
 
+    /// fromLevel → toLevel 로 오르는 블록에서 나올 수 있는 상대들
+    public static func candidates(fromLevel: Int, toLevel: Int) -> [Encounter] {
+        if fromLevel < JobTitle.levelPerBlock { return firstBlock }
+        if let boss = jobBosses[toLevel] { return [boss] }
+        return brackets[min(180, fromLevel / 10 * 10)] ?? []
+    }
+
     /// fromLevel → toLevel 로 오르는 블록에서 싸울 상대. roll은 무작위 수 (같은 값이면 같은 결과).
     public static func encounter(fromLevel: Int, toLevel: Int, roll: Int) -> Encounter? {
-        let pick: ([Encounter]) -> Encounter? = { $0.isEmpty ? nil : $0[abs(roll) % $0.count] }
-        if fromLevel < JobTitle.levelPerBlock { return pick(firstBlock) }
-        if let boss = jobBosses[toLevel] { return boss }
-        let bracket = min(180, fromLevel / 10 * 10)
-        return pick(brackets[bracket] ?? [])
+        let list = candidates(fromLevel: fromLevel, toLevel: toLevel)
+        return list.isEmpty ? nil : list[abs(roll) % list.count]
     }
 
     /// 전직 레벨인지 (10/30/70/120/200)

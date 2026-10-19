@@ -46,6 +46,33 @@ final class GameAssets: @unchecked Sendable {
         return lines.joined(separator: "\n")
     }
 
+    /// 미리보기 레벨에서 무엇이 나올지와 파일이 있는지 (설정 창 확인용)
+    func previewInfo(toLevel: Int) -> String {
+        let to = min(JobTitle.maxLevel, max(JobTitle.levelPerBlock, toLevel / JobTitle.levelPerBlock * JobTitle.levelPerBlock))
+        let from = to == JobTitle.levelPerBlock ? JobTitle.minLevel : to - JobTitle.levelPerBlock
+        var lines: [String] = []
+        let labels: [EquipInfo.Slot: String] = [.coat: "상의", .longcoat: "한벌옷", .pants: "하의", .shoes: "신발",
+                                                 .glove: "장갑", .weapon: "무기"]
+        // 장비 목록을 처음 읽을 때는 오래 걸려서 화면을 멈추지 않게 백그라운드에서
+        lock.lock()
+        let items = equipIndex
+        lock.unlock()
+        guard let items else {
+            Task.detached(priority: .utility) { [self] in _ = self.equipment() }
+            return "장비 목록 읽는 중… (레벨을 다시 바꾸면 보임)"
+        }
+        let outfit = EquipInfo.warriorOutfit(from: items, level: from)
+        lines.append("LV \(from) 장비: " + (outfit.isEmpty ? "없음 (Character 폴더에 장비 파일 없음)"
+            : outfit.map { "\(labels[$0.slot] ?? "")\($0.id)(LV\($0.reqLevel))" }.joined(separator: ", ")))
+        if !outfit.contains(where: { $0.slot == .weapon }) { lines.append("⚠︎ 두손검(01402…) 파일이 없어서 맨손") }
+        let candidates = Bestiary.candidates(fromLevel: from, toLevel: to)
+        lines.append("나올 몬스터: " + candidates.map { e in
+            let missing = e.mobIDs.filter { file(AppFolder.mob, $0) == nil }
+            return missing.isEmpty ? "\(e.name) ✓" : "\(e.name) ✗(\(missing.joined(separator: ",")).img 없음)"
+        }.joined(separator: ", "))
+        return lines.joined(separator: "\n")
+    }
+
     func root(_ url: URL?) -> WZNode? {
         guard let url else { return nil }
         lock.lock()

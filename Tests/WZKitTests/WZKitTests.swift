@@ -98,6 +98,9 @@ final class WZKitTests: XCTestCase {
         XCTAssertEqual(EquipInfo.warriorOutfit(from: items, level: 30).map(\.id), ["01040009", "01060009", "01402001"])
         XCTAssertEqual(EquipInfo.warriorOutfit(from: items, level: 36).map(\.id), ["01050000", "01402001"])
         XCTAssertEqual(EquipInfo.warriorOutfit(from: items, level: 80).map(\.id), ["01040012", "01060009", "01402015"])
+        // 레벨에 맞는 무기가 없으면 가진 것 중 가장 낮은 두손검
+        let onlyHighWeapon = items.filter { $0.id != "01402001" }
+        XCTAssertEqual(EquipInfo.warriorOutfit(from: onlyHighWeapon, level: 20).map(\.id), ["01402015"])
         XCTAssertEqual(EquipInfo.slot(forID: "01402015"), .weapon)
         XCTAssertEqual(EquipInfo.slot(forID: "00002000"), nil)
     }
