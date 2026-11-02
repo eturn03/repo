@@ -30,6 +30,7 @@ Python 계산기를 JavaScript(Web Worker)로 옮겨서 **패와 패트랩 대�
 | `tests/scenarios.cjs` | Playwright 화면 시험 142개 |
 | `tests/calc_fixtures.cjs` | JS 계산기 ↔ Python fixtures 비교 |
 | `tests/deck_pulls_check.cjs`, `tests/site_pick.cjs` | 추천 1순위가 덱에 없는 카드를 꺼내지 않는지 무작위 패 600개로 검사(약 8분) |
+| `calculator-python/` | 원본 Python 계산기(변경 없음) |
 | `NOTES.md`, `README.md` | 파싱 애매한 곳, 계산기 이식 메모, 대비 측정값, 사용법 |
 
 ## 4. 실행·시험 방법
@@ -57,7 +58,7 @@ node tests/deck_pulls_check.cjs                                          # 위�
 
 ## 6. 계산기에 대해 알아야 할 것
 
-- 원본 Python 계산기(`calculator.zip`: checker.py, engine.py, hits.py 등)는 **저장소에 없다.** 필요하면 사용자에게 받아야 한다. 그 안의 `PORTING.md` 지시: 단계 문장 문법 변경 금지, 거리 가중치는 반올림 말고 ×10 정수, 점수 ±0.01 일치.
+- 원본 Python 계산기(`calculator.zip`: checker.py, engine.py, hits.py 등)는 저장소의 `calculator-python/` 폴더에 그대로 들어 있다(수정 없음, 동점 고정 패치는 `tests/fixtures/python-pinned.patch`). 그 안의 `PORTING.md` 지시: 단계 문장 문법 변경 금지, 거리 가중치는 반올림 말고 ×10 정수, 점수 ±0.01 일치.
 - Python과 JS가 갈리던 13건의 원인은 Python의 `sorted(set(...))`가 동점에서 실행마다 순서가 바뀌는 것. 두 동점 규칙(거리 동점 → (루트 id, 단계), 대체 후보 동점 → 처음 나온 순서)을 Python에 넣은 패치가 `tests/fixtures/python-pinned.patch`다. 이 패치를 넣은 Python과는 fixtures 전부 일치한다.
 - 미리 만든 `dd-handtraps.json`·`dd-planlib.json`은 **패치 전 Python**으로 만들어졌다. 그래서 일부 레코드는 "미리 만든 데이터"와 "실시간 계산" 결과가 다르다(예: A1 17단계 니비루 3.6점 vs 6.6점). 데이터를 만드는 쪽에서 패치를 적용해 다시 만들어야 맞는다. 사이트에서는 손대지 않았다.
 - 스몰 월드가 든 패 하나의 계산은 평균 약 1.2초, 최대 약 4.2초(Node 기준). 폰은 더 느릴 수 있다(재보지 않음).
