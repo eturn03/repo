@@ -1,0 +1,2300 @@
+[
+{
+"route": "C2",
+"step": 23,
+"trap": "veiler",
+"expected_score": 10.9,
+"expected_final_monsters": [
+"제우스",
+"빌가메스",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": 13.5
+},
+{
+"route": "A7",
+"step": 18,
+"trap": "belle",
+"expected_score": 6.6,
+"expected_final_monsters": [
+"제우스",
+"오르트로스",
+"데스마키나",
+"스케일"
+],
+"counter_score": 14
+},
+{
+"route": "D6",
+"step": 22,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 9.3
+},
+{
+"route": "F5",
+"step": 19,
+"trap": "dominus",
+"expected_score": 8.4,
+"expected_final_monsters": [
+"테무진",
+"데스마키나",
+"데스마키나",
+"스케일"
+],
+"counter_score": null
+},
+{
+"route": "A4",
+"step": 8,
+"trap": "gyban",
+"expected_score": 12,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A1",
+"step": 24,
+"trap": "dominus",
+"expected_score": 6.3,
+"expected_final_monsters": [
+"제우스",
+"스케일",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "F5",
+"step": 11,
+"trap": "droll",
+"expected_score": 14,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "C3",
+"step": 25,
+"trap": "veiler",
+"expected_score": 6.78,
+"expected_final_monsters": [
+"제우스",
+"오르트로스",
+"알프레드(무효)",
+"토마스",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "C2",
+"step": 18,
+"trap": "ogre",
+"expected_score": 10.5,
+"expected_final_monsters": [
+"제우스",
+"데스마키나",
+"대왕시져"
+],
+"counter_score": 11.3
+},
+{
+"route": "B3",
+"step": 9,
+"trap": "imperm",
+"expected_score": 10.8,
+"expected_final_monsters": [
+"케플러",
+"제우스",
+"사이프리트",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "F5",
+"step": 13,
+"trap": "nibiru",
+"expected_score": 7.5,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "F5",
+"step": 21,
+"trap": "nibiru",
+"expected_score": 1.5,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": null
+},
+{
+"route": "E2",
+"step": 22,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 9
+},
+{
+"route": "B1",
+"step": 14,
+"trap": "ash",
+"expected_score": 14,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "C2",
+"step": 14,
+"trap": "nibiru",
+"expected_score": 7.8,
+"expected_final_monsters": [
+"니비루토큰",
+"랜스",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": 10.8
+},
+{
+"route": "B1",
+"step": 15,
+"trap": "nibiru",
+"expected_score": 7.5,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "E2",
+"step": 9,
+"trap": "dominus",
+"expected_score": 9,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A1",
+"step": 26,
+"trap": "belle",
+"expected_score": 6.9,
+"expected_final_monsters": [
+"제우스",
+"테무진",
+"스케일",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "A4",
+"step": 7,
+"trap": "ash",
+"expected_score": 12,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "B1",
+"step": 27,
+"trap": "nibiru",
+"expected_score": 3,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "A3",
+"step": 1,
+"trap": "ogre",
+"expected_score": 14,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "D2",
+"step": 1,
+"trap": "ash",
+"expected_score": 0,
+"expected_final_monsters": [],
+"counter_score": null
+},
+{
+"route": "A2",
+"step": 19,
+"trap": "ogre",
+"expected_score": 14,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "C4",
+"step": 4,
+"trap": "veiler",
+"expected_score": 1.59,
+"expected_final_monsters": [
+"카운트(무효)"
+],
+"counter_score": null
+},
+{
+"route": "F5",
+"step": 17,
+"trap": "ogre",
+"expected_score": 9,
+"expected_final_monsters": [
+"제우스",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "E2",
+"step": 5,
+"trap": "ash",
+"expected_score": 0,
+"expected_final_monsters": [],
+"counter_score": null
+},
+{
+"route": "F2",
+"step": 19,
+"trap": "nibiru",
+"expected_score": 1.5,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": null
+},
+{
+"route": "E2",
+"step": 19,
+"trap": "gyban",
+"expected_score": 3,
+"expected_final_monsters": [
+"데스마키나"
+],
+"counter_score": 9.3
+},
+{
+"route": "F3",
+"step": 22,
+"trap": "veiler",
+"expected_score": 7.89,
+"expected_final_monsters": [
+"데스마키나",
+"랜스",
+"대왕시져",
+"스케일(무효)"
+],
+"counter_score": null
+},
+{
+"route": "A7",
+"step": 24,
+"trap": "veiler",
+"expected_score": 12.6,
+"expected_final_monsters": [
+"제우스",
+"케플러",
+"대왕시져",
+"토마스",
+"사이프리트",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "D6",
+"step": 14,
+"trap": "dominus",
+"expected_score": 3,
+"expected_final_monsters": [
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A5",
+"step": 26,
+"trap": "dominus",
+"expected_score": 6.9,
+"expected_final_monsters": [
+"제우스",
+"테무진",
+"스케일",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A2",
+"step": 26,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "A7",
+"step": 26,
+"trap": "ogre",
+"expected_score": 11.6,
+"expected_final_monsters": [
+"제우스",
+"클로비스",
+"사이프리트",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "F6",
+"step": 25,
+"trap": "nibiru",
+"expected_score": 1.5,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 10.5
+},
+{
+"route": "C1",
+"step": 18,
+"trap": "veiler",
+"expected_score": 12,
+"expected_final_monsters": [
+"제우스",
+"대왕시져",
+"사이프리트",
+"데스마키나"
+],
+"counter_score": 12
+},
+{
+"route": "C3",
+"step": 23,
+"trap": "nibiru",
+"expected_score": 6.6,
+"expected_final_monsters": [
+"니비루토큰",
+"알프레드",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "F3",
+"step": 8,
+"trap": "belle",
+"expected_score": 12,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "F2",
+"step": 9,
+"trap": "imperm",
+"expected_score": 10.8,
+"expected_final_monsters": [
+"케플러",
+"제우스",
+"사이프리트",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "G1",
+"step": 23,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 13.8
+},
+{
+"route": "E1",
+"step": 27,
+"trap": "nibiru",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"니비루토큰",
+"코페르"
+],
+"counter_score": 12.3
+},
+{
+"route": "D5",
+"step": 14,
+"trap": "nibiru",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"니비루토큰",
+"스케일"
+],
+"counter_score": 9
+},
+{
+"route": "F1",
+"step": 12,
+"trap": "nibiru",
+"expected_score": 7.5,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "C2",
+"step": 16,
+"trap": "nibiru",
+"expected_score": 1.5,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 10.8
+},
+{
+"route": "D4",
+"step": 20,
+"trap": "ash",
+"expected_score": 9,
+"expected_final_monsters": [
+"제우스",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A2",
+"step": 16,
+"trap": "dominus",
+"expected_score": 9.3,
+"expected_final_monsters": [
+"스케일",
+"제우스",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "C4",
+"step": 22,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": null
+},
+{
+"route": "B1",
+"step": 35,
+"trap": "nibiru",
+"expected_score": 2,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "D3",
+"step": 25,
+"trap": "dominus",
+"expected_score": 6.8,
+"expected_final_monsters": [
+"제우스",
+"텔",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A6",
+"step": 3,
+"trap": "ogre",
+"expected_score": 6,
+"expected_final_monsters": [
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "C1",
+"step": 4,
+"trap": "ogre",
+"expected_score": 1.8,
+"expected_final_monsters": [
+"스케일"
+],
+"counter_score": null
+},
+{
+"route": "C3",
+"step": 39,
+"trap": "dominus",
+"expected_score": 11.6,
+"expected_final_monsters": [
+"제우스",
+"테무진",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "D1",
+"step": 1,
+"trap": "ash",
+"expected_score": 0,
+"expected_final_monsters": [],
+"counter_score": null
+},
+{
+"route": "A7",
+"step": 7,
+"trap": "ash",
+"expected_score": 10.5,
+"expected_final_monsters": [
+"데스마키나",
+"제우스",
+"대왕시져"
+],
+"counter_score": null
+},
+{
+"route": "A4",
+"step": 5,
+"trap": "imperm",
+"expected_score": 1.59,
+"expected_final_monsters": [
+"카운트(무효)"
+],
+"counter_score": null
+},
+{
+"route": "F6",
+"step": 5,
+"trap": "droll",
+"expected_score": 7.8,
+"expected_final_monsters": [
+"데스마키나",
+"랜스",
+"대왕시져"
+],
+"counter_score": null
+},
+{
+"route": "F6",
+"step": 8,
+"trap": "dominus",
+"expected_score": 10.5,
+"expected_final_monsters": [
+"데스마키나",
+"제우스",
+"대왕시져"
+],
+"counter_score": null
+},
+{
+"route": "A5",
+"step": 15,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 12
+},
+{
+"route": "D5",
+"step": 2,
+"trap": "veiler",
+"expected_score": 0.09,
+"expected_final_monsters": [
+"케플러(무효)"
+],
+"counter_score": null
+},
+{
+"route": "A4",
+"step": 11,
+"trap": "ash",
+"expected_score": 7.8,
+"expected_final_monsters": [
+"데스마키나",
+"랜스",
+"대왕시져"
+],
+"counter_score": null
+},
+{
+"route": "F1",
+"step": 17,
+"trap": "nibiru",
+"expected_score": 1.5,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": null
+},
+{
+"route": "B1",
+"step": 14,
+"trap": "nibiru",
+"expected_score": 7.5,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A1",
+"step": 36,
+"trap": "nibiru",
+"expected_score": 2,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "D1",
+"step": 19,
+"trap": "nibiru",
+"expected_score": 6.3,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나",
+"랜스",
+"데스마키나"
+],
+"counter_score": 12
+},
+{
+"route": "F2",
+"step": 20,
+"trap": "imperm",
+"expected_score": 10.5,
+"expected_final_monsters": [
+"데스마키나",
+"사이프리트",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "F1",
+"step": 24,
+"trap": "dominus",
+"expected_score": 10.5,
+"expected_final_monsters": [
+"데스마키나",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A6",
+"step": 30,
+"trap": "nibiru",
+"expected_score": 2,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "A3",
+"step": 5,
+"trap": "droll",
+"expected_score": 7.8,
+"expected_final_monsters": [
+"데스마키나",
+"랜스",
+"대왕시져"
+],
+"counter_score": null
+},
+{
+"route": "A3",
+"step": 5,
+"trap": "ogre",
+"expected_score": 9,
+"expected_final_monsters": [
+"데스마키나",
+"대왕시져",
+"사이프리트"
+],
+"counter_score": null
+},
+{
+"route": "E1",
+"step": 14,
+"trap": "veiler",
+"expected_score": 6.3,
+"expected_final_monsters": [
+"데스마키나",
+"코페르",
+"대왕시져"
+],
+"counter_score": 12.3
+},
+{
+"route": "D4",
+"step": 4,
+"trap": "ogre",
+"expected_score": 6.3,
+"expected_final_monsters": [
+"제우스",
+"스케일",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "C4",
+"step": 22,
+"trap": "veiler",
+"expected_score": 9.8,
+"expected_final_monsters": [
+"제우스",
+"텔",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "G1",
+"step": 20,
+"trap": "imperm",
+"expected_score": 7.5,
+"expected_final_monsters": [
+"제우스",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "C2",
+"step": 20,
+"trap": "ogre",
+"expected_score": 9.8,
+"expected_final_monsters": [
+"제우스",
+"제로마키나",
+"데스마키나",
+"대왕시져"
+],
+"counter_score": 11.3
+},
+{
+"route": "A2",
+"step": 27,
+"trap": "nibiru",
+"expected_score": 3,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "D2",
+"step": 19,
+"trap": "nibiru",
+"expected_score": 6.3,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나",
+"랜스",
+"데스마키나"
+],
+"counter_score": 12
+},
+{
+"route": "A1",
+"step": 17,
+"trap": "nibiru",
+"expected_score": 3.6,
+"expected_final_monsters": [
+"니비루토큰",
+"테무진",
+"데스마키나"
+],
+"counter_score": 12
+},
+{
+"route": "A4",
+"step": 28,
+"trap": "imperm",
+"expected_score": 14,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A6",
+"step": 15,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 12
+},
+{
+"route": "A2",
+"step": 19,
+"trap": "nibiru",
+"expected_score": 3,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "B3",
+"step": 19,
+"trap": "imperm",
+"expected_score": 7.5,
+"expected_final_monsters": [
+"데스마키나",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "F1",
+"step": 13,
+"trap": "nibiru",
+"expected_score": 7.5,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "D1",
+"step": 15,
+"trap": "veiler",
+"expected_score": 6,
+"expected_final_monsters": [
+"데스마키나",
+"데스마키나"
+],
+"counter_score": 6.6
+},
+{
+"route": "C3",
+"step": 28,
+"trap": "nibiru",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"니비루토큰",
+"스케일"
+],
+"counter_score": 14
+},
+{
+"route": "B1",
+"step": 23,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "A2",
+"step": 40,
+"trap": "nibiru",
+"expected_score": 2,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "D4",
+"step": 24,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 9
+},
+{
+"route": "D2",
+"step": 25,
+"trap": "ogre",
+"expected_score": 9.6,
+"expected_final_monsters": [
+"제우스",
+"알프레드",
+"데스마키나",
+"사이프리트"
+],
+"counter_score": 12
+},
+{
+"route": "D6",
+"step": 5,
+"trap": "ash",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"코페르"
+],
+"counter_score": null
+},
+{
+"route": "A7",
+"step": 30,
+"trap": "ash",
+"expected_score": 14,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "E1",
+"step": 12,
+"trap": "ogre",
+"expected_score": 6,
+"expected_final_monsters": [
+"제우스",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "F4",
+"step": 21,
+"trap": "nibiru",
+"expected_score": 1.5,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": null
+},
+{
+"route": "E1",
+"step": 28,
+"trap": "nibiru",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"니비루토큰",
+"코페르"
+],
+"counter_score": 12.3
+},
+{
+"route": "A5",
+"step": 35,
+"trap": "nibiru",
+"expected_score": 2,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "G1",
+"step": 22,
+"trap": "nibiru",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"니비루토큰",
+"스케일"
+],
+"counter_score": 13.8
+},
+{
+"route": "C4",
+"step": 8,
+"trap": "ogre",
+"expected_score": 6,
+"expected_final_monsters": [
+"데스마키나",
+"대왕시져"
+],
+"counter_score": null
+},
+{
+"route": "F2",
+"step": 24,
+"trap": "belle",
+"expected_score": 10.5,
+"expected_final_monsters": [
+"데스마키나",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "C2",
+"step": 23,
+"trap": "imperm",
+"expected_score": 10.9,
+"expected_final_monsters": [
+"제우스",
+"빌가메스",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "F3",
+"step": 11,
+"trap": "ash",
+"expected_score": 7.8,
+"expected_final_monsters": [
+"데스마키나",
+"랜스",
+"대왕시져"
+],
+"counter_score": null
+},
+{
+"route": "C3",
+"step": 24,
+"trap": "dominus",
+"expected_score": 6.6,
+"expected_final_monsters": [
+"제우스",
+"오르트로스",
+"토마스",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "D2",
+"step": 6,
+"trap": "veiler",
+"expected_score": 1.59,
+"expected_final_monsters": [
+"코페르(무효)"
+],
+"counter_score": null
+},
+{
+"route": "D4",
+"step": 23,
+"trap": "dominus",
+"expected_score": 6,
+"expected_final_monsters": [
+"제우스",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A1",
+"step": 22,
+"trap": "nibiru",
+"expected_score": 11,
+"expected_final_monsters": [
+"니비루토큰",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "D2",
+"step": 26,
+"trap": "nibiru",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"니비루토큰",
+"오르트로스"
+],
+"counter_score": 12
+},
+{
+"route": "E1",
+"step": 12,
+"trap": "veiler",
+"expected_score": 9,
+"expected_final_monsters": [
+"데스마키나",
+"대왕시져",
+"사이프리트"
+],
+"counter_score": null
+},
+{
+"route": "A7",
+"step": 21,
+"trap": "nibiru",
+"expected_score": 3,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "A3",
+"step": 34,
+"trap": "dominus",
+"expected_score": 11,
+"expected_final_monsters": [
+"제우스",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "D4",
+"step": 12,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": null
+},
+{
+"route": "F5",
+"step": 5,
+"trap": "ogre",
+"expected_score": 14,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "D5",
+"step": 19,
+"trap": "nibiru",
+"expected_score": 6.3,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나",
+"랜스",
+"데스마키나"
+],
+"counter_score": 9
+},
+{
+"route": "D5",
+"step": 18,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 9
+},
+{
+"route": "C4",
+"step": 22,
+"trap": "imperm",
+"expected_score": 9.8,
+"expected_final_monsters": [
+"제우스",
+"텔",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "F6",
+"step": 19,
+"trap": "dominus",
+"expected_score": 8.3,
+"expected_final_monsters": [
+"데스마키나",
+"텔",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A2",
+"step": 3,
+"trap": "droll",
+"expected_score": 12.3,
+"expected_final_monsters": [
+"제우스",
+"데스마키나",
+"대왕시져",
+"케플러",
+"사이프리트"
+],
+"counter_score": null
+},
+{
+"route": "A3",
+"step": 34,
+"trap": "nibiru",
+"expected_score": 2,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "A2",
+"step": 2,
+"trap": "veiler",
+"expected_score": 0.09,
+"expected_final_monsters": [
+"케플러(무효)"
+],
+"counter_score": null
+},
+{
+"route": "D6",
+"step": 21,
+"trap": "ogre",
+"expected_score": 9,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"데스마키나"
+],
+"counter_score": 9.3
+},
+{
+"route": "C3",
+"step": 13,
+"trap": "nibiru",
+"expected_score": 3,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나"
+],
+"counter_score": 12
+},
+{
+"route": "F4",
+"step": 17,
+"trap": "dominus",
+"expected_score": 5.4,
+"expected_final_monsters": [
+"알프레드",
+"데스마키나",
+"스케일"
+],
+"counter_score": null
+},
+{
+"route": "D1",
+"step": 27,
+"trap": "imperm",
+"expected_score": 9.3,
+"expected_final_monsters": [
+"제우스",
+"데스마키나",
+"대왕시져",
+"오르트로스"
+],
+"counter_score": null
+},
+{
+"route": "D3",
+"step": 14,
+"trap": "imperm",
+"expected_score": 6.8,
+"expected_final_monsters": [
+"텔",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "B2",
+"step": 21,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "D6",
+"step": 10,
+"trap": "ogre",
+"expected_score": 3,
+"expected_final_monsters": [
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "B2",
+"step": 36,
+"trap": "nibiru",
+"expected_score": 2,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "D2",
+"step": 23,
+"trap": "nibiru",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"니비루토큰",
+"오르트로스"
+],
+"counter_score": 12
+},
+{
+"route": "C3",
+"step": 31,
+"trap": "nibiru",
+"expected_score": 3.3,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나",
+"스케일"
+],
+"counter_score": 14
+},
+{
+"route": "D1",
+"step": 28,
+"trap": "nibiru",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"니비루토큰",
+"오르트로스"
+],
+"counter_score": 12
+},
+{
+"route": "E1",
+"step": 12,
+"trap": "nibiru",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"니비루토큰",
+"코페르"
+],
+"counter_score": null
+},
+{
+"route": "A6",
+"step": 4,
+"trap": "veiler",
+"expected_score": 1.59,
+"expected_final_monsters": [
+"카운트(무효)"
+],
+"counter_score": null
+},
+{
+"route": "A2",
+"step": 11,
+"trap": "ogre",
+"expected_score": 6.8,
+"expected_final_monsters": [
+"제우스",
+"제로마키나",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A7",
+"step": 19,
+"trap": "veiler",
+"expected_score": 7.5,
+"expected_final_monsters": [
+"데스마키나",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "D2",
+"step": 20,
+"trap": "ash",
+"expected_score": 12,
+"expected_final_monsters": [
+"제우스",
+"데스마키나",
+"대왕시져",
+"사이프리트"
+],
+"counter_score": 12
+},
+{
+"route": "G1",
+"step": 12,
+"trap": "nibiru",
+"expected_score": 6,
+"expected_final_monsters": [
+"니비루토큰",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "C1",
+"step": 24,
+"trap": "ogre",
+"expected_score": 9.6,
+"expected_final_monsters": [
+"제우스",
+"알프레드",
+"사이프리트",
+"데스마키나"
+],
+"counter_score": 12
+},
+{
+"route": "C2",
+"step": 23,
+"trap": "nibiru",
+"expected_score": 1.8,
+"expected_final_monsters": [
+"니비루토큰",
+"그리폰"
+],
+"counter_score": 13.5
+},
+{
+"route": "D3",
+"step": 27,
+"trap": "dominus",
+"expected_score": 9.6,
+"expected_final_monsters": [
+"제우스",
+"테무진",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "B3",
+"step": 3,
+"trap": "ash",
+"expected_score": 0,
+"expected_final_monsters": [],
+"counter_score": null
+},
+{
+"route": "F3",
+"step": 7,
+"trap": "imperm",
+"expected_score": 12,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A5",
+"step": 26,
+"trap": "imperm",
+"expected_score": 6.9,
+"expected_final_monsters": [
+"제우스",
+"알프레드",
+"스케일",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A5",
+"step": 35,
+"trap": "veiler",
+"expected_score": 11,
+"expected_final_monsters": [
+"제우스",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "D3",
+"step": 18,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": null
+},
+{
+"route": "D4",
+"step": 14,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": null
+},
+{
+"route": "C1",
+"step": 29,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 12
+},
+{
+"route": "F3",
+"step": 11,
+"trap": "ogre",
+"expected_score": 6.3,
+"expected_final_monsters": [
+"제우스",
+"카운트",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "B2",
+"step": 8,
+"trap": "belle",
+"expected_score": 12,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A4",
+"step": 33,
+"trap": "gyban",
+"expected_score": 12,
+"expected_final_monsters": [
+"제우스",
+"사이프리트",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "C1",
+"step": 19,
+"trap": "ogre",
+"expected_score": 6.3,
+"expected_final_monsters": [
+"사이프리트",
+"그리폰",
+"데스마키나"
+],
+"counter_score": 12
+},
+{
+"route": "F4",
+"step": 7,
+"trap": "ogre",
+"expected_score": 9.6,
+"expected_final_monsters": [
+"제우스",
+"카운트",
+"데스마키나",
+"코페르",
+"대왕시져"
+],
+"counter_score": null
+},
+{
+"route": "C4",
+"step": 6,
+"trap": "ogre",
+"expected_score": 1.8,
+"expected_final_monsters": [
+"카운트"
+],
+"counter_score": null
+},
+{
+"route": "C2",
+"step": 2,
+"trap": "ash",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"케플러"
+],
+"counter_score": null
+},
+{
+"route": "A6",
+"step": 34,
+"trap": "nibiru",
+"expected_score": 2,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "A2",
+"step": 24,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "B3",
+"step": 7,
+"trap": "ogre",
+"expected_score": 10.5,
+"expected_final_monsters": [
+"데스마키나",
+"제우스",
+"대왕시져"
+],
+"counter_score": null
+},
+{
+"route": "D2",
+"step": 27,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 12
+},
+{
+"route": "B2",
+"step": 31,
+"trap": "ogre",
+"expected_score": 8,
+"expected_final_monsters": [
+"사이프리트",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "C4",
+"step": 21,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": null
+},
+{
+"route": "D4",
+"step": 25,
+"trap": "veiler",
+"expected_score": 9,
+"expected_final_monsters": [
+"제우스",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": 9
+},
+{
+"route": "A5",
+"step": 6,
+"trap": "imperm",
+"expected_score": 6.3,
+"expected_final_monsters": [
+"제우스",
+"카운트",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "D5",
+"step": 5,
+"trap": "ash",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"코페르"
+],
+"counter_score": null
+},
+{
+"route": "A7",
+"step": 16,
+"trap": "nibiru",
+"expected_score": 7.5,
+"expected_final_monsters": [
+"니비루토큰",
+"사이프리트",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "D1",
+"step": 15,
+"trap": "ogre",
+"expected_score": 6.6,
+"expected_final_monsters": [
+"테무진",
+"데스마키나",
+"사이프리트"
+],
+"counter_score": 6.6
+},
+{
+"route": "C4",
+"step": 8,
+"trap": "veiler",
+"expected_score": 4.5,
+"expected_final_monsters": [
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "F5",
+"step": 4,
+"trap": "droll",
+"expected_score": 1.8,
+"expected_final_monsters": [
+"케플러"
+],
+"counter_score": null
+},
+{
+"route": "D5",
+"step": 6,
+"trap": "dominus",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"코페르"
+],
+"counter_score": null
+},
+{
+"route": "F2",
+"step": 2,
+"trap": "droll",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"케플러"
+],
+"counter_score": null
+},
+{
+"route": "D1",
+"step": 12,
+"trap": "ogre",
+"expected_score": 6.6,
+"expected_final_monsters": [
+"테무진",
+"데스마키나",
+"사이프리트"
+],
+"counter_score": null
+},
+{
+"route": "F2",
+"step": 7,
+"trap": "imperm",
+"expected_score": 10.5,
+"expected_final_monsters": [
+"데스마키나",
+"제우스",
+"대왕시져"
+],
+"counter_score": null
+},
+{
+"route": "F1",
+"step": 17,
+"trap": "imperm",
+"expected_score": 4.98,
+"expected_final_monsters": [
+"알프레드(무효)",
+"데스마키나",
+"스케일"
+],
+"counter_score": null
+},
+{
+"route": "A2",
+"step": 26,
+"trap": "gyban",
+"expected_score": 10.2,
+"expected_final_monsters": [
+"제우스",
+"테무진",
+"케플러",
+"사이프리트",
+"토마스",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "F1",
+"step": 21,
+"trap": "nibiru",
+"expected_score": 1.5,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 10.5
+},
+{
+"route": "B1",
+"step": 22,
+"trap": "nibiru",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"니비루토큰",
+"스케일"
+],
+"counter_score": 14
+},
+{
+"route": "B3",
+"step": 22,
+"trap": "nibiru",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"니비루토큰",
+"스케일"
+],
+"counter_score": 14
+},
+{
+"route": "A1",
+"step": 9,
+"trap": "ogre",
+"expected_score": 6,
+"expected_final_monsters": [
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "F5",
+"step": 24,
+"trap": "veiler",
+"expected_score": 8.1,
+"expected_final_monsters": [
+"테무진",
+"제우스",
+"데스마키나"
+],
+"counter_score": 10.5
+},
+{
+"route": "G1",
+"step": 28,
+"trap": "imperm",
+"expected_score": 6.3,
+"expected_final_monsters": [
+"코페르",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "F3",
+"step": 5,
+"trap": "veiler",
+"expected_score": 1.59,
+"expected_final_monsters": [
+"카운트(무효)"
+],
+"counter_score": null
+},
+{
+"route": "C1",
+"step": 24,
+"trap": "veiler",
+"expected_score": 9.3,
+"expected_final_monsters": [
+"제우스",
+"그리폰",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": 12
+},
+{
+"route": "A2",
+"step": 21,
+"trap": "nibiru",
+"expected_score": 3,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "F4",
+"step": 17,
+"trap": "ogre",
+"expected_score": 9,
+"expected_final_monsters": [
+"대왕시져",
+"제우스",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "D1",
+"step": 10,
+"trap": "dominus",
+"expected_score": 6.6,
+"expected_final_monsters": [
+"제우스",
+"테무진",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "D4",
+"step": 25,
+"trap": "gyban",
+"expected_score": 9,
+"expected_final_monsters": [
+"제우스",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": 9
+},
+{
+"route": "C2",
+"step": 9,
+"trap": "imperm",
+"expected_score": 9.2,
+"expected_final_monsters": [
+"제우스(무효)",
+"텔",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "A4",
+"step": 13,
+"trap": "nibiru",
+"expected_score": 7.5,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "D1",
+"step": 6,
+"trap": "veiler",
+"expected_score": 1.59,
+"expected_final_monsters": [
+"코페르(무효)"
+],
+"counter_score": null
+},
+{
+"route": "A6",
+"step": 33,
+"trap": "veiler",
+"expected_score": 11,
+"expected_final_monsters": [
+"제우스",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "C2",
+"step": 30,
+"trap": "nibiru",
+"expected_score": 4.5,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나"
+],
+"counter_score": 14.0
+},
+{
+"route": "A2",
+"step": 26,
+"trap": "ogre",
+"expected_score": 11.6,
+"expected_final_monsters": [
+"제우스",
+"클로비스",
+"사이프리트",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "G1",
+"step": 32,
+"trap": "veiler",
+"expected_score": 10.59,
+"expected_final_monsters": [
+"제우스",
+"대왕시져",
+"토마스(무효)",
+"사이프리트"
+],
+"counter_score": 13.8
+},
+{
+"route": "B3",
+"step": 19,
+"trap": "nibiru",
+"expected_score": 3,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나"
+],
+"counter_score": 14
+},
+{
+"route": "F2",
+"step": 22,
+"trap": "nibiru",
+"expected_score": 1.5,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 10.5
+},
+{
+"route": "A3",
+"step": 17,
+"trap": "nibiru",
+"expected_score": 0.3,
+"expected_final_monsters": [
+"니비루토큰",
+"스케일"
+],
+"counter_score": 9.4
+},
+{
+"route": "F6",
+"step": 4,
+"trap": "imperm",
+"expected_score": 1.59,
+"expected_final_monsters": [
+"케플러(무효)"
+],
+"counter_score": null
+},
+{
+"route": "A6",
+"step": 33,
+"trap": "nibiru",
+"expected_score": 2,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "B2",
+"step": 12,
+"trap": "nibiru",
+"expected_score": 7.5,
+"expected_final_monsters": [
+"니비루토큰",
+"데스마키나",
+"데스마키나"
+],
+"counter_score": null
+},
+{
+"route": "G1",
+"step": 17,
+"trap": "nibiru",
+"expected_score": 0,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": null
+},
+{
+"route": "D1",
+"step": 27,
+"trap": "gyban",
+"expected_score": 12,
+"expected_final_monsters": [
+"제우스",
+"데스마키나",
+"대왕시져",
+"데스마키나"
+],
+"counter_score": 12
+},
+{
+"route": "C2",
+"step": 24,
+"trap": "veiler",
+"expected_score": 13.5,
+"expected_final_monsters": [
+"제우스",
+"대왕시져",
+"사이프리트",
+"데스마키나"
+],
+"counter_score": 13.5
+},
+{
+"route": "A1",
+"step": 35,
+"trap": "nibiru",
+"expected_score": 2,
+"expected_final_monsters": [
+"니비루토큰"
+],
+"counter_score": 14
+},
+{
+"route": "F1",
+"step": 22,
+"trap": "veiler",
+"expected_score": 7.89,
+"expected_final_monsters": [
+"데스마키나",
+"랜스",
+"대왕시져",
+"스케일(무효)"
+],
+"counter_score": null
+},
+{
+"route": "A3",
+"step": 23,
+"trap": "imperm",
+"expected_score": 6.3,
+"expected_final_monsters": [
+"제우스",
+"스케일",
+"데스마키나"
+],
+"counter_score": null
+}
+]
