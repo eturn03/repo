@@ -13,7 +13,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var el = {
     gate: $('gate'), gateForm: $('gate-form'), gateInput: $('gate-input'),
-    gateError: $('gate-error'), gateHelp: $('gate-help'),
+    gateError: $('gate-error'), gateHelp: $('gate-help'), gateDemo: $('gate-demo'),
     board: $('board'),
     hp: $('hp'), hpFill: $('hp-fill'),
     amountWrap: document.querySelector('.money-amount'), amount: $('money-amount'), moneyOf: $('money-of'),
@@ -271,7 +271,12 @@
     el.gateError.hidden = !message;
     el.gateError.textContent = message || '';
     if (!CFG.API_URL) {
-      el.gateHelp.textContent = '백엔드 주소가 아직 설정되지 않았다. js/config.js 의 API_URL을 채워야 한다.';
+      // 아직 연결 전: 넣을 토큰이 없으니 입력칸 대신 안내와 예시 화면 링크만
+      document.getElementById('gate-title').textContent = '연결 준비 중';
+      el.gateHelp.textContent = '아직 구글 시트와 연결되지 않았다. 연결을 마치면 여기서 토큰을 한 번 입력하게 된다.';
+      el.gateForm.hidden = true;
+      el.gateDemo.hidden = false;
+      return;
     }
     el.gateInput.focus();
   }

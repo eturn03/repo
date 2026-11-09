@@ -384,6 +384,15 @@ h1, h2, p, dl, dd { margin: 0; }
 
 .gate-error { color: var(--bad); }
 
+.gate-demo {
+  justify-self: start;
+  margin-left: 0;
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.gate-demo:hover { color: var(--bad); }
+
 /* ===== 작은 반응 ===== */
 .bump { animation: bump 240ms steps(2, end); }
 
