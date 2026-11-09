@@ -1,0 +1,5 @@
+# 로컬 미리보기용 스프라이트 (IP 파일이라 절대 커밋하지 않음)
+local-sprites/
+.DS_Store
+.impeccable/review/
+.claude/settings.local.json

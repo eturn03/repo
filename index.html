@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#46705f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="보드">
+  <title>보드</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="preload" href="fonts/Galmuri14.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 토큰 입력 화면: 기기마다 처음 한 번 -->
+  <section class="win gate" id="gate" hidden aria-labelledby="gate-title">
+    <h1 class="gate-title" id="gate-title">비밀 토큰</h1>
+    <p class="gate-help" id="gate-help">한 번만 입력하면 이 기기에 저장된다.</p>
+    <form class="gate-form" id="gate-form" autocomplete="off">
+      <label class="sr-only" for="gate-input">비밀 토큰</label>
+      <input class="field" id="gate-input" type="password" spellcheck="false" autocapitalize="off" required>
+      <button class="btn" type="submit">확인</button>
+    </form>
+    <p class="gate-error" id="gate-error" role="alert" hidden></p>
+  </section>
+
+  <!-- 대시보드 -->
+  <main class="board" id="board" hidden>
+    <section class="win money" aria-labelledby="money-title">
+      <h2 class="money-title" id="money-title">쓸 수 있는 돈</h2>
+      <div class="hp" id="hp" role="meter" aria-label="이번 달 예산 중 남은 비율" aria-valuemin="0" aria-valuemax="100" hidden>
+        <span class="hp-label" aria-hidden="true">HP</span>
+        <span class="hp-track"><span class="hp-fill" id="hp-fill"></span></span>
+      </div>
+      <p class="money-amount"><span class="num" id="money-amount">-</span><span class="unit">원</span></p>
+      <p class="money-of" id="money-of" hidden></p>
+    </section>
+
+    <section class="scene" id="scene" hidden aria-hidden="true"></section>
+
+    <section class="win dialog" aria-live="polite">
+      <p class="dialog-text" id="status-line">▶ 데이터를 불러오는 중...</p>
+      <span class="dialog-next" aria-hidden="true"></span>
+    </section>
+
+    <section class="win ledger" id="ledger" hidden aria-labelledby="ledger-title">
+      <h2 class="ledger-title" id="ledger-title">이번 달 기록</h2>
+      <dl class="ledger-list" id="ledger-list"></dl>
+    </section>
+
+    <footer class="meta">
+      <p class="meta-time" id="meta-time"></p>
+      <p class="meta-demo" id="meta-demo" hidden>예시 데이터로 보는 중</p>
+      <button class="link-btn" id="reset-token" type="button">토큰 다시 입력</button>
+    </footer>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
