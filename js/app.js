@@ -79,54 +79,67 @@
   }
 
   /* ---------- 화면 그리기 ---------- */
+  function value(rows, key) {
+    var row = findRow(rows, key);
+    return row ? toNumber(row['값']) : NaN;
+  }
+
   function render(data) {
-    var rows = (data.tabs && data.tabs[CFG.SUMMARY_TAB]) || null;
+    var M = CFG.MONEY;
+    var rows = (data.tabs && data.tabs[M.tab]) || null;
     if (!rows) {
-      say('▶ 시트에서 \'' + CFG.SUMMARY_TAB + '\' 탭을 찾지 못했다.');
+      say('▶ 시트에서 \'' + M.tab + '\' 탭을 찾지 못했다.');
       setMood('normal');
       return;
     }
 
-    var availRow = findRow(rows, CFG.KEY_AVAILABLE);
-    var budgetRow = findRow(rows, CFG.KEY_BUDGET);
-    var available = availRow ? toNumber(availRow['값']) : NaN;
-    var budget = budgetRow ? toNumber(budgetRow['값']) : NaN;
+    var today = value(rows, M.today);
+    var daily = value(rows, M.daily);
+    var left = value(rows, M.left);
+    var total = value(rows, M.total);
 
-    if (isNaN(available)) {
+    if (isNaN(today)) {
       el.amount.textContent = '-';
       el.hp.hidden = true;
       el.moneyOf.hidden = true;
-      say('▶ 시트에서 \'' + CFG.KEY_AVAILABLE + '\' 항목을 찾지 못했다.');
+      say('▶ 시트에서 \'' + M.today + '\' 항목을 찾지 못했다.');
       setMood('normal');
     } else {
-      setAmount(available);
-      var ratio = null;
-      if (!isNaN(budget) && budget > 0) {
-        ratio = Math.max(0, Math.min(1, available / budget));
-        var level = ratio > 0.5 ? 'good' : ratio > 0.2 ? 'warn' : 'bad';
+      setAmount(today);
+
+      // HP 바: 이번 달 예산 중 남은 비율
+      if (!isNaN(left) && !isNaN(total) && total > 0) {
+        var ratio = Math.max(0, Math.min(1, left / total));
         el.hp.hidden = false;
-        el.hp.dataset.level = level;
+        el.hp.dataset.level = ratio > 0.5 ? 'good' : ratio > 0.2 ? 'warn' : 'bad';
         el.hp.setAttribute('aria-valuenow', String(Math.round(ratio * 100)));
         el.hpFill.style.setProperty('--ratio', String(ratio));
         el.moneyOf.hidden = false;
-        el.moneyOf.textContent = '예산 ' + won(budget) + '원 중';
+        el.moneyOf.textContent = '이번 달 ' + won(total) + '원 중 ' + won(left) + '원 남음';
       } else {
         el.hp.hidden = true;
         el.moneyOf.hidden = true;
       }
-      say(statusLine(available, ratio));
-      setMood(available < 0 ? 'angry' : ratio === null ? 'normal' : ratio > 0.5 ? 'happy' : ratio <= 0.2 ? 'angry' : 'normal');
+
+      say(statusLine(today, daily));
+      setMood(moodFor(today, daily));
     }
 
     renderLedger(rows);
     el.metaTime.textContent = stamp(data.updatedAt);
   }
 
-  function statusLine(available, ratio) {
-    if (available < 0) return '▶ 예산을 ' + won(-available) + '원 넘었다! 조심하자!';
-    if (ratio !== null && ratio <= 0.2) return '▶ 쓸 수 있는 돈이 ' + won(available) + '원밖에 안 남았다!';
-    if (ratio !== null && ratio > 0.5) return '▶ 이번 달 쓸 수 있는 돈은 ' + won(available) + '원! 아직 여유롭다.';
-    return '▶ 이번 달 쓸 수 있는 돈은 ' + won(available) + '원!';
+  function statusLine(today, daily) {
+    if (today < 0) return '▶ 오늘 몫을 ' + won(-today) + '원 넘게 썼다! 내일 몫에서 빠진다.';
+    if (!isNaN(daily) && today < daily) return '▶ 오늘은 ' + won(today) + '원까지! 아껴 쓰자.';
+    return '▶ 오늘까지 쓸 수 있는 돈은 ' + won(today) + '원!';
+  }
+
+  // 마이너스면 화남, 이틀치 이상 남아 있으면 기쁨, 그 사이는 일반
+  function moodFor(today, daily) {
+    if (today < 0) return 'angry';
+    if (!isNaN(daily) && daily > 0 && today >= daily * 2) return 'happy';
+    return 'normal';
   }
 
   function setAmount(n) {
@@ -146,19 +159,16 @@
   }
 
   function renderLedger(rows) {
-    var hidden = [CFG.KEY_AVAILABLE, CFG.KEY_BUDGET];
-    var rest = rows.filter(function (r) {
-      return r['항목'] !== '' && hidden.indexOf(String(r['항목']).trim()) === -1;
-    });
-    el.ledger.hidden = rest.length === 0;
+    var items = CFG.MONEY.ledger.filter(function (pair) { return findRow(rows, pair[1]); });
+    el.ledger.hidden = items.length === 0;
     el.ledgerList.textContent = '';
-    rest.forEach(function (r) {
+    items.forEach(function (pair) {
+      var raw = findRow(rows, pair[1])['값'];
+      var n = toNumber(raw);
       var dt = document.createElement('dt');
-      dt.textContent = r['항목'];
+      dt.textContent = pair[0];
       var dd = document.createElement('dd');
-      var n = toNumber(r['값']);
-      var unit = r['단위'] !== undefined && r['단위'] !== '' ? r['단위'] : '원';
-      dd.textContent = typeof r['값'] === 'number' || !isNaN(n) && r['값'] !== '' ? won(n) + unit : String(r['값']);
+      dd.textContent = isNaN(n) || raw === '' ? String(raw) : won(n) + '원';
       el.ledgerList.appendChild(dt);
       el.ledgerList.appendChild(dd);
     });
