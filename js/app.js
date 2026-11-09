@@ -115,28 +115,31 @@
         el.hp.setAttribute('aria-valuenow', String(Math.round(ratio * 100)));
         el.hpFill.style.setProperty('--ratio', String(ratio));
         el.moneyOf.hidden = false;
-        el.moneyOf.textContent = '이번 달 ' + won(total) + '원 중 ' + won(left) + '원 남음';
+        el.moneyOf.textContent = '이번 달 ' + won(total) + '원 중 ' +
+          (left < 0 ? won(-left) + '원 초과' : won(left) + '원 남음');
       } else {
         el.hp.hidden = true;
         el.moneyOf.hidden = true;
       }
 
-      say(statusLine(today, daily));
-      setMood(moodFor(today, daily));
+      say(statusLine(today, daily, left));
+      setMood(moodFor(today, daily, left));
     }
 
     renderLedger(rows);
     el.metaTime.textContent = stamp(data.updatedAt);
   }
 
-  function statusLine(today, daily) {
+  function statusLine(today, daily, left) {
+    if (!isNaN(left) && left <= 0) return '▶ 돈 좀... 아껴라...';
     if (today < 0) return '▶ 오늘 몫을 ' + won(-today) + '원 넘게 썼다! 내일 몫에서 빠진다.';
     if (!isNaN(daily) && today < daily) return '▶ 오늘은 ' + won(today) + '원까지! 아껴 쓰자.';
     return '▶ 오늘까지 쓸 수 있는 돈은 ' + won(today) + '원!';
   }
 
-  // 마이너스면 화남, 이틀치 이상 남아 있으면 기쁨, 그 사이는 일반
-  function moodFor(today, daily) {
+  // 이번 달 돈을 다 쓰면 유령, 오늘 몫이 마이너스면 화남, 이틀치 이상 남으면 기쁨, 그 사이는 일반
+  function moodFor(today, daily, left) {
+    if (!isNaN(left) && left <= 0) return 'ghost';
     if (today < 0) return 'angry';
     if (!isNaN(daily) && daily > 0 && today >= daily * 2) return 'happy';
     return 'normal';
@@ -189,7 +192,9 @@
   /* ---------- 마스코트 ---------- */
   function setMood(mood) {
     currentMood = mood;
-    var src = sprites[mood] || sprites.normal;
+    // 유령 이미지가 없으면 화난 표정으로 대신
+    var src = sprites[mood] || (mood === 'ghost' && sprites.angry) || sprites.normal;
+    el.scene.classList.toggle('is-ghost', mood === 'ghost' && src === sprites.ghost);
     if (!src) { el.scene.hidden = true; el.board.classList.remove('has-sprite'); return; }
     el.scene.hidden = false;
     el.board.classList.add('has-sprite');
@@ -213,7 +218,7 @@
     if (DEMO) {
       // 로컬 미리보기 전용: local-sprites/ 폴더 (깃에 안 올라감). 배포 주소에선 찾지 않음
       if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
-      ['normal', 'happy', 'angry'].forEach(function (name) {
+      ['normal', 'happy', 'angry', 'ghost'].forEach(function (name) {
         var url = 'local-sprites/' + name + '.png';
         var probe = new Image();
         probe.onload = function () { sprites[name] = url; setMood(currentMood); };

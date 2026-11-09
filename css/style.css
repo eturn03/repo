@@ -242,6 +242,21 @@ h1, h2, p, dl, dd { margin: 0; }
   image-rendering: crisp-edges;
 }
 
+/* 유령: 검은 캐릭터라 뒤에만 밝은 판을 깐다 (원작처럼 밝은 화면에 나타남).
+   multiply로 섞어서 이미지의 흰 배경은 판 색으로 사라지고 검정은 그대로 남는다 */
+.scene.is-ghost {
+  justify-self: center;
+  align-self: center;
+  min-height: 0;
+  padding: calc(var(--px) * 4);
+  background: var(--ink);
+  border: var(--px) solid var(--dim);
+  border-radius: var(--px);
+  isolation: isolate;
+}
+
+.scene.is-ghost .sprite { mix-blend-mode: multiply; }
+
 /* ===== 대화창 ===== */
 .dialog {
   position: relative;
