@@ -8,7 +8,12 @@
  *   TOKEN            : 대시보드 접속용 비밀 토큰 (아무도 모르는 긴 문자열)
  *   SPRITE_FOLDER_ID : 스프라이트 이미지가 든 구글 드라이브 폴더 ID
  *
- * 요청 방식: POST, 본문은 JSON 문자열 {"token": "...", "view": "data" | "sprites"}
+ * 요청 방식: POST, 본문은 JSON 문자열 {"token": "...", "view": ...}
+ *   view "data"    : 시트 전체 (대시보드 화면용)
+ *   view "sprites" : 마스코트 이미지
+ *   view "check"   : 사기 전 판정. {amount} → 사면 남는 돈, 건당 한도 초과 여부 (기록 안 함)
+ *   view "add"     : 지출 기록. {amount, memo, method} → 지출 탭에 한 줄 추가
+ *   (check·add는 iOS 단축어가 쓴다. docs/SHORTCUT.md)
  * 토큰이 틀리면 빈 객체 {} 를 돌려준다.
  */
 
@@ -29,6 +34,12 @@ function doPost(e) {
 
   if (body.view === 'sprites') {
     return json_(readSprites_());
+  }
+  if (body.view === 'check') {
+    return json_(checkSpend_(body));
+  }
+  if (body.view === 'add') {
+    return json_(addSpend_(body));
   }
   return json_(readSheet_());
 }
@@ -124,6 +135,98 @@ function readSprites_() {
     sprites[key] = 'data:' + type + ';base64,' + base64;
   }
   return { sprites: sprites };
+}
+
+/* ---------- 지출 판정·기록 (iOS 단축어용) ---------- */
+
+var CARD_METHOD = '신용카드';
+
+// 설정 탭의 A열(항목) → B열(값)
+function settings_(ss) {
+  var out = {};
+  var sheet = ss.getSheetByName('설정');
+  sheet.getRange(1, 1, sheet.getLastRow(), 2).getValues().forEach(function (r) {
+    if (r[0] !== '') out[String(r[0]).trim()] = r[1];
+  });
+  return out;
+}
+
+function readAmount_(v) {
+  var n = Math.round(Number(String(v).replace(/[^0-9.\-]/g, '')));
+  return isFinite(n) && n > 0 && n < 10000000 ? n : 0;
+}
+
+function won_(n) {
+  var sign = n < 0 ? '-' : '';
+  return sign + String(Math.abs(Math.round(n))).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '원';
+}
+
+function checkSpend_(body) {
+  var amount = readAmount_(body.amount);
+  if (!amount) return { ok: false, message: '금액을 숫자로 입력해 줘.' };
+
+  var s = settings_(SpreadsheetApp.getActiveSpreadsheet());
+  var today = Number(s['오늘까지쓸돈']) || 0;
+  var limit = Number(s['건당한도']) || 0;
+  var after = today - amount;
+  var over = limit > 0 && amount >= limit;
+
+  var lines = [won_(amount) + '을 쓰면'];
+  lines.push(after >= 0
+    ? '오늘까지 쓸 수 있는 돈이 ' + won_(after) + ' 남는다.'
+    : '오늘 몫을 ' + won_(-after) + ' 넘는다! 내일 몫에서 빠진다.');
+  if (over) lines.push('건당 한도(' + won_(limit) + ') 이상이다!');
+
+  return { ok: true, amount: amount, today: today, after: after, over: over, message: lines.join('\n') };
+}
+
+function addSpend_(body) {
+  var amount = readAmount_(body.amount);
+  if (!amount) return { ok: false, message: '금액을 숫자로 입력해 줘. 기록하지 않았다.' };
+  var memo = String(body.memo || '').trim();
+  var method = String(body.method || '').trim();
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var tz = ss.getSpreadsheetTimeZone();
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var s = settings_(ss);
+    var limit = Number(s['건당한도']) || 0;
+    var over = limit > 0 && amount >= limit;
+    var now = new Date();
+    var day = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // 지출 탭: 날짜 | 금액 | 메모 | 수단 | 한도초과 | 입력시각
+    ss.getSheetByName('지출').appendRow([day, amount, memo, method, over ? '초과' : '', now]);
+    if (method === CARD_METHOD) addToCard_(ss, amount, now, tz);
+    SpreadsheetApp.flush();
+  } finally {
+    lock.releaseLock();
+  }
+
+  var after = settings_(ss);
+  var today = Number(after['오늘까지쓸돈']) || 0;
+  return {
+    ok: true,
+    today: today,
+    message: '기록했다! ' + (memo ? memo + ' ' : '') + won_(amount) + '\n오늘까지 쓸 수 있는 돈은 ' + won_(today) + '.'
+  };
+}
+
+// 신용카드 지출은 아직 통장에서 안 빠진 돈이라, 자산 탭의 첫 번째 "카드" 행에 더한다.
+function addToCard_(ss, amount, now, tz) {
+  var sheet = ss.getSheetByName('자산');
+  var n = sheet.getLastRow();
+  if (n < 2) return;
+  var types = sheet.getRange(2, 2, n - 1, 1).getValues();
+  for (var i = 0; i < types.length; i++) {
+    if (String(types[i][0]).trim() !== '카드') continue;
+    var cell = sheet.getRange(i + 2, 3);
+    cell.setValue((Number(cell.getValue()) || 0) + amount);
+    sheet.getRange(i + 2, 4).setValue(Utilities.formatDate(now, tz, 'yyyy-MM-dd'));
+    return;
+  }
 }
 
 function json_(obj) {

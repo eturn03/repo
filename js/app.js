@@ -266,12 +266,17 @@
     timer = setInterval(refresh, CFG.REFRESH_MS);
   }
 
-  // 폰을 다시 켰을 때 5분이 지났으면 바로 갱신
+  // 화면을 다시 보거나 창을 클릭했을 때 30초 넘게 지났으면 바로 갱신
+  // (단축어로 기록하고 대시보드를 열었을 때 옛날 숫자가 남지 않게)
+  var REFOCUS_MS = 30 * 1000;
+  function refreshIfStale() {
+    if (!el.board.hidden && Date.now() - lastFetch > REFOCUS_MS) refresh();
+  }
   document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'visible' && !el.board.hidden && Date.now() - lastFetch > CFG.REFRESH_MS) {
-      refresh();
-    }
+    if (document.visibilityState === 'visible') refreshIfStale();
   });
+  window.addEventListener('focus', refreshIfStale);
+  window.addEventListener('pageshow', refreshIfStale);
 
   /* ---------- 토큰 입력 ---------- */
   function showGate(message) {

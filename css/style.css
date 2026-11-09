@@ -18,14 +18,16 @@
   font-display: swap;
 }
 
-/* ===== 팔레트 (6색) ===== */
+/* ===== 팔레트 (6색, 어두운 화면) ===== */
+/* 큰 외부 모니터에서 오래 봐도 눈이 안 아프게: 바탕·창 모두 거의 검정, 글자는 순백 대신 누르스름한 회백색 */
 :root {
-  --ground: #46705f;  /* 바탕, 창 안의 보조 글씨 */
-  --paper:  #eef2e6;  /* 창 */
-  --ink:    #263230;  /* 글씨, 테두리 */
+  color-scheme: dark;
+  --ground: #0e1513;  /* 바탕과 창 안쪽 */
+  --ink:    #d5dcc8;  /* 본문 글씨 */
+  --dim:    #7f9488;  /* 보조 글씨, 창 테두리 */
   --good:   #78a860;  /* HP 넉넉 */
   --warn:   #d8a840;  /* HP 절반 이하, 커서 */
-  --bad:    #c05a4c;  /* HP 위험, 빨간날, 오류 */
+  --bad:    #d06a5a;  /* HP 위험, 빨간날, 오류 */
 
   /* 픽셀 한 칸 크기. 폰 2px, 맥북 3px. 테두리·간격은 전부 이 단위의 배수 */
   --px: 2px;
@@ -36,7 +38,7 @@
   --t-hero: 45px;
 
   /* 게임 창 테두리: 바깥 굵은 선 + 안쪽 얇은 선, 모서리는 계단 모양 */
-  --frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' shape-rendering='crispEdges'%3E%3Crect x='2' y='2' width='9' height='9' fill='%23eef2e6'/%3E%3Cg fill='%23263230'%3E%3Crect x='2' y='0' width='9' height='2'/%3E%3Crect x='2' y='11' width='9' height='2'/%3E%3Crect x='0' y='2' width='2' height='9'/%3E%3Crect x='11' y='2' width='2' height='9'/%3E%3Crect x='1' y='1' width='1' height='1'/%3E%3Crect x='11' y='1' width='1' height='1'/%3E%3Crect x='1' y='11' width='1' height='1'/%3E%3Crect x='11' y='11' width='1' height='1'/%3E%3Crect x='4' y='3' width='5' height='1'/%3E%3Crect x='4' y='9' width='5' height='1'/%3E%3Crect x='3' y='4' width='1' height='5'/%3E%3Crect x='9' y='4' width='1' height='5'/%3E%3C/g%3E%3C/svg%3E");
+  --frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' shape-rendering='crispEdges'%3E%3Crect x='2' y='2' width='9' height='9' fill='%230e1513'/%3E%3Cg fill='%237f9488'%3E%3Crect x='2' y='0' width='9' height='2'/%3E%3Crect x='2' y='11' width='9' height='2'/%3E%3Crect x='0' y='2' width='2' height='9'/%3E%3Crect x='11' y='2' width='2' height='9'/%3E%3Crect x='1' y='1' width='1' height='1'/%3E%3Crect x='11' y='1' width='1' height='1'/%3E%3Crect x='1' y='11' width='1' height='1'/%3E%3Crect x='11' y='11' width='1' height='1'/%3E%3Crect x='4' y='3' width='5' height='1'/%3E%3Crect x='4' y='9' width='5' height='1'/%3E%3Crect x='3' y='4' width='1' height='5'/%3E%3Crect x='9' y='4' width='1' height='5'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 @media (min-width: 900px) {
@@ -75,7 +77,7 @@ body {
 
 h1, h2, p, dl, dd { margin: 0; }
 
-::selection { background: var(--warn); color: var(--ink); }
+::selection { background: var(--warn); color: var(--ground); }
 
 :focus-visible {
   outline: var(--px) solid var(--warn);
@@ -184,7 +186,7 @@ h1, h2, p, dl, dd { margin: 0; }
 .money-amount.is-negative .num { color: var(--bad); }
 
 .money-of {
-  color: var(--ground);
+  color: var(--dim);
   font-variant-numeric: tabular-nums;
 }
 
@@ -195,7 +197,7 @@ h1, h2, p, dl, dd { margin: 0; }
   gap: calc(var(--px) * 2);
   margin-top: calc(var(--px) * 2);
   padding: var(--px) calc(var(--px) * 3) var(--px) calc(var(--px) * 2);
-  background: var(--ink);
+  border: var(--px) solid var(--dim);
   border-radius: calc(var(--px) * 3);
 }
 
@@ -210,7 +212,7 @@ h1, h2, p, dl, dd { margin: 0; }
 .hp-track {
   flex: 1;
   height: calc(var(--px) * 3);
-  background: var(--paper);
+  background: color-mix(in srgb, var(--dim) 25%, var(--ground));
   border-radius: var(--px);
   overflow: hidden;
 }
@@ -295,7 +297,7 @@ h1, h2, p, dl, dd { margin: 0; }
   row-gap: var(--px);
 }
 
-.ledger-list dt { color: var(--ground); }
+.ledger-list dt { color: var(--dim); }
 .ledger-list dd {
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -309,11 +311,11 @@ h1, h2, p, dl, dd { margin: 0; }
   gap: calc(var(--px) * 2) calc(var(--px) * 6);
   font-family: Galmuri11, sans-serif;
   font-size: var(--t-small);
-  color: var(--paper);
+  color: var(--dim);
 }
 
 .meta-demo {
-  color: var(--ink);
+  color: var(--ground);
   background: var(--warn);
   padding: 0 calc(var(--px) * 2);
 }
@@ -323,7 +325,7 @@ h1, h2, p, dl, dd { margin: 0; }
   padding: var(--px) 0;
   border: 0;
   background: none;
-  color: var(--paper);
+  color: var(--dim);
   font: inherit;
   text-decoration: underline;
   text-underline-offset: calc(var(--px) * 2);
@@ -347,7 +349,7 @@ h1, h2, p, dl, dd { margin: 0; }
   line-height: 1.5;
 }
 
-.gate-help { color: var(--ground); }
+.gate-help { color: var(--dim); }
 
 .gate-form {
   display: flex;
@@ -361,8 +363,8 @@ h1, h2, p, dl, dd { margin: 0; }
   font-size: 15px;
   color: var(--ink);
   caret-color: var(--bad);
-  background: var(--paper);
-  border: var(--px) solid var(--ink);
+  background: var(--ground);
+  border: var(--px) solid var(--dim);
   border-radius: var(--px);
   padding: calc(var(--px) * 2) calc(var(--px) * 3);
 }
@@ -370,7 +372,7 @@ h1, h2, p, dl, dd { margin: 0; }
 .btn {
   font: inherit;
   font-size: 15px;
-  color: var(--paper);
+  color: var(--ground);
   background: var(--ink);
   border: var(--px) solid var(--ink);
   border-radius: var(--px);
@@ -378,7 +380,7 @@ h1, h2, p, dl, dd { margin: 0; }
   cursor: pointer;
 }
 
-.btn:hover { background: var(--ground); border-color: var(--ground); }
+.btn:hover { background: var(--warn); border-color: var(--warn); }
 .btn:active { transform: translateY(var(--px)); }
 .btn:disabled { opacity: 0.6; cursor: progress; }
 
