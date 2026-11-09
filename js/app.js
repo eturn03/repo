@@ -201,7 +201,8 @@
 
   function loadSprites() {
     if (DEMO) {
-      // 로컬 미리보기 전용: local-sprites/ 폴더 (깃에 안 올라감)
+      // 로컬 미리보기 전용: local-sprites/ 폴더 (깃에 안 올라감). 배포 주소에선 찾지 않음
+      if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
       ['normal', 'happy', 'angry'].forEach(function (name) {
         var url = 'local-sprites/' + name + '.png';
         var probe = new Image();
