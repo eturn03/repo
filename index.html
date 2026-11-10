@@ -13,10 +13,11 @@
   <link rel="apple-touch-icon" href="icons/icon-180.png">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="preload" href="fonts/Galmuri14.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/Galmuri11-Bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- 토큰 입력 화면: 기기마다 처음 한 번 -->
+  <!-- 토큰 입력: 기기마다 처음 한 번 -->
   <section class="win gate" id="gate" hidden aria-labelledby="gate-title">
     <h1 class="gate-title" id="gate-title">비밀 토큰</h1>
     <p class="gate-help" id="gate-help">한 번만 입력하면 이 기기에 저장된다.</p>
@@ -29,38 +30,82 @@
     <a class="link-btn gate-demo" id="gate-demo" href="?demo" hidden>예시 화면 보기</a>
   </section>
 
-  <!-- 대시보드 -->
-  <main class="board" id="board" hidden>
-    <section class="win money" aria-labelledby="money-title">
-      <h2 class="money-title" id="money-title">오늘까지 쓸 수 있는 돈</h2>
-      <div class="hp" id="hp" role="meter" aria-label="이번 달 예산 중 남은 비율 (퍼센트)" aria-valuemin="0" aria-valuemax="100" hidden>
+  <main class="app" id="app" hidden>
+    <!-- 오늘까지 쓸 수 있는 돈 (누적). "등교일 예산"(하루 몫)과 이름표를 분명히 다르게 둔다 -->
+    <section class="win today" aria-labelledby="today-label">
+      <h1 class="label" id="today-label">오늘까지 쓸 수 있는 돈</h1>
+      <p class="today-amount" id="today-amount"><span class="num" id="today-num">-</span><span class="unit">원</span></p>
+      <p class="today-note" id="today-note"></p>
+      <div class="hp" id="hp" role="meter" aria-label="이번 달 예산 중 남은 비율 (퍼센트)" aria-valuemin="0" aria-valuemax="100">
         <span class="hp-label" aria-hidden="true">HP</span>
         <span class="hp-track"><span class="hp-fill" id="hp-fill"></span></span>
       </div>
-      <p class="money-amount"><span class="num" id="money-amount">-</span><span class="unit">원</span></p>
-      <p class="money-of" id="money-of" hidden></p>
+      <p class="month-left" id="month-left"></p>
     </section>
 
-    <section class="scene" id="scene" hidden aria-hidden="true"></section>
-
-    <section class="win dialog" aria-live="polite">
-      <p class="dialog-text" id="status-line">▶ 데이터를 불러오는 중...</p>
-      <span class="dialog-next" aria-hidden="true"></span>
+    <!-- 지출 기록: 금액 → 분류 버튼 한 번 -->
+    <section class="win entry" aria-labelledby="entry-title">
+      <h2 class="label" id="entry-title">지출 기록</h2>
+      <form id="entry-form" autocomplete="off">
+        <div class="amount-row">
+          <label class="sr-only" for="amount">금액</label>
+          <input class="field amount" id="amount" inputmode="numeric" enterkeyhint="done" placeholder="금액">
+          <span class="unit">원</span>
+          <button class="btn-quiet" id="amount-clear" type="button" hidden>안 샀어</button>
+        </div>
+        <p class="preview" id="preview" aria-live="polite"></p>
+        <p class="hint" id="cats-hint">분류를 누르면 바로 기록된다</p>
+        <div class="cats" id="cats" role="group" aria-labelledby="cats-hint"></div>
+        <fieldset class="methods-wrap">
+          <legend class="sr-only">결제 수단</legend>
+          <div class="methods" id="methods"></div>
+        </fieldset>
+        <details class="more" id="more">
+          <summary>메모 · 날짜 바꾸기</summary>
+          <div class="more-body">
+            <label for="memo">메모</label>
+            <input class="field" id="memo" maxlength="100" enterkeyhint="done">
+            <label for="entry-date">날짜 (비우면 오늘)</label>
+            <input class="field" id="entry-date" type="date">
+          </div>
+        </details>
+        <p class="entry-error" id="entry-error" role="alert" hidden></p>
+      </form>
+      <div class="undo" id="undo" hidden role="status">
+        <span id="undo-text"></span>
+        <button class="btn" id="undo-btn" type="button">방금 것 취소</button>
+      </div>
     </section>
 
-    <section class="win ledger" id="ledger" hidden aria-labelledby="ledger-title">
-      <h2 class="ledger-title" id="ledger-title">이번 달 기록</h2>
+    <!-- 상태 문장: 게임 말투와 마스코트는 여기에만 -->
+    <section class="talk">
+      <div class="scene" id="scene" hidden aria-hidden="true"></div>
+      <div class="win dialog" aria-live="polite">
+        <p class="dialog-text" id="status-line">▶ 불러오는 중...</p>
+      </div>
+    </section>
+
+    <section class="win ledger" aria-labelledby="ledger-title">
+      <h2 class="label" id="ledger-title">이번 달 장부</h2>
       <dl class="ledger-list" id="ledger-list"></dl>
     </section>
 
+    <section class="win recent" aria-labelledby="recent-title">
+      <h2 class="label" id="recent-title">최근 지출</h2>
+      <ol class="recent-list" id="recent-list"></ol>
+    </section>
+
     <footer class="meta">
-      <p class="meta-time" id="meta-time"></p>
-      <p class="meta-demo" id="meta-demo" hidden>예시 데이터로 보는 중</p>
+      <p id="meta-time"></p>
+      <p class="meta-queue" id="meta-queue" hidden></p>
+      <p id="meta-demo" hidden>예시 데이터로 보는 중</p>
       <button class="link-btn" id="reset-token" type="button">토큰 다시 입력</button>
     </footer>
   </main>
 
   <script src="js/config.js"></script>
+  <script src="apps-script/Calc.js"></script>
+  <script src="js/demo.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

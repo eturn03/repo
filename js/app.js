@@ -1,32 +1,46 @@
+// 돈 보드 화면. 폰(폭 900px 미만)은 숫자와 입력, 맥북(그 이상)은 한 화면 보드.
+// 숫자는 서버가 준 입력값을 같은 Calc(apps-script/Calc.js)로 다시 계산해서 그린다.
+// 그래서 기록을 누르는 즉시 숫자가 바뀌고, 서버 응답이 오면 그 값으로 맞춰진다.
 (function () {
   'use strict';
 
   var CFG = window.DASH_CONFIG;
-  var TOKEN_KEY = 'dash.token';
-  var CACHE_KEY = 'dash.cache';
-  var SPRITE_KEY = 'dash.sprites';
-  var SPRITE_MAX_AGE = 24 * 60 * 60 * 1000; // 스프라이트는 하루에 한 번만 다시 받음
+  var KEY = {
+    token: 'dash.token', cache: 'dash.cache2', sprites: 'dash.sprites',
+    queue: 'dash.queue', method: 'dash.lastMethod'
+  };
+  var SPRITE_MAX_AGE = 24 * 60 * 60 * 1000;
+  var RETRY_MS = 30 * 1000;
 
   var params = new URLSearchParams(location.search);
   var DEMO = params.has('demo');
 
   var $ = function (id) { return document.getElementById(id); };
   var el = {
-    gate: $('gate'), gateForm: $('gate-form'), gateInput: $('gate-input'),
-    gateError: $('gate-error'), gateHelp: $('gate-help'), gateDemo: $('gate-demo'),
-    board: $('board'),
-    hp: $('hp'), hpFill: $('hp-fill'),
-    amountWrap: document.querySelector('.money-amount'), amount: $('money-amount'), moneyOf: $('money-of'),
-    scene: $('scene'),
-    status: $('status-line'),
-    ledger: $('ledger'), ledgerList: $('ledger-list'),
-    metaTime: $('meta-time'), metaDemo: $('meta-demo'), reset: $('reset-token')
+    gate: $('gate'), gateForm: $('gate-form'), gateInput: $('gate-input'), gateError: $('gate-error'),
+    gateHelp: $('gate-help'), gateTitle: $('gate-title'), gateDemo: $('gate-demo'),
+    app: $('app'),
+    todayNum: $('today-num'), todayWrap: $('today-amount'), todayNote: $('today-note'),
+    hp: $('hp'), hpFill: $('hp-fill'), monthLeft: $('month-left'),
+    form: $('entry-form'), amount: $('amount'), amountClear: $('amount-clear'), preview: $('preview'),
+    cats: $('cats'), methods: $('methods'), memo: $('memo'), date: $('entry-date'), more: $('more'),
+    entryError: $('entry-error'),
+    undo: $('undo'), undoText: $('undo-text'), undoBtn: $('undo-btn'),
+    scene: $('scene'), status: $('status-line'),
+    ledger: $('ledger-list'), recent: $('recent-list'),
+    metaTime: $('meta-time'), metaQueue: $('meta-queue'), metaDemo: $('meta-demo'), reset: $('reset-token')
   };
 
-  var timer = null;
+  var data = null;        // 서버의 마지막 summary 응답
+  var queue = load(KEY.queue) || [];   // 아직 서버에 못 보낸 기록·취소 [{op, id, ...}]
+  var sending = false;
+  var sendFailed = false;  // 마지막 전송이 연결 문제로 실패했는지
   var lastFetch = 0;
+  var timers = { refresh: null, retry: null, undo: null };
   var sprites = {};
-  var currentMood = 'normal';
+  var mood = 'normal';
+  var lastAdded = null;   // 방금 기록한 것 (취소용)
+  var demoServer = null;
 
   /* ---------- 저장소 (사생활 모드 등에서 실패해도 화면은 뜨게) ---------- */
   function load(key) {
@@ -38,14 +52,35 @@
   function drop(key) {
     try { localStorage.removeItem(key); } catch (e) { /* 무시 */ }
   }
+  function saveQueue() { if (!DEMO) save(KEY.queue, queue); }
 
-  /* ---------- 서버 요청 ---------- */
-  function api(view, token) {
+  /* ---------- 날짜·숫자 ---------- */
+  function seoulToday() {
+    // en-CA 형식이 YYYY-MM-DD
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date());
+  }
+  function won(n) { return Math.round(n).toLocaleString('ko-KR'); }
+  function shortDate(text) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(text || '');
+    return m ? Number(m[2]) + '월 ' + Number(m[3]) + '일' : '';
+  }
+  function readAmount() {
+    var n = Number(String(el.amount.value).replace(/[^0-9]/g, ''));
+    return isFinite(n) && n > 0 ? Math.min(n, 9999999) : 0;
+  }
+  function newId() {
+    return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
+  /* ---------- 서버 ---------- */
+  function api(view, body) {
+    if (DEMO) return demoServer.handle(view, body || {});
+    var payload = Object.assign({ token: load(KEY.token), view: view }, body || {});
     return fetch(CFG.API_URL, {
       method: 'POST',
       // text/plain 이어야 브라우저가 사전 확인 요청을 안 보내서 Apps Script가 받을 수 있다
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ token: token, view: view }),
+      body: JSON.stringify(payload),
       redirect: 'follow'
     }).then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -53,247 +88,441 @@
     });
   }
 
-  function fetchData() {
-    if (DEMO) {
-      return fetch('demo.json', { cache: 'no-store' }).then(function (r) { return r.json(); });
-    }
-    return api('data', load(TOKEN_KEY));
+  function accept(res) {
+    if (!res || !res.ok || !res.input) return false;
+    data = res;
+    if (!DEMO) save(KEY.cache, res);
+    return true;
   }
 
-  /* ---------- 숫자 ---------- */
-  function won(n) {
-    return Math.round(n).toLocaleString('ko-KR');
+  function refresh() {
+    lastFetch = Date.now();
+    return api('summary').then(function (res) {
+      if (res && !res.ok && !res.error) { showGate('토큰이 맞지 않는다. 다시 확인해 줘.'); return; }
+      if (accept(res)) { render(); flush(); }
+    }).catch(function () {
+      // 연결이 안 돼도 기기에 남은 값으로 그린다
+      if (data) render();
+      else say('▶ 서버와 연결이 잘 안 된다... 5분 뒤에 다시 해 본다.');
+    });
   }
 
-  function findRow(rows, key) {
-    for (var i = 0; i < rows.length; i++) {
-      if (String(rows[i]['항목']).trim() === key) return rows[i];
-    }
-    return null;
+  /* ---------- 대기열: 기록과 취소를 순서대로 보낸다 ---------- */
+  function flush() {
+    if (sending || queue.length === 0) return;
+    sending = true;
+    var item = queue[0];
+    var view = item.op === 'add' ? 'add_expense' : 'delete_expense';
+    api(view, item).then(function (res) {
+      sending = false;
+      sendFailed = false;
+      queue.shift();
+      saveQueue();
+      if (res && res.ok) accept(res);
+      else if (res && res.error) showEntryError('기록하지 못했다: ' + res.error);
+      render();
+      flush();
+    }).catch(function () {
+      sending = false;
+      sendFailed = true;
+      render();
+      clearTimeout(timers.retry);
+      timers.retry = setTimeout(flush, RETRY_MS);
+    });
   }
 
-  function toNumber(v) {
-    if (typeof v === 'number') return v;
-    var n = Number(String(v).replace(/[^0-9.\-]/g, ''));
-    return isFinite(n) ? n : NaN;
+  function enqueue(item) {
+    queue.push(item);
+    saveQueue();
+    render();
+    flush();
   }
 
-  /* ---------- 화면 그리기 ---------- */
-  function value(rows, key) {
-    var row = findRow(rows, key);
-    return row ? toNumber(row['값']) : NaN;
+  /* ---------- 지금 보여 줄 값: 서버 값 + 아직 안 보낸 기록 ---------- */
+  function view() {
+    if (!data) return null;
+    var adds = queue.filter(function (q) { return q.op === 'add'; });
+    var deleted = {};
+    queue.forEach(function (q) { if (q.op === 'delete') deleted[q.id] = true; });
+    var keep = function (r) { return !deleted[r.id]; };
+
+    var input = Object.assign({}, data.input, {
+      today: seoulToday(),
+      expenses: data.input.expenses.filter(keep).concat(adds.filter(keep))
+    });
+    var pendingIds = {};
+    adds.forEach(function (a) { pendingIds[a.id] = true; });
+    var recent = adds.filter(keep).slice().reverse()
+      .concat(data.recent.filter(function (r) { return keep(r) && !pendingIds[r.id]; }))
+      .slice(0, 8);
+    return { result: Calc.summary(input), recent: recent, pending: pendingIds };
   }
 
-  function render(data) {
-    var M = CFG.MONEY;
-    var rows = (data.tabs && data.tabs[M.tab]) || null;
-    if (!rows) {
-      say('▶ 시트에서 \'' + M.tab + '\' 탭을 찾지 못했다.');
-      setMood('normal');
-      return;
-    }
+  /* ---------- 그리기 ---------- */
+  function render() {
+    var v = view();
+    if (!v) return;
+    var r = v.result;
 
-    var today = value(rows, M.today);
-    var daily = value(rows, M.daily);
-    var left = value(rows, M.left);
-    var total = value(rows, M.total);
+    setAmount(r.available);
+    el.todayNote.textContent = '등교일마다 ' + won(r.perSchoolDay) + '원씩 쌓인다' +
+      (r.isSchoolDay ? '' : ' · 오늘은 쉬는 날');
 
-    if (isNaN(today)) {
-      el.amount.textContent = '-';
-      el.hp.hidden = true;
-      el.moneyOf.hidden = true;
-      say('▶ 시트에서 \'' + M.today + '\' 항목을 찾지 못했다.');
-      setMood('normal');
-    } else {
-      setAmount(today);
+    var ratio = r.cycleBudget > 0 ? Math.max(0, Math.min(1, r.monthLeft / r.cycleBudget)) : 0;
+    el.hp.dataset.level = ratio > 0.5 ? 'good' : ratio > 0.2 ? 'warn' : 'bad';
+    el.hp.setAttribute('aria-valuenow', String(Math.round(ratio * 100)));
+    el.hpFill.style.setProperty('--ratio', String(ratio));
+    el.monthLeft.textContent = r.monthLeft < 0
+      ? '이번 달 ' + won(r.cycleBudget) + '원에서 ' + won(-r.monthLeft) + '원 넘게 썼다'
+      : '이번 달 ' + won(r.cycleBudget) + '원 중 ' + won(r.monthLeft) + '원 남음';
 
-      // HP 바: 이번 달 예산 중 남은 비율
-      if (!isNaN(left) && !isNaN(total) && total > 0) {
-        var ratio = Math.max(0, Math.min(1, left / total));
-        el.hp.hidden = false;
-        el.hp.dataset.level = ratio > 0.5 ? 'good' : ratio > 0.2 ? 'warn' : 'bad';
-        el.hp.setAttribute('aria-valuenow', String(Math.round(ratio * 100)));
-        el.hpFill.style.setProperty('--ratio', String(ratio));
-        el.moneyOf.hidden = false;
-        el.moneyOf.textContent = '이번 달 ' + won(total) + '원 중 ' +
-          (left < 0 ? won(-left) + '원 초과' : won(left) + '원 남음');
-      } else {
-        el.hp.hidden = true;
-        el.moneyOf.hidden = true;
-      }
+    renderChoices();
+    renderPreview(r);
+    renderLedger(r);
+    renderRecent(v.recent, v.pending);
 
-      say(statusLine(today, daily, left));
-      setMood(moodFor(today, daily, left));
-    }
+    say(statusLine(r));
+    setMood(moodFor(r));
 
-    renderLedger(rows);
-    el.metaTime.textContent = stamp(data.updatedAt);
-  }
-
-  function statusLine(today, daily, left) {
-    if (!isNaN(left) && left <= 0) return '▶ 돈 좀... 아껴라...';
-    if (today < 0) return '▶ 오늘 몫을 ' + won(-today) + '원 넘게 썼다! 내일 몫에서 빠진다.';
-    if (!isNaN(daily) && today < daily) return '▶ 오늘은 ' + won(today) + '원까지! 아껴 쓰자.';
-    return '▶ 오늘까지 쓸 수 있는 돈은 ' + won(today) + '원!';
-  }
-
-  // 이번 달 돈을 다 쓰면 유령, 오늘 몫이 마이너스면 화남, 이틀치 이상 남으면 기쁨, 그 사이는 일반
-  function moodFor(today, daily, left) {
-    if (!isNaN(left) && left <= 0) return 'ghost';
-    if (today < 0) return 'angry';
-    if (!isNaN(daily) && daily > 0 && today >= daily * 2) return 'happy';
-    return 'normal';
+    el.metaTime.textContent = stamp();
+    var waiting = queue.length;
+    el.metaQueue.hidden = waiting === 0;
+    el.metaQueue.textContent = sendFailed
+      ? '보내지 못한 기록 ' + waiting + '건 · 연결되면 자동으로 보낸다'
+      : '서버에 보내는 중 ' + waiting + '건';
   }
 
   function setAmount(n) {
     var text = won(n);
-    el.amountWrap.classList.toggle('is-negative', n < 0);
-    if (el.amount.textContent !== text) {
-      var changed = el.amount.textContent !== '-';
-      el.amount.textContent = text;
-      if (changed) bump(el.amount);
+    el.todayWrap.classList.toggle('is-negative', n < 0);
+    if (el.todayNum.textContent !== text) {
+      var changed = el.todayNum.textContent !== '-';
+      el.todayNum.textContent = text;
+      if (changed) bump(el.todayNum);
     }
   }
 
   function bump(node) {
     node.classList.remove('bump');
-    void node.offsetWidth; // 애니메이션 다시 시작
+    void node.offsetWidth;
     node.classList.add('bump');
   }
 
-  function renderLedger(rows) {
-    var items = CFG.MONEY.ledger.filter(function (pair) { return findRow(rows, pair[1]); });
-    el.ledger.hidden = items.length === 0;
-    el.ledgerList.textContent = '';
-    items.forEach(function (pair) {
-      var raw = findRow(rows, pair[1])['값'];
-      var n = toNumber(raw);
-      var dt = document.createElement('dt');
-      dt.textContent = pair[0];
-      var dd = document.createElement('dd');
-      dd.textContent = isNaN(n) || raw === '' ? String(raw) : won(n) + '원';
-      el.ledgerList.appendChild(dt);
-      el.ledgerList.appendChild(dd);
+  // 분류 버튼과 수단 버튼은 목록이 바뀔 때만 다시 만든다
+  var drawnChoices = '';
+  function renderChoices() {
+    var key = JSON.stringify([data.categories, data.methods]);
+    if (key === drawnChoices) { syncMethod(); return; }
+    drawnChoices = key;
+
+    el.cats.textContent = '';
+    data.categories.forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'cat';
+      b.textContent = c;
+      b.addEventListener('click', function () { record(c); });
+      el.cats.appendChild(b);
     });
+
+    el.methods.textContent = '';
+    data.methods.forEach(function (m) {
+      var label = document.createElement('label');
+      label.className = 'method';
+      var input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'method';
+      input.value = m;
+      input.addEventListener('change', function () { save(KEY.method, m); });
+      var span = document.createElement('span');
+      span.textContent = m;
+      label.appendChild(input);
+      label.appendChild(span);
+      el.methods.appendChild(label);
+    });
+    syncMethod();
+  }
+
+  function currentMethod() {
+    var picked = el.methods.querySelector('input:checked');
+    return picked ? picked.value : '';
+  }
+
+  // 직전에 쓴 수단 → 시트의 기본수단 → 첫 번째 순서로 미리 고른다
+  function syncMethod() {
+    if (currentMethod()) return;
+    var want = [load(KEY.method), data.defaultMethod, data.methods[0]];
+    for (var i = 0; i < want.length; i++) {
+      var box = want[i] && el.methods.querySelector('input[value="' + CSS.escape(want[i]) + '"]');
+      if (box) { box.checked = true; return; }
+    }
+  }
+
+  function renderPreview(r) {
+    var amount = readAmount();
+    el.cats.classList.toggle('is-ready', amount > 0);
+    el.amountClear.hidden = !el.amount.value;
+    if (!amount) {
+      el.preview.textContent = '금액을 치면 쓰고 남는 돈이 바로 보인다.';
+      el.preview.dataset.tone = '';
+      return;
+    }
+    var after = r.available - amount;
+    if (after >= 0) {
+      el.preview.textContent = won(amount) + '원을 쓰면 오늘까지 쓸 돈이 ' + won(after) + '원 남는다.';
+      el.preview.dataset.tone = '';
+    } else {
+      el.preview.textContent = won(amount) + '원을 쓰면 ' + won(-after) + '원 넘는다. 다음 등교일 몫에서 빠진다.';
+      el.preview.dataset.tone = 'over';
+    }
+  }
+
+  function ledgerRow(label, value, note) {
+    var dt = document.createElement('dt');
+    dt.textContent = label;
+    var dd = document.createElement('dd');
+    dd.textContent = value;
+    el.ledger.appendChild(dt);
+    el.ledger.appendChild(dd);
+    if (note) {
+      var small = document.createElement('dd');
+      small.className = 'note';
+      small.textContent = note;
+      el.ledger.appendChild(small);
+    }
+  }
+
+  function renderLedger(r) {
+    el.ledger.textContent = '';
+    ledgerRow('등교일 예산', '하루 ' + won(r.perSchoolDay) + '원', '등교일 ' + r.cycleSchoolDays + '일 · 지금까지 ' + r.schoolDaysToDate + '일');
+    ledgerRow('이번 달 예산', won(r.cycleBudget) + '원', '쓴 돈 ' + won(r.spent) + '원 (교통 제외)');
+    if (r.irregular && r.irregular.remaining > 0) {
+      ledgerRow('비정규 쓸 돈', won(r.irregular.remaining) + '원 더 쌓임', shortDate(r.irregular.endDate) + '까지 등교일마다');
+    }
+    ledgerRow('교통 예상', won(r.transit) + '원',
+      r.transitCheckedUntil ? shortDate(r.transitCheckedUntil) + '까지는 실제 금액' : '전부 등교일 수로 예상');
+    ledgerRow('월 상환 가능액', (r.repayable < 0 ? '−' : '') + won(Math.abs(r.repayable)) + '원',
+      r.overIncome ? '예산이 수입을 넘는다' : '수입 − 구독 − 교통 − 예산');
+    ledgerRow('남은 빚', won(r.debtLeft) + '원', '갚은 돈 ' + won(r.repaid) + '원');
+    ledgerRow('마지막 카드 대조', data.lastReconciled ? shortDate(data.lastReconciled) : '아직 안 함',
+      r.recordDay ? '기록 ' + r.recordDay + '일째' : '');
+  }
+
+  function renderRecent(list, pending) {
+    el.recent.textContent = '';
+    if (list.length === 0) {
+      var li = document.createElement('li');
+      li.className = 'empty';
+      li.textContent = '아직 기록이 없다. 금액을 치고 분류를 누르면 여기에 쌓인다.';
+      el.recent.appendChild(li);
+      return;
+    }
+    list.forEach(function (x) {
+      var li = document.createElement('li');
+      var when = document.createElement('span');
+      when.className = 'r-date';
+      when.textContent = shortDate(x.date);
+      var what = document.createElement('span');
+      what.className = 'r-what';
+      what.textContent = x.category + (x.memo ? ' · ' + x.memo : '');
+      var amount = document.createElement('span');
+      amount.className = 'r-amount';
+      amount.textContent = won(x.amount) + '원';
+      li.appendChild(when);
+      li.appendChild(what);
+      li.appendChild(amount);
+      if (pending[x.id]) {
+        li.classList.add('is-pending');
+        li.title = '아직 서버에 보내는 중';
+      }
+      el.recent.appendChild(li);
+    });
+  }
+
+  // 게임 말투는 이 상태 문장에만 쓴다
+  function statusLine(r) {
+    if (r.monthLeft <= 0 && r.cycleBudget > 0) return '▶ 돈 좀... 아껴라...';
+    if (r.overIncome) return '▶ 예산이 수입을 ' + won(-r.repayable) + '원 넘는다! 등교일 예산을 줄여야 한다.';
+    if (r.needRebudget) return '▶ 기록 ' + r.recordDay + '일째! 등교일 예산을 다시 정할 때다.';
+    if (r.available < 0) return '▶ 오늘 몫을 ' + won(-r.available) + '원 넘게 썼다! 다음 등교일 몫에서 빠진다.';
+    if (!r.isSchoolDay) return '▶ 오늘은 쉬는 날. 숫자는 그대로다. 남은 돈은 ' + won(r.available) + '원!';
+    return '▶ 오늘까지 쓸 수 있는 돈은 ' + won(r.available) + '원!';
+  }
+
+  function moodFor(r) {
+    if (r.monthLeft <= 0 && r.cycleBudget > 0) return 'ghost';
+    if (r.available < 0 || r.overIncome) return 'angry';
+    if (r.perSchoolDay > 0 && r.available >= r.perSchoolDay * 2) return 'happy';
+    return 'normal';
   }
 
   function say(text) {
     if (el.status.textContent !== text) el.status.textContent = text;
   }
 
-  function stamp(updatedAt) {
-    var d = updatedAt ? new Date(updatedAt) : new Date();
-    if (isNaN(d)) d = new Date();
-    var hh = String(d.getHours()).padStart(2, '0');
-    var mm = String(d.getMinutes()).padStart(2, '0');
-    return hh + ':' + mm + ' 기준 · 5분마다 자동 갱신';
+  function stamp() {
+    var src = data && data.updatedAt ? new Date(data.updatedAt) : new Date();
+    if (isNaN(src)) src = new Date();
+    var hhmm = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false }).format(src);
+    return hhmm + ' 기준 · 5분마다 자동 갱신';
   }
+
+  /* ---------- 입력 ---------- */
+  function record(category) {
+    var amount = readAmount();
+    if (!amount) {
+      showEntryError('금액부터 쳐 줘.');
+      el.amount.focus();
+      return;
+    }
+    var method = currentMethod();
+    var item = {
+      op: 'add', id: newId(), amount: amount, category: category, method: method,
+      memo: el.memo.value.trim().slice(0, 100), date: el.date.value || seoulToday()
+    };
+    showEntryError('');
+    lastAdded = item;
+    el.amount.value = '';
+    el.memo.value = '';
+    el.date.value = '';
+    el.more.open = false;
+    enqueue(item);
+    showUndo(category + ' ' + won(amount) + '원 기록했다.');
+  }
+
+  function showUndo(text) {
+    el.undoText.textContent = text;
+    el.undo.hidden = false;
+    clearTimeout(timers.undo);
+    timers.undo = setTimeout(function () { el.undo.hidden = true; lastAdded = null; }, 60 * 1000);
+  }
+
+  function undoLast() {
+    if (!lastAdded) return;
+    var id = lastAdded.id;
+    lastAdded = null;
+    el.undo.hidden = true;
+    // 아직 안 보낸 기록이면 대기열에서 빼기만 한다
+    var idx = -1;
+    queue.forEach(function (q, i) { if (q.op === 'add' && q.id === id) idx = i; });
+    if (idx > 0 || (idx === 0 && !sending)) {
+      queue.splice(idx, 1);
+      saveQueue();
+      render();
+      return;
+    }
+    enqueue({ op: 'delete', id: id });
+  }
+
+  function showEntryError(text) {
+    el.entryError.hidden = !text;
+    el.entryError.textContent = text;
+  }
+
+  el.form.addEventListener('submit', function (e) { e.preventDefault(); });
+  el.amount.addEventListener('input', function () {
+    var n = readAmount();
+    el.amount.value = n ? n.toLocaleString('ko-KR') : '';
+    showEntryError('');
+    render();
+  });
+  // 안 샀으면 지우기: 아무것도 남기지 않는다
+  el.amountClear.addEventListener('click', function () {
+    el.amount.value = '';
+    el.memo.value = '';
+    el.date.value = '';
+    el.more.open = false;
+    showEntryError('');
+    render();
+    el.amount.focus();
+  });
+  el.undoBtn.addEventListener('click', undoLast);
 
   /* ---------- 마스코트 ---------- */
-  function setMood(mood) {
-    currentMood = mood;
-    // 유령 이미지가 없으면 화난 표정으로 대신
-    var src = sprites[mood] || (mood === 'ghost' && sprites.angry) || sprites.normal;
-    el.scene.classList.toggle('is-ghost', mood === 'ghost' && src === sprites.ghost);
-    if (!src) { el.scene.hidden = true; el.board.classList.remove('has-sprite'); return; }
-    el.scene.hidden = false;
-    el.board.classList.add('has-sprite');
-    if (!el.sprite.parentNode) el.scene.appendChild(el.sprite);
-    if (el.sprite.getAttribute('src') !== src) el.sprite.src = src;
-  }
-
-  // 마스코트 이미지는 스프라이트가 있을 때만 만든다
-  el.sprite = document.createElement('img');
-  el.sprite.className = 'sprite';
-  el.sprite.alt = '';
-
+  var sprite = document.createElement('img');
+  sprite.className = 'sprite';
+  sprite.alt = '';
   // 픽셀이 뭉개지지 않게 원본 크기의 정수배로만 키운다
-  el.sprite.addEventListener('load', function () {
-    var scale = window.matchMedia('(min-width: 900px)').matches ? 4 : 2;
-    el.sprite.style.width = (el.sprite.naturalWidth * scale) + 'px';
-    el.sprite.style.height = (el.sprite.naturalHeight * scale) + 'px';
+  sprite.addEventListener('load', function () {
+    var scale = window.matchMedia('(min-width: 900px)').matches ? 3 : 2;
+    sprite.style.width = (sprite.naturalWidth * scale) + 'px';
+    sprite.style.height = (sprite.naturalHeight * scale) + 'px';
   });
+
+  function setMood(next) {
+    mood = next;
+    // 유령 이미지가 없으면 화난 표정으로 대신
+    var src = sprites[next] || (next === 'ghost' && sprites.angry) || sprites.normal;
+    el.scene.classList.toggle('is-ghost', next === 'ghost' && src === sprites.ghost);
+    if (!src) { el.scene.hidden = true; el.app.classList.remove('has-sprite'); return; }
+    el.scene.hidden = false;
+    el.app.classList.add('has-sprite');
+    if (!sprite.parentNode) el.scene.appendChild(sprite);
+    if (sprite.getAttribute('src') !== src) sprite.src = src;
+  }
 
   function loadSprites() {
     if (DEMO) {
-      // 로컬 미리보기 전용: local-sprites/ 폴더 (깃에 안 올라감). 배포 주소에선 찾지 않음
+      // 로컬 미리보기 전용: local-sprites/ 폴더 (git이 무시). 배포 주소에선 찾지 않는다
       if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
       ['normal', 'happy', 'angry', 'ghost'].forEach(function (name) {
         var url = 'local-sprites/' + name + '.png';
         var probe = new Image();
-        probe.onload = function () { sprites[name] = url; setMood(currentMood); };
+        probe.onload = function () { sprites[name] = url; setMood(mood); };
         probe.src = url;
       });
       return;
     }
-    var cached = load(SPRITE_KEY);
+    var cached = load(KEY.sprites);
     if (cached && cached.sprites && Date.now() - cached.at < SPRITE_MAX_AGE) {
       sprites = cached.sprites;
-      setMood(currentMood);
+      setMood(mood);
       return;
     }
-    api('sprites', load(TOKEN_KEY)).then(function (res) {
+    api('sprites').then(function (res) {
       if (!res || !res.sprites) return;
       sprites = res.sprites;
-      save(SPRITE_KEY, { at: Date.now(), sprites: sprites });
-      setMood(currentMood);
-    }).catch(function () { /* 스프라이트가 없어도 돈 화면은 그대로 */ });
+      save(KEY.sprites, { at: Date.now(), sprites: sprites });
+      setMood(mood);
+    }).catch(function () { /* 마스코트가 없어도 숫자는 그대로 */ });
   }
 
-  /* ---------- 갱신 ---------- */
-  function refresh() {
-    lastFetch = Date.now();
-    return fetchData().then(function (data) {
-      if (!data || !data.tabs) {
-        // 토큰이 틀리면 서버가 빈 객체를 준다
-        showGate('토큰이 맞지 않는다. 다시 확인해 줘.');
-        return;
-      }
-      if (!DEMO) save(CACHE_KEY, data);
-      render(data);
-    }).catch(function () {
-      say('▶ 연결이 잘 안 된다... 5분 뒤에 다시 해 본다.');
-    });
-  }
-
-  function startBoard() {
+  /* ---------- 시작과 갱신 ---------- */
+  function startApp() {
     el.gate.hidden = true;
-    el.board.hidden = false;
+    el.app.hidden = false;
     el.metaDemo.hidden = !DEMO;
     el.reset.hidden = DEMO;
-
-    var cached = DEMO ? null : load(CACHE_KEY);
-    if (cached && cached.tabs) render(cached);
-
+    if (DEMO) demoServer = window.makeDemoServer(params.get('demo'), seoulToday());
+    var cached = DEMO ? null : load(KEY.cache);
+    if (cached && cached.input) { data = cached; render(); }
     loadSprites();
     refresh();
-    clearInterval(timer);
-    timer = setInterval(refresh, CFG.REFRESH_MS);
+    clearInterval(timers.refresh);
+    timers.refresh = setInterval(refresh, CFG.REFRESH_MS);
   }
 
-  // 화면을 다시 보거나 창을 클릭했을 때 30초 넘게 지났으면 바로 갱신
-  // (단축어로 기록하고 대시보드를 열었을 때 옛날 숫자가 남지 않게)
-  var REFOCUS_MS = 30 * 1000;
+  // 화면을 다시 보거나 창을 눌렀을 때 30초 넘게 지났으면 바로 갱신
   function refreshIfStale() {
-    if (!el.board.hidden && Date.now() - lastFetch > REFOCUS_MS) refresh();
+    if (!el.app.hidden && Date.now() - lastFetch > CFG.REFOCUS_MS) refresh();
   }
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') refreshIfStale();
   });
   window.addEventListener('focus', refreshIfStale);
   window.addEventListener('pageshow', refreshIfStale);
+  window.addEventListener('online', flush);
 
   /* ---------- 토큰 입력 ---------- */
   function showGate(message) {
-    clearInterval(timer);
-    el.board.hidden = true;
+    clearInterval(timers.refresh);
+    el.app.hidden = true;
     el.gate.hidden = false;
     el.gateError.hidden = !message;
     el.gateError.textContent = message || '';
     if (!CFG.API_URL) {
-      // 아직 연결 전: 넣을 토큰이 없으니 입력칸 대신 안내와 예시 화면 링크만
-      document.getElementById('gate-title').textContent = '연결 준비 중';
-      el.gateHelp.textContent = '아직 구글 시트와 연결되지 않았다. 연결을 마치면 여기서 토큰을 한 번 입력하게 된다.';
+      el.gateTitle.textContent = '연결 준비 중';
+      el.gateHelp.textContent = '아직 서버 주소가 없다. 연결을 마치면 여기서 토큰을 한 번 입력하게 된다.';
       el.gateForm.hidden = true;
       el.gateDemo.hidden = false;
       return;
@@ -304,19 +533,21 @@
   el.gateForm.addEventListener('submit', function (e) {
     e.preventDefault();
     var token = el.gateInput.value.trim();
-    if (!token || !CFG.API_URL) return;
+    if (!token) return;
     var btn = el.gateForm.querySelector('button');
     btn.disabled = true;
-    api('data', token).then(function (data) {
-      if (!data || !data.tabs) {
+    save(KEY.token, token);
+    api('summary').then(function (res) {
+      if (!res || !res.ok) {
+        drop(KEY.token);
         showGate('토큰이 맞지 않는다. 다시 확인해 줘.');
         return;
       }
-      save(TOKEN_KEY, token);
-      save(CACHE_KEY, data);
+      accept(res);
       el.gateInput.value = '';
-      startBoard();
+      startApp();
     }).catch(function () {
+      drop(KEY.token);
       showGate('서버에 연결하지 못했다. 잠시 뒤에 다시 해 줘.');
     }).then(function () {
       btn.disabled = false;
@@ -324,13 +555,12 @@
   });
 
   el.reset.addEventListener('click', function () {
-    drop(TOKEN_KEY);
-    drop(CACHE_KEY);
-    drop(SPRITE_KEY);
+    drop(KEY.token);
+    drop(KEY.cache);
+    drop(KEY.sprites);
     showGate();
   });
 
-  /* ---------- 시작 ---------- */
-  if (DEMO || load(TOKEN_KEY)) startBoard();
+  if (DEMO || load(KEY.token)) startApp();
   else showGate();
 })();
