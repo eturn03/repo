@@ -135,7 +135,7 @@ test('많이 쓰면 오늘까지 쓸 돈과 이번 달 남은 돈이 음수가 �
 
 test('교통 분류는 예산 지출에서 빠진다', () => {
   const spent = [
-    { date: '2026-11-02', amount: 14600, category: '교통' },
+    { date: '2026-11-02', amount: 9900, category: '교통' },
     { date: '2026-11-02', amount: 2000, category: '식비' }
   ];
   const r = budget(MON_THU, '2026-11-02', spent);
