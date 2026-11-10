@@ -456,7 +456,8 @@ fieldset { border: 0; padding: 0; min-width: 0; }
   0%, 100% { translate: 0 0; }
   50% { translate: 0 calc(var(--px) * -1); }
 }
-.scene.is-ghost .sprite { background: var(--ink); padding: var(--px); mix-blend-mode: normal; }
+/* 유령은 검은 캐릭터라 뒤의 밝은 판을 남기되, 순백 대신 크림빛으로 눅인다 */
+.scene.is-ghost .sprite { filter: sepia(0.35) brightness(0.9); }
 .scene-sign {
   position: absolute;
   left: 73.2%;
@@ -622,6 +623,62 @@ fieldset { border: 0; padding: 0; min-width: 0; }
   }
   .hp-label { font-size: 24px; }
   .px-icon { width: 48px; height: 48px; }
+}
+
+/* 4K를 '2560×1440처럼'으로 쓸 때: 숫자·풍경·아이콘을 한 단계 키워 가운데가 비지 않게 */
+@media (min-width: 2400px) {
+  :root {
+    --t-value: 48px;
+    --t-hero: 192px;
+    --t-hero-unit: 60px;
+    --t-dialog: 48px;
+    --menu-w: 640px;
+  }
+  .scene { width: 336px; }           /* 3배 */
+  .scene-sign { font-size: 24px; }
+  .field.amount { font-size: var(--t-value); }
+}
+
+/* 4K 모니터를 '공간 넓게'(약 3008×1692 ~ 3840×2160)로 쓸 때: 한 단계 더 크게.
+   모든 크기가 정수배라 레티나(2배)에서도 픽셀이 선명하다. */
+@media (min-width: 2800px) {
+  :root {
+    --px: 4px;
+    --t-body: 36px;
+    --t-label: 36px;
+    --t-value: 48px;
+    --t-hero: 216px;
+    --t-hero-unit: 72px;
+    --t-dialog: 48px;
+    --menu-w: 780px;
+  }
+  body { padding: 40px 56px; }
+  .app { min-height: calc(100dvh - 80px); }
+  .hp-label { font-size: 36px; }
+  .px-icon { width: 64px; height: 64px; }
+  .scene { width: 336px; }           /* 112×64칸의 3배 */
+  .scene-sign { font-size: 24px; }
+  .field.amount { font-size: var(--t-value); }
+}
+
+/* 4K를 원래 해상도(3840×2160, 1배)로 쓸 때: 외부 모니터 단계(1800px)의 정확히 2배 */
+@media (min-width: 3600px) {
+  :root {
+    --px: 6px;
+    --t-body: 48px;
+    --t-label: 48px;
+    --t-value: 72px;
+    --t-hero: 288px;
+    --t-hero-unit: 96px;
+    --t-dialog: 72px;
+    --menu-w: 1040px;
+  }
+  body { padding: 44px 72px; }
+  .app { min-height: calc(100dvh - 88px); }
+  .hp-label { font-size: 48px; }
+  .px-icon { width: 96px; height: 96px; }
+  .scene { width: 448px; }           /* 112×64칸의 4배 */
+  .scene-sign { font-size: 24px; }
 }
 
 /* ===== 작은 반응 ===== */
