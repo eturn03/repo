@@ -3,3 +3,6 @@ local-sprites/
 .DS_Store
 .impeccable/review/
 .claude/settings.local.json
+
+# Apps Script 연결 정보 (clasp, 스크립트 ID가 들어 있음)
+.clasp.json
