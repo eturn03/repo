@@ -122,10 +122,55 @@ var Calc = (function () {
     return String(r.category || '').trim() !== TRANSIT;
   }
 
+  /* ---------- 3.6 비정규 수입의 쓸 돈 몫 ---------- */
+
+  var SPREAD_DAYS = 30;
+  var IRREGULAR = '비정규';
+
+  // 한 행의 쓸 돈 몫이 어느 날까지 얼마 쌓였는지 계산하는 함수를 만든다
+  function makeStream(row, cap, isSchoolDay) {
+    var start = toDay(row.date);
+    var amount = num(row.amount);
+    if (isNaN(start) || amount <= 0) return null;
+    var share = Math.min(amount, Math.max(0, cap));
+    var days = [];
+    for (var d = start + 1; d <= start + SPREAD_DAYS; d++) {
+      if (isSchoolDay(d)) days.push(d);
+    }
+    if (days.length === 0) {
+      for (var e = start + 1; e <= start + SPREAD_DAYS; e++) days.push(e);
+    }
+    function accruedBy(day) {
+      var n = 0;
+      while (n < days.length && days[n] <= day) n++;
+      return Math.floor(share * n / days.length);
+    }
+    return {
+      date: fromDay(start),
+      amount: amount,
+      share: share,
+      repay: amount - share,
+      endDay: days[days.length - 1],
+      accruedBy: accruedBy
+    };
+  }
+
+  function irregularStreams(input, isSchoolDay) {
+    var cap = num((input.settings || {}).비정규쓸돈);
+    var out = [];
+    (input.incomes || []).forEach(function (r) {
+      if (String(r.kind || '').trim() !== IRREGULAR) return;
+      var st = makeStream(r, cap, isSchoolDay);
+      if (st) out.push(st);
+    });
+    return out;
+  }
+
   /* ---------- 3.1 오늘까지 쓸 수 있는 돈 ---------- */
 
   /**
-   * input: { settings, expenses: [{date, amount, category}], vacations: [{start, end}], today }
+   * input: { settings, expenses: [{date, amount, category}], vacations: [{start, end}],
+   *          incomes: [{date, amount, kind}], today }
    */
   function budget(input) {
     var s = input.settings || {};
@@ -143,6 +188,21 @@ var Calc = (function () {
     var earned = perSchool * toDate.school + perRest * toDate.rest;
     var spent = sumIn(input.expenses, cycle.start, cycle.end, isBudgetExpense);
 
+    // 3.6 비정규 쓸 돈: 이 주기 몫 전체는 주기 예산에, 오늘까지 쌓인 몫은 오늘까지 쓸 돈에
+    var cycleShare = 0;
+    var todayShare = 0;
+    var remaining = 0;
+    var endDay = -Infinity;
+    var items = irregularStreams(input, isSchoolDay).map(function (st) {
+      var before = st.accruedBy(cycle.start - 1);
+      cycleShare += st.accruedBy(cycle.end) - before;
+      todayShare += st.accruedBy(today) - before;
+      var left = st.share - st.accruedBy(today);
+      remaining += left;
+      if (left > 0) endDay = Math.max(endDay, st.endDay);
+      return { date: st.date, amount: st.amount, share: st.share, repay: st.repay, left: left, endDate: fromDay(st.endDay) };
+    });
+
     return {
       today: fromDay(today),
       cycleStart: fromDay(cycle.start),
@@ -156,10 +216,17 @@ var Calc = (function () {
       perSchoolDay: perSchool,
       perRestDay: perRest,
       baseCycleBudget: baseCycleBudget,
-      cycleBudget: baseCycleBudget,
+      cycleBudget: baseCycleBudget + cycleShare,
       spent: spent,
-      available: earned - spent,
-      monthLeft: baseCycleBudget - spent
+      available: earned + todayShare - spent,
+      monthLeft: baseCycleBudget + cycleShare - spent,
+      irregular: {
+        items: items,
+        cycleShare: cycleShare,
+        accruedToDate: todayShare,
+        remaining: remaining,
+        endDate: remaining > 0 ? fromDay(endDay) : ''
+      }
     };
   }
 
