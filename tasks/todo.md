@@ -11,7 +11,7 @@
 - 확인: `git tag`, `grep -rn "읽기 전용\|Google Tasks" --include=*.md . | grep -v "docs/archive\|tasks/todo.md"`
 - 크기: S
 
-### [ ] P2. 남은 값 받기
+### [x] P2. 남은 값 받기
 `tasks/plan.md` 10절의 1·2번(임시 등교일 예산, 결제 수단 이름)을 `AskUserQuestion`으로 묻는다. 3·4번은 지금 알면 같이 받는다. 받은 값은 `local-notes/값_v2.md`에 적는다.
 - 완료 기준: 1차에 필요한 값이 `local-notes/값_v2.md`에 전부 있다.
 - 크기: XS
