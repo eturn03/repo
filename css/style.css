@@ -33,6 +33,9 @@
   --warn:   #f2c94c;  /* HP 절반 이하, 고른 것, 포커스 */
   --bad:    #f2685a;  /* 넘침, 오류 */
   --line:   #3b3249;  /* 표의 점선 (글자 아님) */
+  --teal:   #4fb8b0;  /* 장부 이름표 (게임보이 컬러 Teal) */
+  --berry:  #e8508a;  /* 최근 지출 이름표 (Berry) */
+  --frame-c: #8f84a6; /* 풍경 창 테두리 */
 
   /* 픽셀 한 칸. 폰 2px, 보드 3px. 테두리·간격은 전부 이 단위의 배수 */
   --px: 2px;
@@ -47,7 +50,7 @@
   --tap: 44px;
 
   /* 게임 창 테두리: 바깥 굵은 선 + 안쪽 얇은 선, 모서리는 계단 모양 */
-  --frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' shape-rendering='crispEdges'%3E%3Crect x='2' y='2' width='9' height='9' fill='%23211a2b'/%3E%3Cg fill='%238f84a6'%3E%3Crect x='2' y='0' width='9' height='2'/%3E%3Crect x='2' y='11' width='9' height='2'/%3E%3Crect x='0' y='2' width='2' height='9'/%3E%3Crect x='11' y='2' width='2' height='9'/%3E%3Crect x='1' y='1' width='1' height='1'/%3E%3Crect x='11' y='1' width='1' height='1'/%3E%3Crect x='1' y='11' width='1' height='1'/%3E%3Crect x='11' y='11' width='1' height='1'/%3E%3Crect x='4' y='3' width='5' height='1'/%3E%3Crect x='4' y='9' width='5' height='1'/%3E%3Crect x='3' y='4' width='1' height='5'/%3E%3Crect x='9' y='4' width='1' height='5'/%3E%3C/g%3E%3C/svg%3E");
+  --frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' shape-rendering='crispEdges'%3E%3Crect x='2' y='2' width='9' height='9' fill='%23211a2b'/%3E%3Cg fill='%238f84a6'%3E%3Crect x='2' y='0' width='9' height='2'/%3E%3Crect x='2' y='11' width='9' height='2'/%3E%3Crect x='0' y='2' width='2' height='9'/%3E%3Crect x='11' y='2' width='2' height='9'/%3E%3Crect x='1' y='1' width='1' height='1'/%3E%3Crect x='11' y='1' width='1' height='1'/%3E%3Crect x='1' y='11' width='1' height='1'/%3E%3Crect x='11' y='11' width='1' height='1'/%3E%3Crect x='4' y='3' width='5' height='1'/%3E%3Crect x='4' y='9' width='5' height='1'/%3E%3Crect x='3' y='4' width='1' height='5'/%3E%3Crect x='9' y='4' width='1' height='5'/%3E%3C/g%3E%3Cg fill='%23f2c94c'%3E%3Crect x='2' y='1' width='1' height='1'/%3E%3Crect x='1' y='2' width='1' height='1'/%3E%3Crect x='2' y='2' width='1' height='1'/%3E%3Crect x='3' y='2' width='1' height='1'/%3E%3Crect x='2' y='3' width='1' height='1'/%3E%3Crect x='10' y='1' width='1' height='1'/%3E%3Crect x='9' y='2' width='1' height='1'/%3E%3Crect x='10' y='2' width='1' height='1'/%3E%3Crect x='11' y='2' width='1' height='1'/%3E%3Crect x='10' y='3' width='1' height='1'/%3E%3Crect x='2' y='9' width='1' height='1'/%3E%3Crect x='1' y='10' width='1' height='1'/%3E%3Crect x='2' y='10' width='1' height='1'/%3E%3Crect x='3' y='10' width='1' height='1'/%3E%3Crect x='2' y='11' width='1' height='1'/%3E%3Crect x='10' y='9' width='1' height='1'/%3E%3Crect x='9' y='10' width='1' height='1'/%3E%3Crect x='10' y='10' width='1' height='1'/%3E%3Crect x='11' y='10' width='1' height='1'/%3E%3Crect x='10' y='11' width='1' height='1'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* ===== 기본 ===== */
@@ -229,7 +232,7 @@ fieldset { border: 0; padding: 0; min-width: 0; }
 /* 분류 버튼: 누르면 바로 기록 */
 .cats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: calc(var(--px) * 3);
 }
 .cat {
@@ -318,27 +321,12 @@ fieldset { border: 0; padding: 0; min-width: 0; }
 /* ===== 상태 문장 + 마스코트 (게임 말투는 여기에만) ===== */
 .talk {
   display: flex;
-  align-items: flex-end;
   gap: var(--gap);
   min-width: 0;
 }
 .dialog { flex: 1; min-width: 0; }
 .dialog-text { min-height: 3.2em; }
-
-.scene {
-  flex: none;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-.sprite {
-  display: block;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-}
-/* 유령은 검은 캐릭터라 뒤에만 밝은 판을 깔고 곱하기로 섞는다 */
-.scene.is-ghost { background: var(--ink); padding: var(--px); }
-.scene.is-ghost .sprite { mix-blend-mode: multiply; }
+.sprite { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
 
 /* ===== 이번 달 장부 ===== */
 .ledger-list {
@@ -411,6 +399,93 @@ fieldset { border: 0; padding: 0; min-width: 0; }
 .gate-form { display: flex; gap: calc(var(--px) * 3); }
 .gate-error { color: var(--bad); }
 .gate-demo { justify-self: start; margin-left: 0; color: var(--ink); display: inline-flex; align-items: center; }
+
+/* ===== 픽셀 아이콘 (js/pixels.js, 16칸을 정수배로) ===== */
+.px-icon { flex: none; width: 32px; height: 32px; display: block; }
+.cat { display: flex; align-items: center; justify-content: center; gap: calc(var(--px) * 2); }
+.ledger-list dt { display: flex; align-items: center; gap: calc(var(--px) * 3); }
+.recent-list .r-what { display: flex; align-items: center; gap: calc(var(--px) * 2); }
+
+/* ===== 구역 이름표 탭 (본체색) ===== */
+.tab { --tab: var(--dim); }
+.ledger .tab { --tab: var(--teal); }
+.recent .tab { --tab: var(--berry); }
+.entry .tab { --tab: var(--warn); }
+.tab span {
+  display: inline-block;
+  padding: 0 calc(var(--px) * 4);
+  background: var(--tab);
+  color: var(--ground);
+  /* 계단 모서리 */
+  clip-path: polygon(0 var(--px), var(--px) var(--px), var(--px) 0, calc(100% - var(--px)) 0, calc(100% - var(--px)) var(--px), 100% var(--px), 100% calc(100% - var(--px)), calc(100% - var(--px)) calc(100% - var(--px)), calc(100% - var(--px)) 100%, var(--px) 100%, var(--px) calc(100% - var(--px)), 0 calc(100% - var(--px)));
+}
+/* 입력창 이름표는 창 테두리 위에 걸친다 */
+.entry { position: relative; }
+.entry > .tab {
+  position: absolute;
+  top: calc(var(--px) * -2.5);
+  left: calc(var(--px) * 6);
+  transform: translateY(-50%);
+  margin: 0;
+}
+.entry form { margin-top: calc(var(--px) * 3); }
+
+/* ===== 풀숲 배틀 땅 풍경 창 ===== */
+.talk { flex-direction: column; align-items: stretch; }
+.scene {
+  position: relative;
+  flex: none;
+  box-sizing: content-box;
+  width: 224px;            /* 112×64칸의 2배 */
+  align-self: center;
+  aspect-ratio: 112 / 64;
+  overflow: hidden;
+  border: var(--px) solid var(--frame-c);
+  background: var(--window);
+}
+.scene-art, .scene-art svg { display: block; width: 100%; height: 100%; }
+.scene .sprite {
+  position: absolute;
+  left: 50%;
+  bottom: 12.5%;          /* 발판 가운데 (64칸 중 아래 8칸) */
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+  animation: bob 1.6s steps(1, end) infinite;
+}
+@keyframes bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 calc(var(--px) * -1); }
+}
+.scene.is-ghost .sprite { background: var(--ink); padding: var(--px); mix-blend-mode: normal; }
+.scene-sign {
+  position: absolute;
+  left: 73.2%;
+  top: 50%;
+  width: 21.4%;
+  height: 15.6%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-num);
+  font-size: 12px;
+  line-height: 1;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* 대화창 끝의 ▼ */
+.dialog { position: relative; }
+.dialog-next {
+  position: absolute;
+  right: calc(var(--px) * 6);
+  bottom: calc(var(--px) * 3);
+  width: calc(var(--px) * 4);
+  height: calc(var(--px) * 3);
+  background: var(--warn);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  animation: blink 1s steps(1, end) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
 
 /* ===== 맥북 보드 (폭 900px 이상) =====
    맥북 화면(1440×900~1512×982)과 외부 모니터(1920×1080 이상)에서 스크롤 없이 한 화면.
@@ -506,6 +581,7 @@ fieldset { border: 0; padding: 0; min-width: 0; }
   .field.amount { font-size: var(--t-value); }
   .cats { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .cat {
+    justify-content: flex-start;
     text-align: left;
     border: 0;
     padding: 0 calc(var(--px) * 2) 0 1.5em;
@@ -524,8 +600,10 @@ fieldset { border: 0; padding: 0; min-width: 0; }
   .preview { min-height: 3em; }
   .undo { margin-top: 0; padding-top: 0; border-top: 0; }
 
-  /* 맨 아래 대화창: 화면 폭 전체, 마스코트는 왼쪽에 */
-  .talk { align-items: flex-end; }
+  /* 맨 아래: 왼쪽 풀숲 풍경 창(2배), 오른쪽 대화창 */
+  .talk { flex-direction: row; align-items: stretch; }
+  .px-icon { width: 32px; height: 32px; }
+  .ledger-list dt { padding-top: calc(var(--px) * 2); padding-bottom: calc(var(--px) * 2.5); }
   .dialog-text { font-family: var(--font-num); font-size: var(--t-dialog); line-height: 1.5; min-height: 2em; display: flex; align-items: center; }
   .talk .dialog { min-height: 0; }
 }
@@ -543,6 +621,7 @@ fieldset { border: 0; padding: 0; min-width: 0; }
     --font-body: Galmuri11, Galmuri14, sans-serif;
   }
   .hp-label { font-size: 24px; }
+  .px-icon { width: 48px; height: 48px; }
 }
 
 /* ===== 작은 반응 ===== */
@@ -553,5 +632,6 @@ fieldset { border: 0; padding: 0; min-width: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   .bump { animation: none; }
+  .scene .sprite, .dialog-next { animation: none; }
   .hp-fill { transition: none; }
 }

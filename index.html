@@ -45,7 +45,7 @@
 
     <!-- 지출 기록: 금액 → 분류 버튼 한 번 -->
     <section class="win entry" aria-labelledby="entry-title">
-      <h2 class="label" id="entry-title">지출 기록</h2>
+      <h2 class="label tab" id="entry-title"><span>지출 기록</span></h2>
       <form id="entry-form" autocomplete="off">
         <div class="amount-row">
           <label class="sr-only" for="amount">금액</label>
@@ -78,19 +78,24 @@
 
     <!-- 상태 문장: 게임 말투와 마스코트는 여기에만 -->
     <section class="talk">
-      <div class="scene" id="scene" hidden aria-hidden="true"></div>
+      <!-- 풀숲 배틀 땅: 날씨가 돈 상태를 따른다. 마스코트는 발판 위 -->
+      <div class="scene" id="scene" aria-hidden="true">
+        <div class="scene-art" id="scene-art"></div>
+        <span class="scene-sign" id="scene-sign" hidden>쉬는 날</span>
+      </div>
       <div class="win dialog" aria-live="polite">
         <p class="dialog-text" id="status-line">▶ 불러오는 중...</p>
+        <span class="dialog-next" aria-hidden="true"></span>
       </div>
     </section>
 
     <section class="win ledger" aria-labelledby="ledger-title">
-      <h2 class="label" id="ledger-title">이번 달 장부</h2>
+      <h2 class="label tab" id="ledger-title"><span>이번 달 장부</span></h2>
       <dl class="ledger-list" id="ledger-list"></dl>
     </section>
 
     <section class="win recent" aria-labelledby="recent-title">
-      <h2 class="label" id="recent-title">최근 지출</h2>
+      <h2 class="label tab" id="recent-title"><span>최근 지출</span></h2>
       <ol class="recent-list" id="recent-list"></ol>
     </section>
 
@@ -104,6 +109,7 @@
 
   <script src="js/config.js"></script>
   <script src="apps-script/Calc.js"></script>
+  <script src="js/pixels.js"></script>
   <script src="js/demo.js"></script>
   <script src="js/app.js"></script>
 </body>

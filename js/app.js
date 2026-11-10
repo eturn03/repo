@@ -26,7 +26,7 @@
     cats: $('cats'), methods: $('methods'), memo: $('memo'), date: $('entry-date'), more: $('more'),
     entryError: $('entry-error'),
     undo: $('undo'), undoText: $('undo-text'), undoBtn: $('undo-btn'),
-    scene: $('scene'), status: $('status-line'),
+    scene: $('scene'), sceneArt: $('scene-art'), sceneSign: $('scene-sign'), status: $('status-line'),
     ledger: $('ledger-list'), recent: $('recent-list'),
     metaTime: $('meta-time'), metaQueue: $('meta-queue'), metaDemo: $('meta-demo'), reset: $('reset-token')
   };
@@ -183,6 +183,7 @@
 
     say(statusLine(r));
     setMood(moodFor(r));
+    renderScene(r);
 
     el.metaTime.textContent = stamp() + ' · 마지막 카드 대조 ' +
       (data.lastReconciled ? shortDate(data.lastReconciled) : '아직 안 함');
@@ -221,7 +222,10 @@
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'cat';
-      b.textContent = c;
+      b.appendChild(Pixels.categoryIcon(c));
+      var t = document.createElement('span');
+      t.textContent = c;
+      b.appendChild(t);
       b.addEventListener('click', function () { record(c); });
       el.cats.appendChild(b);
     });
@@ -278,9 +282,10 @@
     }
   }
 
-  function ledgerRow(label, value, note) {
+  function ledgerRow(label, value, note, iconName) {
     var dt = document.createElement('dt');
-    dt.textContent = label;
+    if (iconName) dt.appendChild(Pixels.icon(iconName));
+    dt.appendChild(document.createTextNode(label));
     var dd = document.createElement('dd');
     dd.textContent = value;
     el.ledger.appendChild(dt);
@@ -296,17 +301,17 @@
 
   function renderLedger(r) {
     el.ledger.textContent = '';
-    ledgerRow('등교일 예산 (하루)', won(r.perSchoolDay) + '원');
-    ledgerRow('이번 달 예산', won(r.cycleBudget) + '원');
+    ledgerRow('등교일 예산 (하루)', won(r.perSchoolDay) + '원', '', 'calendar');
+    ledgerRow('이번 달 예산', won(r.cycleBudget) + '원', '', 'pouch');
     if (r.irregular && r.irregular.remaining > 0) {
-      ledgerRow('비정규 쓸 돈 (남음)', won(r.irregular.remaining) + '원', shortDate(r.irregular.endDate) + '까지 등교일마다 더해진다');
+      ledgerRow('비정규 쓸 돈 (남음)', won(r.irregular.remaining) + '원', shortDate(r.irregular.endDate) + '까지 등교일마다 더해진다', 'gift');
     }
     ledgerRow('교통 (실제 + 예상)', won(r.transit) + '원',
-      r.transitCheckedUntil ? shortDate(r.transitCheckedUntil) + '까지 실제' : '');
+      r.transitCheckedUntil ? shortDate(r.transitCheckedUntil) + '까지 실제' : '', 'bus');
     // 음수면 빨간 글씨 (이유는 상태 문장이 말한다)
-    var repay = ledgerRow('월 상환 가능액', (r.repayable < 0 ? '−' : '') + won(Math.abs(r.repayable)) + '원');
+    var repay = ledgerRow('월 상환 가능액', (r.repayable < 0 ? '−' : '') + won(Math.abs(r.repayable)) + '원', '', 'coins');
     repay.classList.toggle('is-bad', r.overIncome);
-    ledgerRow('남은 빚', won(r.debtLeft) + '원');
+    ledgerRow('남은 빚', won(r.debtLeft) + '원', '', 'receipt');
   }
 
   function renderRecent(list, pending) {
@@ -325,7 +330,8 @@
       when.textContent = shortDate(x.date);
       var what = document.createElement('span');
       what.className = 'r-what';
-      what.textContent = x.category + (x.memo ? ' · ' + x.memo : '');
+      what.appendChild(Pixels.categoryIcon(x.category));
+      what.appendChild(document.createTextNode(x.category + (x.memo ? ' · ' + x.memo : '')));
       var amount = document.createElement('span');
       amount.className = 'r-amount';
       amount.textContent = won(x.amount) + '원';
@@ -348,6 +354,21 @@
     if (r.available < 0) return '▶ 오늘 몫을 ' + won(-r.available) + '원 넘게 썼다! 다음 등교일 몫에서 빠진다.';
     if (!r.isSchoolDay) return '▶ 오늘은 쉬는 날. 숫자는 그대로다. 남은 돈은 ' + won(r.available) + '원!';
     return '▶ 오늘까지 쓸 수 있는 돈은 ' + won(r.available) + '원!';
+  }
+
+  // 날씨: 예산 안 맑음, 오늘 몫을 넘게 쓰면 흐림, 이번 달 돈을 다 쓰면 비. 쉬는 날엔 팻말
+  var drawnScene = '';
+  function renderScene(r) {
+    var weather = (r.monthLeft <= 0 && r.cycleBudget > 0) ? 'rain' : r.available < 0 ? 'cloudy' : 'sunny';
+    var rest = !r.isSchoolDay;
+    var key = weather + rest;
+    el.scene.dataset.weather = weather;
+    el.sceneSign.hidden = !rest;
+    sizeSprite();
+    if (key === drawnScene) return;
+    drawnScene = key;
+    el.sceneArt.textContent = '';
+    el.sceneArt.appendChild(Pixels.scene(weather, rest));
   }
 
   function moodFor(r) {
@@ -451,23 +472,23 @@
   sprite.className = 'sprite';
   sprite.alt = '';
   // 픽셀이 뭉개지지 않게 원본 크기의 정수배로만 키운다
-  // 보드에서는 대화창 높이를 넘지 않는 가장 큰 정수배
-  sprite.addEventListener('load', function () {
-    var maxH = window.matchMedia('(min-width: 1800px)').matches ? 150
-      : window.matchMedia('(min-width: 900px)').matches ? 130 : 128;
-    var scale = Math.max(1, Math.floor(maxH / sprite.naturalHeight));
+  // 풍경과 같은 픽셀 배율(보드 2배, 폰은 풍경 폭에 맞춘 배율)로 키운다
+  sprite.addEventListener('load', sizeSprite);
+  window.addEventListener('resize', sizeSprite);
+  function sizeSprite() {
+    if (!sprite.naturalWidth) return;
+    // 풍경 높이를 넘지 않는 가장 큰 정수배 (위쪽 빈 칸은 풍경 창이 잘라 낸다)
+    var scale = Math.max(1, Math.floor(el.sceneArt.getBoundingClientRect().height / sprite.naturalHeight));
     sprite.style.width = (sprite.naturalWidth * scale) + 'px';
     sprite.style.height = (sprite.naturalHeight * scale) + 'px';
-  });
+  }
 
   function setMood(next) {
     mood = next;
     // 유령 이미지가 없으면 화난 표정으로 대신
     var src = sprites[next] || (next === 'ghost' && sprites.angry) || sprites.normal;
     el.scene.classList.toggle('is-ghost', next === 'ghost' && src === sprites.ghost);
-    if (!src) { el.scene.hidden = true; el.app.classList.remove('has-sprite'); return; }
-    el.scene.hidden = false;
-    el.app.classList.add('has-sprite');
+    if (!src) { if (sprite.parentNode) sprite.remove(); return; }
     if (!sprite.parentNode) el.scene.appendChild(sprite);
     if (sprite.getAttribute('src') !== src) sprite.src = src;
   }
