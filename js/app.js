@@ -263,7 +263,7 @@
     el.cats.classList.toggle('is-ready', amount > 0);
     el.amountClear.hidden = !el.amount.value;
     if (!amount) {
-      el.preview.textContent = '금액을 치고 분류를 누르면 바로 기록된다.';
+      el.preview.textContent = '금액을 치고 분류를 누르면 기록된다.';
       el.preview.dataset.tone = '';
       return;
     }
@@ -290,22 +290,23 @@
       small.textContent = note;
       el.ledger.appendChild(small);
     }
+    return dd;
   }
 
   function renderLedger(r) {
     el.ledger.textContent = '';
-    ledgerRow('등교일 예산', '하루 ' + won(r.perSchoolDay) + '원', '등교일 ' + r.cycleSchoolDays + '일 · 지금까지 ' + r.schoolDaysToDate + '일');
-    ledgerRow('이번 달 예산', won(r.cycleBudget) + '원', '쓴 돈 ' + won(r.spent) + '원 (교통 제외)');
+    ledgerRow('등교일 예산 (하루)', won(r.perSchoolDay) + '원');
+    ledgerRow('이번 달 예산', won(r.cycleBudget) + '원');
     if (r.irregular && r.irregular.remaining > 0) {
-      ledgerRow('비정규 쓸 돈', won(r.irregular.remaining) + '원 더 쌓임', shortDate(r.irregular.endDate) + '까지 등교일마다');
+      ledgerRow('비정규 쓸 돈 (남음)', won(r.irregular.remaining) + '원', shortDate(r.irregular.endDate) + '까지 등교일마다 더해진다');
     }
-    ledgerRow('교통 예상', won(r.transit) + '원',
-      r.transitCheckedUntil ? shortDate(r.transitCheckedUntil) + '까지는 실제 금액' : '전부 등교일 수로 예상');
-    ledgerRow('월 상환 가능액', (r.repayable < 0 ? '−' : '') + won(Math.abs(r.repayable)) + '원',
-      r.overIncome ? '예산이 수입을 넘는다' : '수입 − 구독 − 교통 − 예산');
-    ledgerRow('남은 빚', won(r.debtLeft) + '원', '갚은 돈 ' + won(r.repaid) + '원');
-    ledgerRow('마지막 카드 대조', data.lastReconciled ? shortDate(data.lastReconciled) : '아직 안 함',
-      r.recordDay ? '기록 ' + r.recordDay + '일째' : '');
+    ledgerRow('교통 (실제 + 예상)', won(r.transit) + '원',
+      r.transitCheckedUntil ? shortDate(r.transitCheckedUntil) + '까지 실제' : '');
+    // 음수면 빨간 글씨 (이유는 상태 문장이 말한다)
+    var repay = ledgerRow('월 상환 가능액', (r.repayable < 0 ? '−' : '') + won(Math.abs(r.repayable)) + '원');
+    repay.classList.toggle('is-bad', r.overIncome);
+    ledgerRow('남은 빚', won(r.debtLeft) + '원');
+    ledgerRow('마지막 카드 대조', data.lastReconciled ? shortDate(data.lastReconciled) : '아직 안 함');
   }
 
   function renderRecent(list, pending) {
@@ -393,15 +394,21 @@
   function showUndo(text) {
     el.undoText.textContent = text;
     el.undo.hidden = false;
+    el.preview.hidden = true;
     clearTimeout(timers.undo);
-    timers.undo = setTimeout(function () { el.undo.hidden = true; lastAdded = null; }, 60 * 1000);
+    timers.undo = setTimeout(hideUndo, 60 * 1000);
+  }
+
+  function hideUndo() {
+    el.undo.hidden = true;
+    el.preview.hidden = false;
+    lastAdded = null;
   }
 
   function undoLast() {
     if (!lastAdded) return;
     var id = lastAdded.id;
-    lastAdded = null;
-    el.undo.hidden = true;
+    hideUndo();
     // 아직 안 보낸 기록이면 대기열에서 빼기만 한다
     var idx = -1;
     queue.forEach(function (q, i) { if (q.op === 'add' && q.id === id) idx = i; });
@@ -423,6 +430,7 @@
   el.amount.addEventListener('input', function () {
     var n = readAmount();
     el.amount.value = n ? n.toLocaleString('ko-KR') : '';
+    if (n && !el.undo.hidden) hideUndo();
     showEntryError('');
     render();
   });
@@ -443,8 +451,11 @@
   sprite.className = 'sprite';
   sprite.alt = '';
   // 픽셀이 뭉개지지 않게 원본 크기의 정수배로만 키운다
+  // 보드에서는 대화창 높이를 넘지 않는 가장 큰 정수배
   sprite.addEventListener('load', function () {
-    var scale = window.matchMedia('(min-width: 900px)').matches ? 3 : 2;
+    var maxH = window.matchMedia('(min-width: 1800px)').matches ? 150
+      : window.matchMedia('(min-width: 900px)').matches ? 130 : 128;
+    var scale = Math.max(1, Math.floor(maxH / sprite.naturalHeight));
     sprite.style.width = (sprite.naturalWidth * scale) + 'px';
     sprite.style.height = (sprite.naturalHeight * scale) + 'px';
   });

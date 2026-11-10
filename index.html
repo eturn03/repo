@@ -54,6 +54,10 @@
           <button class="btn-quiet" id="amount-clear" type="button" hidden>안 샀어</button>
         </div>
         <p class="preview" id="preview" aria-live="polite"></p>
+        <div class="undo" id="undo" hidden role="status">
+          <span id="undo-text"></span>
+          <button class="btn" id="undo-btn" type="button">방금 것 취소</button>
+        </div>
         <div class="cats" id="cats" role="group" aria-label="분류. 누르면 바로 기록된다"></div>
         <fieldset class="methods-wrap">
           <legend class="sr-only">결제 수단</legend>
@@ -70,10 +74,6 @@
         </details>
         <p class="entry-error" id="entry-error" role="alert" hidden></p>
       </form>
-      <div class="undo" id="undo" hidden role="status">
-        <span id="undo-text"></span>
-        <button class="btn" id="undo-btn" type="button">방금 것 취소</button>
-      </div>
     </section>
 
     <!-- 상태 문장: 게임 말투와 마스코트는 여기에만 -->
