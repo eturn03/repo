@@ -263,7 +263,7 @@
     el.cats.classList.toggle('is-ready', amount > 0);
     el.amountClear.hidden = !el.amount.value;
     if (!amount) {
-      el.preview.textContent = '금액을 치면 쓰고 남는 돈이 바로 보인다.';
+      el.preview.textContent = '금액을 치고 분류를 누르면 바로 기록된다.';
       el.preview.dataset.tone = '';
       return;
     }
