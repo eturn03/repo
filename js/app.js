@@ -184,7 +184,8 @@
     say(statusLine(r));
     setMood(moodFor(r));
 
-    el.metaTime.textContent = stamp();
+    el.metaTime.textContent = stamp() + ' · 마지막 카드 대조 ' +
+      (data.lastReconciled ? shortDate(data.lastReconciled) : '아직 안 함');
     var waiting = queue.length;
     el.metaQueue.hidden = waiting === 0;
     el.metaQueue.textContent = sendFailed
@@ -306,7 +307,6 @@
     var repay = ledgerRow('월 상환 가능액', (r.repayable < 0 ? '−' : '') + won(Math.abs(r.repayable)) + '원');
     repay.classList.toggle('is-bad', r.overIncome);
     ledgerRow('남은 빚', won(r.debtLeft) + '원');
-    ledgerRow('마지막 카드 대조', data.lastReconciled ? shortDate(data.lastReconciled) : '아직 안 함');
   }
 
   function renderRecent(list, pending) {

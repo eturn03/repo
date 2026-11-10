@@ -19,17 +19,20 @@
   font-display: swap;
 }
 
-/* ===== 팔레트 (6색, 어두운 화면) ===== */
-/* 큰 외부 모니터에서 오래 봐도 눈이 안 아프게: 바탕·창 모두 거의 검정, 글자는 순백 대신 누르스름한 회백색 */
+/* ===== 팔레트 (게임보이 컬러풍, 어두운 화면) =====
+   바탕은 'Atomic Purple' 본체처럼 포도빛이 도는 검정(초록 기운 없음), 글자는 게임보이 대화창 종이 같은 크림색(순백 아님).
+   HP 초록·노랑·빨강은 포켓몬 크리스탈 HP바 색을 어두운 바탕에 맞게 조금 눅였다. 강조는 Dandelion 노랑.
+   참고: pokecrystal hp_bar.pal, Lospec "Johto Redrawn (Modernised GBC)", "GBC Color Retro Style" (2026-11-10 조사) */
 :root {
   color-scheme: dark;
-  --ground: #0e1513;  /* 바탕과 창 안쪽 */
-  --ink:    #d5dcc8;  /* 본문 글씨 */
-  --dim:    #8a9e92;  /* 보조 글씨, 창 테두리 */
-  --good:   #78a860;  /* HP 넉넉 */
-  --warn:   #d8a840;  /* HP 절반 이하, 고른 것, 포커스 */
-  --bad:    #e07a68;  /* 넘침, 오류 */
-  --line:   #3a4a43;  /* 표의 점선 (글자 아님, 장식선) */
+  --ground: #16111d;  /* 바탕 */
+  --window: #211a2b;  /* 게임 창 안쪽 (바탕보다 한 단계 밝게) */
+  --ink:    #ece3d2;  /* 본문 글씨 (크림) */
+  --dim:    #a79cb8;  /* 보조 글씨 (라벤더 회색) */
+  --good:   #5cc24a;  /* HP 넉넉 */
+  --warn:   #f2c94c;  /* HP 절반 이하, 고른 것, 포커스 */
+  --bad:    #f2685a;  /* 넘침, 오류 */
+  --line:   #3b3249;  /* 표의 점선 (글자 아님) */
 
   /* 픽셀 한 칸. 폰 2px, 보드 3px. 테두리·간격은 전부 이 단위의 배수 */
   --px: 2px;
@@ -44,7 +47,7 @@
   --tap: 44px;
 
   /* 게임 창 테두리: 바깥 굵은 선 + 안쪽 얇은 선, 모서리는 계단 모양 */
-  --frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' shape-rendering='crispEdges'%3E%3Crect x='2' y='2' width='9' height='9' fill='%230e1513'/%3E%3Cg fill='%238a9e92'%3E%3Crect x='2' y='0' width='9' height='2'/%3E%3Crect x='2' y='11' width='9' height='2'/%3E%3Crect x='0' y='2' width='2' height='9'/%3E%3Crect x='11' y='2' width='2' height='9'/%3E%3Crect x='1' y='1' width='1' height='1'/%3E%3Crect x='11' y='1' width='1' height='1'/%3E%3Crect x='1' y='11' width='1' height='1'/%3E%3Crect x='11' y='11' width='1' height='1'/%3E%3Crect x='4' y='3' width='5' height='1'/%3E%3Crect x='4' y='9' width='5' height='1'/%3E%3Crect x='3' y='4' width='1' height='5'/%3E%3Crect x='9' y='4' width='1' height='5'/%3E%3C/g%3E%3C/svg%3E");
+  --frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' shape-rendering='crispEdges'%3E%3Crect x='2' y='2' width='9' height='9' fill='%23211a2b'/%3E%3Cg fill='%238f84a6'%3E%3Crect x='2' y='0' width='9' height='2'/%3E%3Crect x='2' y='11' width='9' height='2'/%3E%3Crect x='0' y='2' width='2' height='9'/%3E%3Crect x='11' y='2' width='2' height='9'/%3E%3Crect x='1' y='1' width='1' height='1'/%3E%3Crect x='11' y='1' width='1' height='1'/%3E%3Crect x='1' y='11' width='1' height='1'/%3E%3Crect x='11' y='11' width='1' height='1'/%3E%3Crect x='4' y='3' width='5' height='1'/%3E%3Crect x='4' y='9' width='5' height='1'/%3E%3Crect x='3' y='4' width='1' height='5'/%3E%3Crect x='9' y='4' width='1' height='5'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* ===== 기본 ===== */
@@ -233,7 +236,7 @@ fieldset { border: 0; padding: 0; min-width: 0; }
   min-height: var(--tap);
   font: inherit;
   color: var(--dim);
-  background: var(--ground);
+  background: transparent;
   border: var(--px) solid var(--dim);
   border-radius: 0;
   padding: calc(var(--px) * 2);
@@ -424,13 +427,13 @@ fieldset { border: 0; padding: 0; min-width: 0; }
     --t-dialog: 24px;
     --menu-w: 380px;
   }
-  body { line-height: 1.5; }
-  .win { padding: calc(var(--px) * 3) calc(var(--px) * 5); }
+  body { line-height: 1.5; padding: 22px 36px; }
+  .win { padding: calc(var(--px) * 5) calc(var(--px) * 7); }
 
   .app {
-    --gap: calc(var(--px) * 5);
+    --gap: calc(var(--px) * 8);
     max-width: none;
-    min-height: calc(100dvh - 32px);
+    min-height: calc(100dvh - 44px);
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) var(--menu-w);
     grid-template-rows: auto minmax(0, 1fr) auto auto;
     grid-template-areas:
@@ -438,7 +441,7 @@ fieldset { border: 0; padding: 0; min-width: 0; }
       "ledger recent entry"
       "talk   talk   talk"
       "meta   meta   meta";
-    column-gap: calc(var(--gap) * 2);
+    column-gap: calc(var(--gap) * 1.5);
   }
 
   /* 테두리 없는 구역 */
@@ -457,10 +460,10 @@ fieldset { border: 0; padding: 0; min-width: 0; }
       "amount note"
       "amount hp"
       "amount left";
-    column-gap: calc(var(--px) * 12);
+    column-gap: calc(var(--px) * 16);
     align-items: end;
-    padding-bottom: calc(var(--px) * 5);
-    border-bottom: var(--px) solid var(--dim);
+    padding-bottom: calc(var(--px) * 8);
+    border-bottom: var(--px) solid var(--line);
   }
   .today .label { grid-area: label; }
   .today-amount { grid-area: amount; margin: 0; }
@@ -471,8 +474,8 @@ fieldset { border: 0; padding: 0; min-width: 0; }
 
   /* 장부와 최근 지출: 제목 밑줄 + 금액 세로줄 */
   .ledger .label, .recent .label {
-    padding-bottom: calc(var(--px) * 1);
-    border-bottom: var(--px) solid var(--dim);
+    padding-bottom: calc(var(--px) * 2);
+    border-bottom: var(--px) solid var(--line);
     margin-bottom: calc(var(--px) * 2);
   }
   .ledger-list, .recent-list { margin-top: 0; }
@@ -484,15 +487,15 @@ fieldset { border: 0; padding: 0; min-width: 0; }
   /* 줄마다 점선: 이름표에서 금액까지 눈이 따라가게 */
   .ledger-list { row-gap: 0; column-gap: 0; }
   .ledger-list dd:not(.note) { padding-left: 1em; }
-  .ledger-list dt, .ledger-list dd { margin-top: 0 !important; padding-top: calc(var(--px) * 2); }
-  .ledger-list dt { align-self: end; padding-bottom: calc(var(--px) * 2.5); border-bottom: var(--px) dotted var(--line); }
-  .ledger-list dd:not(.note) { padding-bottom: calc(var(--px) * 1.5); border-bottom: var(--px) dotted var(--line); }
+  .ledger-list dt, .ledger-list dd { margin-top: 0 !important; padding-top: calc(var(--px) * 3); }
+  .ledger-list dt { align-self: end; padding-bottom: calc(var(--px) * 4); border-bottom: var(--px) dotted var(--line); }
+  .ledger-list dd:not(.note) { padding-bottom: calc(var(--px) * 3); border-bottom: var(--px) dotted var(--line); }
   .ledger-list dt:has(+ dd + .note), .ledger-list dt:has(+ dd + .note) + dd { border-bottom: 0; }
-  .ledger-list .note { text-align: right; padding-top: 0; padding-bottom: calc(var(--px) * 2); border-bottom: var(--px) dotted var(--line); }
+  .ledger-list .note { text-align: right; padding-top: 0; padding-bottom: calc(var(--px) * 3.5); border-bottom: var(--px) dotted var(--line); }
   .recent-list { gap: 0; }
   .recent-list li {
     grid-template-columns: 5.5em minmax(0, 1fr) auto;
-    padding: calc(var(--px) * 2) 0 calc(var(--px) * 1.5);
+    padding: calc(var(--px) * 3.5) 0 calc(var(--px) * 3);
     border-bottom: var(--px) dotted var(--line);
   }
   .recent-list li.empty { border-bottom: 0; }
@@ -523,7 +526,8 @@ fieldset { border: 0; padding: 0; min-width: 0; }
 
   /* 맨 아래 대화창: 화면 폭 전체, 마스코트는 왼쪽에 */
   .talk { align-items: flex-end; }
-  .dialog-text { font-family: var(--font-num); font-size: var(--t-dialog); line-height: 1.5; min-height: 3em; display: flex; align-items: center; }
+  .dialog-text { font-family: var(--font-num); font-size: var(--t-dialog); line-height: 1.5; min-height: 2em; display: flex; align-items: center; }
+  .talk .dialog { min-height: 0; }
 }
 
 /* 외부 모니터(폭 1800px 이상): 팔 길이에서 읽히게 한 단계 크게 */

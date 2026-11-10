@@ -10,10 +10,10 @@ const CACHE_FILE = 'moneyboard-widget.json';
 const REFRESH_MIN = 15;
 
 const C = {
-  ground: new Color('#0e1513'),
-  ink: new Color('#d5dcc8'),
-  dim: new Color('#8a9e92'),
-  bad: new Color('#e07a68')
+  ground: new Color('#16111d'),
+  ink: new Color('#ece3d2'),
+  dim: new Color('#a79cb8'),
+  bad: new Color('#f2685a')
 };
 
 const fm = FileManager.local();
