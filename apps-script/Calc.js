@@ -163,8 +163,64 @@ var Calc = (function () {
     };
   }
 
+  /* ---------- 3.2~3.4 교통 차감, 월 상환 가능액, 남은 빚, 기록 며칠째 ---------- */
+
+  /**
+   * input: budget의 입력 + { subscriptions: [{amount}], repayments: [{amount}], incomes: [{date, amount, kind}] }
+   * budget의 결과에 교통·상환·기록 값을 더해 돌려준다.
+   */
+  function summary(input) {
+    var s = input.settings || {};
+    var b = budget(input);
+    var today = toDay(input.today);
+    var start = toDay(b.cycleStart);
+    var end = toDay(b.cycleEnd);
+    var isSchoolDay = makeCalendar(s, input.vacations);
+
+    // 3.2 교통대조일까지는 실제 교통 지출, 다음 날부터 주기 끝까지는 등교일 × 등교일당교통비
+    var checked = toDay(s.교통대조일);
+    var actualUntil = isNaN(checked) ? start - 1 : Math.min(checked, end);
+    var transitActual = actualUntil >= start
+      ? sumIn(input.expenses, start, actualUntil, function (r) { return !isBudgetExpense(r); })
+      : 0;
+    var forecastFrom = Math.max(actualUntil + 1, start);
+    var transitForecast = forecastFrom <= end
+      ? num(s.등교일당교통비) * countDays(isSchoolDay, forecastFrom, end).school
+      : 0;
+    var transit = transitActual + transitForecast;
+
+    // 3.3
+    var subscriptions = 0;
+    (input.subscriptions || []).forEach(function (r) { subscriptions += num(r.amount); });
+    var repayable = num(s.월수입) - subscriptions - transit - b.baseCycleBudget;
+    var repaid = 0;
+    (input.repayments || []).forEach(function (r) { repaid += num(r.amount); });
+
+    // 3.4 기록시작일부터 14일이 지나면(15일째부터) 예산을 다시 정할 때
+    var recordStart = toDay(s.기록시작일);
+    var confirmed = toDay(s.예산확정일);
+    var recordDay = isNaN(recordStart) ? null : today - recordStart + 1;
+    var needRebudget = recordDay !== null && recordDay >= 15 && !(confirmed >= recordStart);
+
+    b.transitActual = transitActual;
+    b.transitForecast = transitForecast;
+    b.transit = transit;
+    b.transitCheckedUntil = isNaN(checked) ? '' : fromDay(checked);
+    b.subscriptions = subscriptions;
+    b.monthlyIncome = num(s.월수입);
+    b.repayable = repayable;
+    b.overIncome = repayable < 0;
+    b.debtPrincipal = num(s.빚원금);
+    b.repaid = repaid;
+    b.debtLeft = num(s.빚원금) - repaid;
+    b.recordDay = recordDay;
+    b.needRebudget = needRebudget;
+    return b;
+  }
+
   return {
     budget: budget,
+    summary: summary,
     // 아래는 다른 계산과 화면이 같이 쓰는 도구
     toDay: toDay,
     fromDay: fromDay,
