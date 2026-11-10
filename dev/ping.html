@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>연결 시험</title>
+<style>
+  body { background: #0e1513; color: #c9d4c5; font: 16px/1.5 system-ui, sans-serif; padding: 24px; max-width: 640px; }
+  input, button { font: inherit; padding: 10px; margin: 4px 0; width: 100%; box-sizing: border-box; background: #1b2522; color: inherit; border: 1px solid #4a5a52; }
+  pre { background: #1b2522; padding: 12px; white-space: pre-wrap; word-break: break-all; }
+</style>
+</head>
+<body>
+<!-- 개발용: 서버 연결만 시험한다. 토큰은 이 기기 localStorage(dash.token)에만 둔다. -->
+<h1>서버 연결 시험</h1>
+<p>서버 주소(…/exec)와 토큰을 넣고 누른다. 맞는 토큰이면 ok, 틀린 토큰이면 빈 응답이 나와야 한다.</p>
+<input id="url" placeholder="서버 주소 (…/exec)">
+<input id="token" type="password" placeholder="토큰" autocomplete="off">
+<button id="save">토큰 저장하고 시험</button>
+<button id="wrong">틀린 토큰으로 시험</button>
+<pre id="out">아직 안 함</pre>
+<script>
+  var $ = function (id) { return document.getElementById(id); };
+  try {
+    $('url').value = JSON.parse(localStorage.getItem('dash.apiUrl') || '""') || '';
+  } catch (e) {}
+  function ping(token) {
+    var url = $('url').value.trim();
+    localStorage.setItem('dash.apiUrl', JSON.stringify(url));
+    var t0 = Date.now();
+    $('out').textContent = '보내는 중...';
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ token: token, view: 'ping' }),
+      redirect: 'follow'
+    }).then(function (r) { return r.text(); }).then(function (t) {
+      $('out').textContent = (Date.now() - t0) + 'ms\n' + t;
+    }).catch(function (e) { $('out').textContent = '실패: ' + e; });
+  }
+  $('save').onclick = function () {
+    var t = $('token').value.trim();
+    if (t) localStorage.setItem('dash.token', JSON.stringify(t));
+    $('token').value = '';
+    var saved = JSON.parse(localStorage.getItem('dash.token') || 'null');
+    if (saved) ping(saved);
+  };
+  $('wrong').onclick = function () { ping('wrong-token'); };
+</script>
+</body>
+</html>
